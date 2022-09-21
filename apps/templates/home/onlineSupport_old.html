@@ -1,0 +1,195 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} UI Tables {% endblock %} 
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<link rel="stylesheet" href="/static/assets/vendors/select2/select2.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}
+<script>
+    $(document).ready(function(){
+    setInterval(function(){
+        $.ajax({
+            type: 'GET',
+            url : "get_message",
+            success: function(response){
+                console.log(response);
+                $("#display").empty();
+                for (var key in response.messages)
+                { 
+                    var dateT = new Date(response.messages[key].date);
+                    str=dateT.toLocaleString();
+                    if(response.messages[key].type == "1")
+                    {
+                        var tmp ="<div class=\"row\" style=\"margin-top: 20px;\"><div class=\"col-sm-1  grid-margin\"><img src=\"/static/assets/images/faces/face15.jpg\" style =\"width:100%;\" alt=\"image\" class=\"rounded-circle profile-pic\"></div><div class=\"col-sm-10\" grid-margin><a><h4>"
+                        tmp+= str+":"+response.messages[key].user +"</h4></a><hr style=\"margin-top:0;\"></hr>"
+                       
+                        for(i in response.messages[key].msg.split('\n'))
+                        {
+                         tmp+="<p>"+response.messages[key].msg.split('\n')[i]+"</p>"
+                        }
+                        tmp+="</div></div>"
+                        $("#display").append(tmp);
+
+                    }
+                    else
+                    {
+                        var tmp ="<div class=\"row\" style=\"margin-left: 100px;margin-top: 20px;\"><div class=\"col-sm-1  grid-margin\"><img src=\"/static/assets/images/faces/face2.jpg\" style =\"width:100%;\" alt=\"image\" class=\"rounded-circle profile-pic\"></div><div class=\"col-sm-10\" grid-margin><a><h4>"
+                        tmp+= str+":"+response.messages[key].user +"</h4></a><hr style=\"margin-top:0;\"></hr><a>"
+                        for(i in response.messages[key].msg.split('\n'))
+                        {
+                         tmp+="<p>"+response.messages[key].msg.split('\n')[i]+"</p>"
+                        }
+                        tmp+="</div></div>"
+                        $("#display").append(tmp);
+                    }
+
+                   
+                }
+            },
+            error: function(response){
+                //alert('An error occured')
+            }
+        });
+    },100000);
+    })
+</script>
+<div class="content-wrapper">
+    <!--Header-->
+    <div class="page-header">
+        <h1 class="page-title">Ticket Support</h1>
+    </div>   
+    <!-- [ Main Content ] start -->
+    <div class="row">
+        <!--[D F info] start-->
+        <div class="col-sm-12  grid-margin">
+            <div class="Phone">
+                <div class="Phone-header">
+                    <h5>
+                        If support is offline you can always leave your message and wiil
+                        reply as soon as possible once available
+                    </h5>
+                </div>
+                <div class="Phone-body" style = "height:600px;overflow-y:auto;">
+                    <div class="col-sm-12" style="text-align:right;">
+                         
+                        <button class="btn btn-primary"  onclick="os_onTicket_click()" data-toggle="modal" data-target="#myModal">Open New Ticket</button>
+                    </div>
+                    <div class="modal fade" id="myModal" >
+                        <div class="modal-dialog" >
+                          <div class="modal-content" style="background-color: #191c24;">
+                            
+                            <!-- Modal Header -->
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                            
+                            <!-- Modal body -->
+                            <div class="modal-body">
+                                <form class="forms-sample">
+                                    <div class="form-group">
+                                        <label for="exampleFormControlSelect2">Please select category</label>
+                                        <select class="form-control" id="exampleFormControlSelect2">
+                                          <option>1</option>
+                                          <option>2</option>
+                                          <option>3</option>
+                                          <option>4</option>
+                                          <option>5</option>
+                                        </select>
+                                      </div>
+                                        
+                                        <!--{% for kk in tickers %}
+                                            <option  value="{{kk.ticker}}" selected><image src = "{{kk.img}}"></image>{{kk.name}}</option>
+                                            {% endfor %} --> 
+                                       
+                                        
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="exampleInputName1" placeholder="Subject">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleTextarea1">Textarea</label>
+                                        <textarea class="form-control" id="exampleTextarea1" rows="4"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>File upload</label>
+                                        <input type="file" name="img[]" class="file-upload-default">
+                                        <div class="input-group col-xs-12">
+                                          <input type="text" class="form-control file-upload-info" disabled placeholder="Upload File(Maximum Size:12MB>">
+                                          <span class="input-group-append">
+                                            <button class="file-upload-browse btn btn-primary" type="button">Upload</button>
+                                          </span>
+                                        </div>
+                                      </div>
+                                </form>
+                            </div>
+                            
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                            </div>
+                            
+                          </div>
+                        </div>
+                      </div>
+                      
+                    <div id="display"  class="clearfix">
+                        
+                        
+                    </div>
+                </div>
+                <div class ="Phone-footer">
+                    <div class="row">
+                        <div class = "col-sm-11">
+                            <input type="hidden" name="onlineSupport_message_username" id="onlineSupport_message_username" value="{{user_name}}"/>
+                            <textarea rows = "2" cols = "60"  name="onlineSupport_message" id = "onlineSupport_message" style="width:100%;"></textarea>
+                  
+                        </div>
+                        <div class = "col-sm-1">
+                            <button class="btn btn-primary"  onclick="send_message_click()">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function send_message_click() {
+        $.ajax({
+            type: 'POST',
+            url : "send_message",
+            data:{
+                user:$('#onlineSupport_message_username').val(),
+                message:$('#onlineSupport_message').val(),
+                csrfmiddlewaretoken:getCookie("csrftoken"),
+            },
+            success: function(response){
+                console.log(response.messages);
+            },
+            error: function(response){
+                alert('An error occured')
+            } 
+            }
+        )    
+    }
+         
+</script> 
+
+{% endblock content %}
+{% block plugin_javascripts %}
+
+  <script src="/static/assets/vendors/select2/select2.min.js"></script>
+ 
+{% endblock plugin_javascripts %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <script src="/static/assets/js/file-upload.js"></script>
+
+  <script src="/static/assets/js/select2.js"></script>
+
+{% endblock javascripts %}

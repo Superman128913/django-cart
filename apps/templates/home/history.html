@@ -1,0 +1,188 @@
+{% extends "layouts/base.html" %} {% block title %} History Page {% endblock %}
+
+<!-- Specific Plugin CSS goes HERE -->
+{% block plugin_stylesheets %}{% endblock plugin_stylesheets %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+<div class="content-wrapper">
+  <!--Header-->
+  <div class="page-header">
+    <h5 class="page-title">History</h5>
+    <input type="hidden" name="hi_select_item" id="hi_select_item" value="{{sel_item}}" />
+  </div>
+
+  <!-- [ Main Content ] start -->
+  <div class="row">
+    <!--[D F info] start-->
+    <div class="col-sm-12 grid-margin">
+      <div class="Phone">
+        <ul class="nav nav-pills mb-2" style="justify-content: space-evenly; align-items: baseline; margin-top: 15px" role="tablist">
+          {% for kk in btn_array %} {% if kk == sel_item %}
+          <li class="nav-item">
+            <a
+              type="button"
+              onclick="history_click('{{kk}}')"
+              name="history_click"
+              class="nav-link active"
+              data-toggle="pill"
+              role="tab"
+              aria-controls="pills-home"
+              aria-selected="true"
+              >{{kk}}</a
+            >
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a type="button" onclick="history_click('{{kk}}')" name="history_click" class="nav-link" data-toggle="pill" role="tab" aria-controls="pills-home" aria-selected="true"
+              >{{kk}}</a
+            >
+          </li>
+          {% endif %} {% endfor %}
+        </ul>
+        <div class="tab-content">
+          <div class="row">
+            <div class="col-md-12" id="hi_Content"></div>
+            <div class="col-md-12">
+              <div class="row mt-4" id="toolbar-bottom">
+                <div class="col-md-3">
+                  <button class="btn btn-danger" id="btn-clear-history">Clear my history</button>
+                </div>
+                <div class="col-md-6">
+                  <input type="checkbox" class="form-check-input" id="confirm-delete" /> I confirm that once I click on clear my history it can't be restored, the data &amp;
+                  records is gone forever and no way to be restored.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  jQuery(document).ready(function () {
+    var tmp_sel_item = document.getElementById("hi_select_item").value;
+    history_click(tmp_sel_item);
+
+    $("#btn-clear-history").click(function () {
+      if ($("#confirm-delete").prop("checked")) {
+        $.ajax({
+          type: "POST",
+          url: "/delete_history",
+          data: {
+            type: tmp_sel_item,
+            csrfmiddlewaretoken: getCookie("csrftoken"),
+          },
+          complete: function () {},
+          success: function (response) {
+            tmp_sel_item = document.getElementById("hi_select_item").value;
+            history_click(tmp_sel_item);
+            if (response.blocked > 0) {
+              showWarningToast(`There are ${response.blocked} running batchs, So you can't delete these history.`);
+            }
+          },
+        });
+      } else {
+        showDangerToast("To delete history, you have to confirm right message");
+      }
+    });
+  });
+  function history_click(m_type) {
+    $("#hi_Content").html("");
+    //type:0-all,1-Success only ,2-Done only ,3-Fail only
+    $.ajax({
+      type: "POST",
+      url: "/history_get_info",
+      data: {
+        type: m_type,
+        //groupOption:m_GroupOption,
+        csrfmiddlewaretoken: getCookie("csrftoken"),
+      },
+      beforeSend: function () {
+        $("#loader-wrapper").show();
+      },
+      complete: function () {
+        $("#loader-wrapper").hide();
+      },
+      success: function (response) {
+        tmp = "";
+        if (response.gate_array.length == 0) return;
+        tmp +=
+          '<div class="table-responsive" style="overflow-y: auto; max-height: 500px;"><table class="table table-bordered" style="text-align: center;border: 1px solid #2c2e33;" >';
+        tmp +=
+          "<thead><tr><th>Gate Link</th><th>Batch Start Time</th><th>Data as Inserted</th><th> SQL Field 1</th><th> SQL Field 2</th><th> SQL Field 3</th><th> SQL Field 4</th><th> SQL Field 5</th><th> Status </th></tr></thead>";
+        tmp += '<tbody style="text-align: center;">';
+        for (kk in response.gate_array) {
+          tmp += "<tr><td>" + response.gate_array[kk]["gate_link"] + "</td>";
+          tmp += "<td>" + moment(response.gate_array[kk]["start_time"]).format("YYYY-MM-DD hh:mm") + "</td>";
+          tmp += "<td>" + response.gate_array[kk]["inserted_text"] + "</td>";
+          if (response.gate_array[kk]["status"] == 1) {
+            tmp +=
+              '<td><div class="spinner-border text-muted"></div> </td><td><div class="spinner-border text-muted"></div> </td><td><div class="spinner-border text-muted"></div> </td><td><div class="spinner-border text-muted"></div> </td><td><div class="spinner-border text-muted"></div> </td><td> Processing</td>';
+          } else {
+            switch (response.gate_array[kk]["result1"].toLowerCase()) {
+              case "phone registered successfully":
+                tmp += `<td><span class="text-success">${response.gate_array[kk]["result1"]}</span></td>`;
+                break;
+              case "phone registration fails":
+                tmp += `<td><span class="text-danger">${response.gate_array[kk]["result1"]}</span></td>`;
+                break;
+              case "please try again later":
+              case "unknown error please contact support":
+                tmp += `<td><span class="text-warning">${response.gate_array[kk]["result1"]}</span></td>`;
+                break;
+              default:
+                tmp += `<td><span class="text-warning">${response.gate_array[kk]["result1"]}</span></td>`;
+            }
+            switch (response.gate_array[kk]["result2"]) {
+              case "Date accepted":
+              case "accepted":
+              case "data is valid":
+                tmp += `<td><span class="text-success">${response.gate_array[kk]["result2"]}</span></td>`;
+                break;
+              case "Registration Fail":
+              case "Inactive number":
+              case "wrong number":
+                tmp += `<td><span class="text-danger">${response.gate_array[kk]["result2"]}</span></td>`;
+                break;
+              default:
+                tmp += `<td>${response.gate_array[kk]["result2"]}</td>`;
+            }
+            switch (response.gate_array[kk]["result3"]) {
+              case "zipcode accepted":
+              case "zipcode is valid":
+              case "zipcode matches":
+                tmp += `<td><span class="text-success">${response.gate_array[kk]["result3"]}</span></td>`;
+                break;
+              case "Wrong zipcode":
+              case "zipcode is not valid":
+              case "Invalid zipcode":
+                tmp += `<td><span class="text-danger">${response.gate_array[kk]["result3"]}</span></td>`;
+                break;
+              default:
+                tmp += `<td>${response.gate_array[kk]["result3"]}</td>`;
+            }
+            tmp += "</td><td>" + response.gate_array[kk]["result4"] + "</td><td>" + response.gate_array[kk]["result5"] + "</td><td>";
+            if (response.gate_array[kk]["status"] == 0) tmp += "In Queue";
+            else if (response.gate_array[kk]["status"] == 2) tmp += "Error";
+            else if (response.gate_array[kk]["status"] == 3) tmp += "Done";
+            tmp += "</td>";
+          }
+          tmp += "</tr>";
+        }
+        tmp += "</tbody></table></div>";
+
+        $("#hi_Content").html(tmp);
+      },
+      error: function (err) {},
+    });
+  }
+</script>
+
+{% endblock content %}
+
+<!-- Specific Plugin JS goes HERE  -->
+{% block plugin_javascripts %}{% endblock plugin_javascripts %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

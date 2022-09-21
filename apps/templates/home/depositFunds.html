@@ -1,0 +1,274 @@
+{% extends "layouts/base.html" %} {% block title %} DepositFunds {% endblock %}
+<!-- Specific Plugin CSS goes HERE -->
+{% block plugin_stylesheets %}
+
+<!-- Plugin css for this page -->
+<link rel="stylesheet" href="/static/assets/vendors/select2/select2.min.css" />
+<!--<link rel="stylesheet" href="/static/assets/vendors/select2-bootstrap-theme/select2-bootstrap.min.css">-->
+<!-- End plugin css for this page -->
+
+{% endblock plugin_stylesheets %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+<script>
+  m_status = "";
+  $(document).ready(function () {
+    setInterval(function () {
+      $.ajax({
+        type: "POST",
+        url: "df_get_history",
+        data: {
+          csrfmiddlewaretoken: getCookie("csrftoken"),
+        },
+        success: function (response) {
+          console.log(response);
+          tmp_stu = "";
+          for (key in response.trans_array) {
+            tmp_stu += response.trans_array[key]["Transaction_Status"] + response.trans_array[key]["From_Ticket"];
+          }
+
+          if (m_status != tmp_stu) {
+            m_status = tmp_stu;
+            $("#df_history").empty();
+            tmp =
+              '<div class="w-full" style="overflow-x: auto;"><table class="table table-bordered"><thead><tr><th>Payment ID</th><th>Payment Method</th><th>Receiver Address</th>';
+            tmp +=
+              '<th>Received Amount</th><th>Transaction Status</th></tr></thead><tbody style="text-align: center;">';
+            for (key in response.trans_array) {
+              tmp +=
+                "<tr><td>" +
+                response.trans_array[key]["Transaction_ID"] +
+                "</td> <td>" +
+                response.trans_array[key]["From_Ticket"] +
+                "</td><td>";
+              tmp +=
+                response.trans_array[key]["USDT_Reciver_Address"] +
+                "</td> <td>" +
+                response.trans_array[key]["Amount_Recived"] +
+                "</td><td>";
+              tmp += response.trans_array[key]["Transaction_Status"] + "</td></tr>";
+            }
+            tmp += "</tbody></table></div>";
+            $("#df_history").append(tmp);
+          }
+
+          //"</td> <td>"+response.trans_array[key]['User_Balance']+"</td><td>";tmp+=response.trans_array[key]['User_Balance_updated_At']+
+        },
+        error: function (response) {
+          //alert('An error occured')
+        },
+      });
+    }, 1000);
+  });
+</script>
+<div class="content-wrapper">
+  <div class="page-header">
+    <h5 class="page-title">Deposit Funds</h5>
+  </div>
+  <!-- [ Main Content ] start -->
+  <div class="row">
+    <!--[D F info] start-->
+    <!--[Gate1 Link] end-->
+    <div class="col-sm-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-body">
+          <div class="row">
+            <div class="col-sm-2" style="font-size: 20px; text-align: right; padding-right: 0px">
+              <a>Select Crypto:</a>
+            </div>
+            <div class="col-sm-4">
+              <div class="form-group">
+                <!--<label>Single select box using select 2</label>-->
+                <select id="sel_ticker" class="js-example-basic-single" style="width: 100%">
+                  {% for kk in tickers %}
+                  <option value="{{kk.ticker}}" selected><image src="{{kk.img}}"></image>{{kk.name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <a>USD Amout:</a><input type="text" id="input_amount" style="max-width: 50px; margin-left: 10px" />
+            </div>
+            <div class="col-sm -1" id="df_progress"></div>
+            <div class="col-sm-2">
+              <button type="button" class="btn btn-primary mb-2" onclick="send_deposit_click()">Deposit</button>
+            </div>
+          </div>
+          <div id="df_error" style="text-align: center; color: red"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 grid-margin">
+      <div class="Phone">
+        <div class="Phone-header">
+          <h5>Payment Info</h5>
+		  <h7>* Each coin address must be used for 1 deposit only .</h7><br>
+		  <h7>* Address is valid for 7 days after that it will completely deleted from our database. </h7><br>
+		  <h7>* Deposits Takes 10-45 minutes depends on the confirmation time needed for the selected coin.</h7><br>
+		  <h7>* USD Deposit amount may vary from the amount showen Below since the final USD amount is calculated at the time of confirmation received, we use coinmarketcap.com exchange rates.</h7>
+		  
+        </div>
+        <div class="Phone-body">
+          <dix class="row">
+            <div class="col-sm-12 col-md-6" id="df_address_info"></div>
+            <div class="col-sm-12 col-md-6" id="df_qrcode_box"></div>
+          </dix>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 grid-margin">
+      <div class="Phone">
+        <div class="Phone-body" id="df_history"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const min_amount = "{{ min_amount }}";
+    /* function select_ticker(min_amount){
+        var input_amount= document.getElementById('input_amount').value;
+        var e = document.getElementById("sel_ticker");
+        m_seletedTicker = e.options[e.selectedIndex].value
+        console.log(input_amount)
+        console.log(m_seletedTicker)
+
+        if (input_amount == "")
+        {
+            alert("Please Insert amount");
+            return;
+        }
+        else
+        {
+            if(parseFloat(input_amount) < parseFloat(min_amount))
+            {
+                str = "Amount must be greater than\t"+min_amount+",Please input large value";
+                console.log(str);
+                return;
+            }
+            $("#df_exchange_amount").empty();
+            tmp = "<div class=\"spinner-border text-muted\"></div>"
+            $("#df_exchange_amount").append(tmp);
+            $.ajax({
+                type: 'POST',
+                url : "df_selected_ticker",
+                data:{
+                    ticker:m_seletedTicker,
+                    amount:input_amount,
+                    csrfmiddlewaretoken:getCookie("csrftoken"),
+                },
+                success: function(response){
+                    amount = response.estimatedAmount
+                    tmp = "<a>You Get:"+response.estimatedAmount+"\t\t"+m_seletedTicker +"</a>";
+                    $("#df_exchange_amount").empty();
+                    $("#df_exchange_amount").append(tmp);
+                    console.log(response.estimatedAmount);
+                },
+                error: function(response){
+                    alert('An error occured')
+                } 
+            })
+        }
+        
+     
+    }*/
+    function send_deposit_click() {
+      document.getElementById("df_error").innerHTML = "";
+      amount = document.getElementById("input_amount").value;
+      var e = document.getElementById("sel_ticker");
+      m_seletedTicker = e.options[e.selectedIndex].value;
+
+      if (amount == "") {
+        document.getElementById("df_error").innerHTML = "Error Amount, Please insert amount";
+        return;
+      }
+      if (amount < min_amount) {
+        document.getElementById("df_error").innerHTML =
+          "Amount must be greater than\t" + min_amount + ", Please input large value";
+        return;
+      }
+      if ((selected_ticker = "")) {
+        document.getElementById("df_error").innerHTML = "Please Select Crypto";
+        return;
+      } else {
+        $("#df_progress").empty();
+        tmp = '<div class="spinner-border text-muted"></div>';
+        $("#df_progress").append(tmp);
+        $.ajax({
+          type: "POST",
+          url: "df_deposit_click",
+          data: {
+            ticker: m_seletedTicker,
+            amount: amount,
+            csrfmiddlewaretoken: getCookie("csrftoken"),
+          },
+          success: function (response) {
+            $("#df_progress").empty();
+            console.log(response);
+            if (JSON.stringify(response).includes("error")) {
+              if (response.error == "Status Error") {
+                $("#df_qrcode_box").empty();
+                tmp =
+                  '<div id = "df_qrcode" style="background-color: white; display: flex; height: 175px; width: 175px;" class="align-items-center justify-content-center"></div>';
+                $("#df_qrcode_box").append(tmp);
+                $("#df_address_info").empty();
+                $("#df_qrcode").empty();
+                tmp =
+                  "<a><b> Est. Deposit Amount:</b><br></a><a>" + "\t\t" + response.amount + "\t" + response.tick + "</a>" + "<p></p>";
+                tmp += "<b><a>" + response.tick + " Deposit address: </b></a><br><a>" + response.payinAddress + "</a>";
+                $("#df_address_info").append(tmp);
+				
+                qrc = new QRCode(document.getElementById("df_qrcode"), {
+                  text: response.payinAddress,
+                  width: 150,
+                  height: 150,
+                });
+              } else {
+                tmp = "<a>" + response.error + ":</a>\t<a>" + response.message + "</a>";
+                $("#df_error").append(tmp);
+              }
+            } else {
+              $("#df_qrcode_box").empty();
+              tmp =
+                '<div id = "df_qrcode" style="background-color: white; display: flex;  height: 175px; width: 175px;" class="align-items-center justify-content-center"></div>';
+              $("#df_qrcode_box").append(tmp);
+              $("#df_address_info").empty();
+              $("#df_qrcode").empty();
+              tmp =
+                "<a>Deposit Amount:</a><a>" +
+                "\t\t" +
+                response.amount +
+                "\t" +
+                response.fromCurrency +
+                "</a>" +
+                "<p></p>";
+              tmp += "<a>To this address:</a><br><a>" + response.payinAddress + "</a>";
+              $("#df_address_info").append(tmp);
+              qrc = new QRCode(document.getElementById("df_qrcode"), {
+                text: response.payinAddress,
+                width: 150,
+                height: 150,
+              });
+            }
+          },
+          error: function (response) {
+            alert("An error occured");
+          },
+        });
+      }
+    }
+  </script>
+  {% endblock content %}
+  <!-- Specific Plugin JS goes HERE  -->
+  {% block plugin_javascripts %}
+
+  <script src="/static/assets/vendors/select2/select2.min.js"></script>
+  <script src="/static/assets/vendors/typeahead.js/typeahead.bundle.min.js"></script>
+
+  {% endblock plugin_javascripts %}
+
+  <!-- Specific Page JS goes HERE  -->
+  {% block javascripts %}
+
+  <script src="/static/assets/js/select2.js"></script>
+
+  {% endblock javascripts %}
+</div>

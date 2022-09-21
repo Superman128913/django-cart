@@ -1,0 +1,42 @@
+{% extends "layouts/base.html" %} {% block title %} Profile {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+<div class="content-wrapper">
+  <div class="page-header">
+    <h5 class="page-title">Profile</h5>
+  </div>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="Phone">
+        <div class="Phone-body">
+          <h4 class="Phone-title">Change Password</h4>
+          {% if success == True %}
+          <span class="text-success">{{msg|safe}}</span>
+          {% else %}
+          <span class="text-danger">{{msg|safe}}</span>
+          {% endif %}
+          <form class="forms-sample" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+              <label>Password</label>
+              {{ form.password1 }}
+              <span class="text-danger">{{ form.password1.errors }}</span>
+            </div>
+            <div class="form-group">
+              <label>Confirm Password</label>
+              {{ form.password2 }}
+              <span class="text-danger">{{ form.password2.errors }}</span>
+            </div>
+            <button type="submit" class="btn btn-primary mr-2">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

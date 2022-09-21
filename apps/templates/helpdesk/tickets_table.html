@@ -1,0 +1,27 @@
+{% if len_tickets > 0 %} {% for ticket in tickets %}
+<tr onclick="javscript:open_ticket({{ticket.id}})" style="cursor: pointer;">
+  <td>{{ ticket.queue.title }}</td>
+  <td>{{ ticket.title }}</td>
+  <td>{{ ticket.modified }}</td>
+  <td class="text-center">
+    {% if ticket.status == 1 %}
+    <label class="badge badge-success">Open</label>
+    {% elif ticket.status == 2 %}
+    <label class="badge badge-success">Reopened</label>
+    {% elif ticket.status == 3 %}
+    <label class="badge badge-info">Resolved</label>
+    {% elif ticket.status == 4 %}
+    <label class="badge badge-warning">Closed</label>
+    {% elif ticket.status == 5 %}
+    <label class="badge badge-danger">Duplicated</label>
+    {% endif %}
+  </td>
+  {% comment %}
+  <td><button class="btn btn-sm btn-info" onclick="javascript:open_ticket({{ticket.id}});">View</button></td>
+  {% endcomment %}
+</tr>
+{% endfor %} {% else %}
+<tr>
+  <td colspan="4">No tickets found</td>
+</tr>
+{%endif %}

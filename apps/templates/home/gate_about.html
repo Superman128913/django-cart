@@ -1,0 +1,46 @@
+{% extends "layouts/base.html" %} {% block title %} UI Tables {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+<div class="content-wrapper">
+  <div class="page-header">
+    <h5 class="page-title">About Gate {{pk}}</h5>
+  </div>
+  <!-- [ Main Content ] start -->
+  <!--[D F info] start-->
+  <div class="row">
+    {% if underMaintainance %}
+    <div class="col-md-12 grid-margin">
+      <div class="alert alert-danger">{{ status.uner_mantatince_messge}}</div>
+    </div>
+    {% else %} {% for ABOUT_ITEM in about %}
+    <div class="col-sm-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-header">
+          <h5>About Gate {{ pk }}</h5>
+        </div>
+        <div class="Phone-body">{{ABOUT_ITEM.About_Gate | safe}}</div>
+      </div>
+    </div>
+    {% endfor %}
+    <!--[About Gate1] end-->
+    <!--[Gate1 Link] start-->
+    <div class="col-sm-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-body">
+          <div class="row">
+            {% for GL_ITEM in nes_gateLink %}
+            <div class="col-md-2 col-sm-3">
+              <a href="{% url 'gate_link' GL_ITEM.id %}">
+                <img class="w-100" src="{{GL_ITEM.Link_Logo_large.url}}" alt="" />
+                <p class="text-white mt-2 mb-4 text-center">{{GL_ITEM.Link_Name}}</p>
+              </a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %} {% endblock content %}
+</div>

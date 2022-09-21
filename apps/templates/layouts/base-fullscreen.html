@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="csrf-token" content="{% csrf_token %}">
+    <link rel="shortcut icon" href="/static/assets/images/favicon.png" />
+
+    <title>Welcome to My Website - {% block title %}{% endblock %} | Alex</title>
+
+    <link rel="stylesheet" href="/static/assets/vendors/mdi/css/materialdesignicons.min.css" />
+    <link rel="stylesheet" href="/static/assets/vendors/css/vendor.bundle.base.css" />
+
+    <!-- Specific Plugin CSS goes HERE -->
+    {% block plugin_stylesheets %}{% endblock plugin_stylesheets %}
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/static/assets/css/style.css" />
+    <link rel="stylesheet" href="/static/assets/my_assets/css/mycss.css" />
+    <link rel="stylesheet" href="/static/assets/custom/css/components.css" />
+    <!-- End layout styles -->
+
+    <!-- Specific CSS goes HERE -->
+    <style>
+      .sidebar .nav .menu-items .collapse .nav-item:nth-child(5n+1) .nav-link .menu-icon i {
+        color: #00d25b; }
+      .sidebar .nav .menu-items .collapse .nav-item:nth-child(5n+2) .nav-link .menu-icon i {
+        color: #fc424a; }
+      .sidebar .nav .menu-items .collapse .nav-item:nth-child(5n+3) .nav-link .menu-icon i {
+        color: #ffab00; }
+      .sidebar .nav .menu-items .collapse .nav-item:nth-child(5n+4) .nav-link .menu-icon i {
+        color: #0090e7; }
+      .sidebar .nav .menu-items .collapse .nav-item:nth-child(5n+5) .nav-link .menu-icon i {
+        color: #8f5fe8; }
+      .navbar .navbar-menu-wrapper .count-indicator .count-number {
+        height: 14px;
+        width: 14px;
+        font-size: 10px;
+        color: #ffffff;
+        line-height: 12px;
+        text-align: center;
+        font-weight: 700;
+      }
+    </style>
+    {% block stylesheets %}{% endblock stylesheets %}
+  </head>
+  <body>
+    <noscript>
+      <div class="w-100 h-100">
+        <div class="w-100 h-100 page-no-script"></div>
+        <div class="row alert-wrapper flex justify-content-center">
+          <span class="alert alert-danger">Please Enable JavaScript to use the service</span>
+        </div>
+      </div>
+    </noscript>
+
+    <div class="container-scroller">{% block content %}{% endblock content %}</div>
+    <!-- container-scroller -->
+
+    <script src="/static/assets/vendors/js/vendor.bundle.base.js"></script>
+
+    <!-- Specific Plugin JS goes HERE  -->
+    {% block plugin_javascripts %}{% endblock plugin_javascripts %}
+
+    <script src="/static/assets/js/off-canvas.js"></script>
+    <script src="/static/assets/js/hoverable-collapse.js"></script>
+    <script src="/static/assets/js/misc.js"></script>
+    <script src="/static/assets/js/settings.js"></script>
+    <script src="/static/assets/js/todolist.js"></script>
+
+    <!-- Specific Page JS goes HERE  -->
+    {% block javascripts %}{% endblock javascripts %}
+  </body>
+</html>

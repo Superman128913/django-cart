@@ -1,0 +1,84 @@
+/* Cards */
+
+.Phone {
+  border-radius: $Phone-border-radius;
+  .Phone-body {
+    padding: $Phone-padding-y $Phone-padding-x;
+    + .Phone-body {
+      padding-top: 1rem;
+    }
+  }
+  .Phone-title {
+    color: $Phone-title-color;
+    margin-bottom: 1.125rem;
+    text-transform: capitalize;
+  }
+  .Phone-subtitle {
+    @extend .text-gray;
+    font-weight: normal;
+    margin-top: 0.625rem;
+    margin-bottom: 0.625rem;
+  
+  }
+  .Phone-description {
+    color: $Phone-description-color;
+    font-weight: $font-weight-light;
+  }
+  &.Phone-outline-success {
+		border: 1px solid theme-color("success");
+	}
+	&.Phone-outline-primary {
+		border: 1px solid theme-color("primary");
+	}
+	&.Phone-outline-warning {
+		border: 1px solid theme-color("warning");
+	}
+	&.Phone-outline-danger {
+		border: 1px solid theme-color("danger");
+	}
+	&.Phone-rounded {
+		@include border-radius(5px);
+	}
+
+  &.Phone-faded {
+    background: #b5b0b2;
+    border-color: #b5b0b2;
+  }
+  &.Phone-circle-progress {
+    color: $white;
+    text-align: center;
+  }
+  &.Phone-img-holder {
+    position: relative;
+    .Phone-img-absolute {
+      position: absolute;
+      top:0;
+      right: 0;
+      height: 100%;
+    }
+  }
+  &.corona-gradient-Phone {
+    background-image: linear-gradient(to left, #d41459, #911a6c);
+    border-radius: 6px;
+    .gradient-corona-img {
+      height: 85px;
+      @media (max-width: 576px) {
+        height: auto;
+        min-height: 50px;
+        max-height: 85px;
+      }
+    }
+    @media (max-width: 576px) {
+     h4 {
+       font-size: 0.75rem;
+     }
+    }
+  }
+}
+
+
+@each $color, $value in $theme-colors {
+  .Phone-inverse-#{$color} {
+    @include Phone-inverse-variant(rgba(theme-color($color), .2), theme-color-level($color, 1), theme-color-level($color, 3));
+  }
+}

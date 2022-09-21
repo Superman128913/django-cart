@@ -1,0 +1,234 @@
+{% extends "layouts/base.html" %} {% block title %} UI Tables {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<link rel="stylesheet" href="/static/assets/vendors/select2/select2.min.css" />
+
+{% endblock stylesheets %} {% block modals %}
+<div class="modal fade" id="myModal">
+  <div class="modal-dialog">
+    <form method="post" enctype="multipart/form-data" id="form-new-ticket">
+      <div class="modal-content" style="background-color: #191c24">
+        <!-- Modal Header -->
+        <div class="modal-header">Submit a Ticket</div>
+        <!-- Modal body -->
+        <div class="modal-body">
+          {% csrf_token %} {% for field in form %} {% if field.is_hidden %} {{ field }} {% else %}
+          <div class="form-group">
+            <label for="id_{{ field.name }}"> {{ field.label }} </label>
+            {{ field }} {% if field.errors %}
+            <small class="error">{{ field.errors }}</small>
+            {% endif %} {% if field.help_text %}
+            <small class="form_help_text help-block">{{field.help_text }}</small>
+            {% endif %}
+          </div>
+          {% endif %} {% endfor %} <input name="priority" value="3" hidden />
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fa fa-send"></i> Submit Ticket</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="view_ticket">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background-color: #191c24">
+      <!-- Modal Header -->
+      <div class="modal-header" id="view_ticket_title" style="font-size: 1.2rem"></div>
+      <!-- Modal body -->
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <textarea rows="6" class="w-100" id="textarea-reply" placeholder="Reply..."></textarea>
+          </div>
+          <div class="col-md-12 justify-content-between d-flex mt-2">
+            <button class="btn btn-success" id="btn-post-reply">Post Reply</button>
+          </div>
+          <div class="col-md-12">
+            <h5 class="mt-4 mb-4">Ticket Messages</h5>
+          </div>
+          <div class="col-md-12">
+            <div class="w-100 preview-list" id="ticket-messages"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        {% comment %} <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fa fa-send"></i> Submit Ticket</button> {% endcomment %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock modals %} {% block content %}
+
+<script>
+  var current_ticket_id = -1;
+  const read_messages = () => {
+    $.get("/get_tickets")
+      .then((res) => {
+        $("#tickets-list").html(res);
+        setTimeout(read_messages, 5000);
+      })
+      .catch((err) => {});
+  };
+
+  $(document).ready(function () {
+    read_messages();
+  });
+</script>
+
+<div class="content-wrapper">
+  <!--Header-->
+  <div class="page-header">
+    <h1 class="page-title">Ticket Support</h1>
+  </div>
+
+  <!-- [ Main Content ] start -->
+  <div class="row">
+    <!--[D F info] start-->
+    <div class="col-sm-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-header">
+          <h5>If support is offline you can always leave your message and wiil reply as soon as possible once available</h5>
+        </div>
+        <div class="Phone-body">
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="w-100 justify-content-end" style="display: flex">
+                <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">Open New Ticket</button>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <table class="table table-bordered table-striped" style="margin-top: 1rem">
+                <thead>
+                  <tr>
+                    <th style="width: 120px">Category</th>
+                    <th>Subject</th>
+                    <th style="width: 120px">Last Reply</th>
+                    <th style="width: 120px">Status</th>
+                    {% comment %}
+                    <th style="width: 80px"></th>
+                    {% endcomment %}
+                  </tr>
+                </thead>
+                <tbody id="tickets-list"></tbody>
+              </table>
+            </div>
+          </div>
+          <div id="display" class="clearfix"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  jQuery(document).ready(function () {
+    $("#btn-post-reply").click(function () {
+      if ($("#textarea-reply").val().trim() == "") {
+        return;
+      }
+      $.ajax({
+        type: "POST",
+        url: `/tickets/follow/${current_ticket_id}`,
+        data: {
+          csrfmiddlewaretoken: getCookie("csrftoken"),
+          message: $("#textarea-reply").val(),
+        },
+        success: function (data) {
+          open_ticket(current_ticket_id);
+          $("#textarea-reply").val("");
+          showSuccessToast("Reply was successfully submitted");
+        },
+        error: function () {},
+      });
+    });
+    $("#btn-close-ticket").click(function () {
+      $.ajax({
+        type: "POST",
+        url: `/tickets/close/${current_ticket_id}`,
+        data: {
+          csrfmiddlewaretoken: getCookie("csrftoken"),
+        },
+        success: function (data) {
+          read_messages();
+          showSuccessToast("Ticket was closed successfully");
+          $("#view_ticket").modal("hide");
+        },
+        error: function () {},
+      });
+    });
+  });
+  function open_ticket(id) {
+    $.get(`/tickets/${id}`)
+      .then((res) => {
+        current_ticket_id = id;
+        $("#view_ticket_title").html(res.title);
+        $("#ticket-description").html(res.description);
+        $("#ticket-resolution").html(res.resolution);
+        let tmp_str = "";
+        for (record of res.followup_set.reverse()) {
+          tmp_str += `<div class="preview-item ${record.user != 1 && "success"}">
+            <div class="preview-item-content d-flex flex-grow">
+              <div class="flex-grow">
+                <div class="d-flex d-md-block d-xl-flex justify-content-between">
+                  <h6 class="preview-subject">${record.title}</h6>
+                  <p class="text-muted text-small">${moment(record.date).format("YYYY-MM-DD hh:mm:ss")}</p>
+                </div>
+                <p class="text-muted">${record.comment}</p>
+              </div>
+            </div>
+          </div>`;
+        }
+        tmp_str += `<div class="preview-item success">
+          <div class="preview-item-content d-flex flex-grow">
+            <div class="flex-grow">
+              <div class="d-flex d-md-block d-xl-flex justify-content-between">
+                <h6 class="preview-subject"></h6>
+                <p class="text-muted text-small">${moment(res.created).format("YYYY-MM-DD hh:mm:ss")}</p>
+              </div>
+              <p class="text-muted">${res.description}</p>
+            </div>
+          </div>
+        </div>`;
+        $("#ticket-messages").html(tmp_str);
+        $("#view_ticket").modal("show");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  jQuery(document).ready(function () {
+    $("#form-new-ticket").submit(function (e) {
+      e.preventDefault();
+      $.ajax({
+        type: "POST",
+        url: "/tickets/create",
+        data: $(this).serialize(), // serializes the form's elements.
+        success: function (data) {
+          read_messages();
+          showSuccessToast("New ticket was created successfully");
+          $("#myModal").modal("hide");
+        },
+        error: function () {
+          showWarningToast("Please enter ticket info correctly");
+        },
+      });
+    });
+  });
+</script>
+
+{% endblock content %} {% block plugin_javascripts %}
+
+<script src="/static/assets/vendors/select2/select2.min.js"></script>
+
+{% endblock plugin_javascripts %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<script src="/static/assets/js/file-upload.js"></script>
+
+<script src="/static/assets/js/select2.js"></script>
+
+{% endblock javascripts %}

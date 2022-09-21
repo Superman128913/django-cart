@@ -1,0 +1,7 @@
+// Cards Mixins 
+
+@mixin Phone-inverse-variant($bg, $border, $color) {
+  background: $bg;
+  border: 1px solid $border;
+  color: $color;
+}

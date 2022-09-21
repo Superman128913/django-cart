@@ -1,0 +1,111 @@
+{% extends "layouts/base.html" %} {% block title %} Blank Page {% endblock %}
+
+<!-- Specific Plugin CSS goes HERE -->
+{% block plugin_stylesheets %}{% endblock plugin_stylesheets %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+<div class="content-wrapper">
+  <!--Header-->
+  <div class="page-header">
+    <h5 class="page-title">Area Codes LookUp</h5>
+  </div>
+  <!-- [ Main Content ] start -->
+  <div class="row">
+    <!--[Area Find info] start-->
+    <div class="col-md-12 grid-margin">
+      <div class="Phone">
+        {% if error %}
+        <div class="alert alert-danger">{{ error_msg }}</div>
+        {% endif %}
+        <div class="Phone-header">
+          <h4>Insert up to 50 Phone number to serach info about its area code for free</h4>
+          <h5>make sure that the length of each row is at least 6 digits</h5>
+        </div>
+        <form method="post" action="">
+          {% csrf_token %}
+          <div class="Phone-body">
+            <div>{{ form.area_inputData }}</div>
+            <div class="row mt-4">
+              <div class="col-md-2"></div>
+              <div class="col-md-5">{{ form.capatchacode }}</div>
+              <div class="col-md-5">
+                <button name="123" class="btn btn-primary" type="submit" value="send_data">Find Area</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!--[Area Find result] start-->
+    {% if segment == "in(p)_response" %}
+    <div class="col-md-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-body">
+          <h4 class="Phone-title">Search Result</h4>
+          <div class="row">
+            <div class="col-md-12 mb-4">
+              <a class="Phone-description">Found : {{found_cnt}}/ </a>
+              <a class="Phone-description">Not Found: {{not_found_cnt}}</a>
+            </div>
+          </div>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th id="p1">Data as inserted</th>
+                <th>Bin Code</th>
+                <th>Brand</th>
+                <th>Issuer</th>
+                <th>Type</th>
+                <th>Level</th>
+                <th>Country</th>
+              </tr>
+            </thead>
+            <tbody>
+              <input type="hidden" name="fnd_result" id="fnd_result" value="{{fnd_result}}" />
+              <input type="hidden" name="find_result" id="all_result" value="{{all_result}}" />
+              {% for i in find_result %} {% if i.3 != "NotFound" %}
+              <tr>
+                <td>{{forloop.counter}}</td>
+                {% for ii in i %}
+                <td class="text-success">{{ii}}</td>
+                {% endfor %}
+              </tr>
+              {% else %}
+              <tr>
+                <td>{{forloop.counter}}</td>
+                {% for ii in i %}
+                <td class="text-danger">{{ii}}</td>
+                {% endfor %}
+              </tr>
+              {% endif %} {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="Phone-footer" style="text-align: center">
+        <a class="btn btn-primary" onclick="copyToClipboard('copy_area_p1')" style="margin-right: 5rem">Copy All Result</a>
+        <a class="btn btn-success" onclick="copyToClipboard('copy_area_p2')">Copy Found Only</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+<script>
+  function copyToClipboard(element) {
+    if (element == "copy_area_p1") {
+      copyTextToClipboard($("#all_result").val());
+    } else if (element == "copy_area_p2") {
+      copyTextToClipboard($("#fnd_result").val());
+    }
+  }
+</script>
+{% endblock content %}
+
+<!-- Specific Plugin JS goes HERE  -->
+{% block plugin_javascripts %}{% endblock plugin_javascripts %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

@@ -1,0 +1,164 @@
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+  <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+    <a class="sidebar-brand brand-logo" style="width: 100%; height: 100%" href="{% url 'index' %}"><img src="/static/assets/images/logo.png" alt="logo" /></a>
+    <a class="sidebar-brand brand-logo-mini" style="width: 100%; height: 100%" href="{% url 'index' %}"><img src="/static/assets/images/logo.png" alt="logo" /></a>
+  </div>
+  <ul class="nav">
+    <!--NEWS ITEM-->
+    <li class="nav-item nav-category">
+      <span class="nav-link">Navigation</span>
+    </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" href="{% url 'index' %}">
+        <span class="menu-icon">
+          <i class="mdi mdi-bell-outline"></i>
+        </span>
+        <span class="menu-title">NEWS</span>
+      </a>
+    </li>
+    <!--DIGITAL STORE-->
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="#digital_store">
+        <span class="menu-icon">
+          <i class="mdi mdi-check"></i>
+        </span>
+        <span class="menu-title">Digital Store</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="digital_store">
+        <ul class="nav sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <span class="menu-icon">
+                <i class="mdi mdi-information-variant"></i>
+              </span>
+              Store Info</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'search' %}">
+              <span class="menu-icon">
+                <i class="mdi mdi-file-find"></i>
+              </span>
+              Search</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <span class="menu-icon">
+                <i class="mdi mdi-cart-outline"></i>
+              </span>
+              Show Cart (8)</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <span class="menu-icon">
+                <i class="mdi mdi-history"></i>
+              </span>
+              Orders History</a
+            >
+          </li>
+        </ul>
+      </div>
+    </li>
+    <!--GATE ITEM-->
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="#ui-basic1">
+        <span class="menu-icon">
+          <i class="mdi mdi-check"></i>
+        </span>
+        <span class="menu-title">Gate1</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="ui-basic1">
+        <ul class="nav sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="/gate_about/G1">
+              <span class="sub-menu-image">
+                <img class="gate-about-image" src="{{Gate1_About_Image.url}}" alt="" />
+              </span>
+              Gate About</a
+            >
+          </li>
+          {% for Item in gateLink %} {% if Item.assin_link_to_gateway == "G1" %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'gate_link'  Item.id %}">
+              <img class="gate-about-image" alt="" src="{{Item.Link_Logo_large.url}}" />
+              {{Item.Link_Name}}</a
+            >
+          </li>
+          {% endif %} {% endfor %}
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="#ui-basic2">
+        <span class="menu-icon">
+          <i class="mdi mdi-check"></i>
+        </span>
+        <span class="menu-title">Gate2</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="ui-basic2">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'gate_about' 'G2' %}">
+              <span class="sub-menu-image"> <img class="gate-about-image" src="{{Gate2_About_Image.url}}" alt="" /> </span>Gate2 About
+            </a>
+          </li>
+          {% for Item in gateLink %} {% if Item.assin_link_to_gateway == "G2" %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'gate_link'  Item.id %}">
+              <img class="gate-about-image" alt="" src="{{Item.Link_Logo_large.url}}" />
+              {{Item.Link_Name}}</a
+            >
+          </li>
+          {% endif %} {% endfor %}
+        </ul>
+      </div>
+    </li>
+    <!--Area Codes Item Start-->
+    <li class="nav-item menu-items">
+      <a class="nav-link" href="{% url 'area_code' %}">
+        <span class="menu-icon">
+          <i class="mdi mdi-file-find"></i>
+        </span>
+        <span class="menu-title">Area Codes</span>
+      </a>
+    </li>
+    <!--Area Codes Item End-->
+    <!--History Start-->
+    <li class="nav-item menu-items">
+      <a class="nav-link" href="{% url 'history' 'hgo' %}">
+        <span class="menu-icon">
+          <i class="mdi mdi-history"></i>
+        </span>
+        <span class="menu-title">History</span>
+      </a>
+    </li>
+    <li class="nav-item menu-items">
+      <a class="nav-link" href={% url 'assist' %}>
+        <span class="menu-icon">
+          <i class="mdi mdi-information-variant"></i>
+        </span>
+        <span class="menu-title">FAQs</span>
+      </a>
+    </li>
+    <!--History End-->
+    <!--Online Support Start-->
+    <li class="nav-item menu-items">
+      {% if user.is_superuser %}
+      <a class="nav-link" href="/helpdesk/">
+      {% else %}  
+      <a class="nav-link" href="{% url 'onlineSupport' %}">
+      {% endif %}
+        <span class="menu-icon">
+          <i class="mdi mdi-email"></i>
+        </span>
+        <span class="menu-title">Online Support</span>
+      </a>
+    </li>
+    <!--Online Support end-->
+  </ul>
+</nav>

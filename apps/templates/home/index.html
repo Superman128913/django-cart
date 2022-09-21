@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Dashboard {% endblock %} 
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="page-header">
+        <h5 class="page-title"> Latest News </h5>
+    </div>
+    <div class = "row">
+        {% for NEWS_ITEMS in news %}
+        <div class="col-12 grid-margin">
+            <div class="Phone">
+                    <!--<div class="Phone-body">
+                        <div class = "row">
+                            <div class = "col-8">
+                                <a> Title </a>
+                            </div>
+                            <div class = "col-4" style = "text-align:right;">
+                                <a>Date</a>
+                            </div>
+                            <div class = "col-4" style = "text-align:right;">
+                                <span class="menu-icon">
+                                    <a >More</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>--> 
+            
+                <div class="Phone-body">
+                    <div class = "row">
+                        <div class = "col-8">
+                            <a>{{NEWS_ITEMS.title}} </a>
+                        </div>
+                        <div class = "col-4" style = "text-align:right;">
+                            <a>{{NEWS_ITEMS.publish_date}}</a>
+                        </div>
+                        <!--<div class = "col-4" style = "text-align:right;">
+                            <span class="menu-icon">
+                                <a class="mdi mdi-menu" data-toggle="collapse" href="#ui-index-new{{NEWS_ITEMS.id}}" aria-expanded="false" ></a>
+                            </span>
+                        </div>-->
+                    </div>
+                    <hr>
+                <!--class="collapse"--> 
+                    <div  id="ui-index-new{{NEWS_ITEMS.id}}">
+                        <ul class="nav flex-column sub-menu">
+                            <div style = "margin-left:3%;">{{NEWS_ITEMS.content | safe}}</div>
+                        </ul>
+                    </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

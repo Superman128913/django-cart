@@ -1,0 +1,806 @@
+{% extends "layouts/base.html" %} {% block title %} UI Tables {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %} {% endblock stylesheets %} {% block loader %}
+<div id="loader-wrapper">
+  <div style="display: flex; flex-direction: column" class="align-items-center justify-content-center w-100 h-100">
+    <div class="loader"></div>
+    <div class="loader-text">Loading...</div>
+  </div>
+</div>
+{% endblock loader %} {% block content %}
+<script>
+  let view_flag = false;
+  var last_batch_id = -1;
+
+  const checkToolbar = function () {
+    if ($("input[batch-id]").length > 0) {
+      $("#toolbar-top").show();
+      $("#toolbar-bottom").show();
+    } else {
+      $("#toolbar-top").hide();
+      $("#toolbar-bottom").hide();
+    }
+  };
+
+  $(document).ready(function () {
+    gateLink_get_batch_data(0, "{{Name}}", 0);
+
+    setInterval(function () {
+      $.ajax({
+        type: "POST",
+        url: "/get_link_info",
+        data: {
+          gateLink_Name: $("#now_page_name").val(),
+          csrfmiddlewaretoken: getCookie("csrftoken"),
+        },
+        success: function (response) {
+          tmp_str = $("#input_running_batch_array").val();
+          if (tmp_str != response.str_status) {
+            m_status = response.str_status;
+            document.getElementById("input_running_batch_array").value = m_status;
+            gateLink_get_batch_data(0, "{{Name}}", 0);
+            checkToolbar();
+            return;
+          }
+          view_flag = true;
+          for (temp_kkk of response.batch) {
+            var dateT = new Date(temp_kkk["start_time"]);
+            s_time = dateT.toLocaleString();
+            tmp1 = "#glb_batch_finish_time" + temp_kkk["batch_id"];
+            tmp2 = "#glb_batch_start_time" + temp_kkk["batch_id"];
+            tmp3 = "#glb_batch_status" + temp_kkk["batch_id"];
+            tmp4 = "#glb_batch_total" + temp_kkk["batch_id"];
+            tmp5 = "#glb_batch_success" + temp_kkk["batch_id"];
+            tmp6 = "#glb_batch_done" + temp_kkk["batch_id"];
+            tmp7 = "#glb_batch_remains" + temp_kkk["batch_id"];
+            tmp8 = "#glb_batch_fail" + temp_kkk["batch_id"];
+            tmp9 = "#glb_gate_body" + temp_kkk["batch_id"];
+            tmp10 = "#glb_gate_error" + temp_kkk["batch_id"];
+
+            var temp = "Finish time:--:--:--";
+            $(tmp1).html(temp);
+            var temp = "Start time:" + s_time;
+            $(tmp2).html(temp);
+            var temp = "Status:" + temp_kkk.status;
+            if (temp_kkk.status === "Running") temp += "<img src='/static/assets/images/loading.gif' width='36' height='36'/> ";
+            $(tmp3).html(temp);
+            var temp = "Total:" + temp_kkk.total;
+            $(tmp4).html(temp);
+            var temp = "Approved:" + temp_kkk.succeed;
+            $(tmp5).html(temp);
+            <!-- var temp = "Done:" + temp_kkk.done; -->
+            $(tmp6).html(temp);
+            var temp = "Remains:" + temp_kkk.remains;
+            $(tmp7).html(temp);
+            var temp = "Declined:" + temp_kkk.fail;
+            $(tmp8).html(temp);
+            var temp = "Error:" + temp_kkk.retry;
+            $(tmp10).html(temp);
+
+            var temp = "";
+
+            for (var key in response.gate) {
+              if (response.gate[key]["batch_id"] == temp_kkk["batch_id"]) {
+                var mm = response.gate[key];
+                temp += "<tr><td>" + mm.inserted_text + "</td>";
+                m_status += mm.status;
+                if (mm.status == 1) {
+                  temp +=
+                    '<td><div class="spinner-border text-muted"></div> </td><td> <div class="spinner-border text-muted"></div> </td><td> <div class="spinner-border text-muted"></div> </td><td> <div class="spinner-border text-muted"></div> </td><td> <div class="spinner-border text-muted"></div> </td></td><td> <div class="spinner-border text-muted"></div> </td><td> Processing</td>';
+                } else {
+                  switch (mm["result1"]) {
+                    case "Approved.":
+                    case "phone registered successfully":
+                    case "phone registered successfully222":
+                      temp += `<td><span class="text-success">${mm["result1"]}</span></td>`;
+                      break;
+                    case "Phone Number is Valid / PUK-CODE No Match.":
+					case "Declined.":
+					case "Invalid Phone Number.":
+					case "Expired Phone Number.":
+					case "Unsupported Phone Type.":
+					case "phone registration fails":
+                      temp += `<td><span class="text-danger">${mm["result1"]}</span></td>`;
+                      break;
+                    case "Please try again Later.":
+                    case "Unknown error please contact support.":
+                      temp += `<td><span class="text-warning">${mm["result1"]}</span></td>`;
+                      break;
+                    default:
+                      temp += `<td><span class="text-warning">${mm["result1"]}</span></td>`;
+                  }
+                  switch (mm["result2"]) {
+                    case "3DS Disabled.":
+                    case "accepted":
+                    case "data is valid":
+                      temp += `<td><span class="text-success">${mm["result2"]}</span></td>`;
+                      break;
+                    case "3DS Enabled.":
+                    case "Inactive number":
+                    case "wrong number":
+                      temp += `<td><span class="text-danger">${mm["result2"]}</span></td>`;
+                      break;
+                    default:
+                      temp += `<td>${mm["result2"]}</td>`;
+                  }
+                  switch (mm["result3"]) {
+                    case "PUK-CODE Match.":
+                    case "zipcode is valid":
+                    case "zipcode matches":
+                      temp += `<td><span class="text-success">${mm["result3"]}</span></td>`;
+                      break;
+                    case "PUK-CODE No Match.":
+                    case "zipcode is not valid":
+                    case "Invalid zipcode":
+                      temp += `<td><span class="text-danger">${mm["result3"]}</span></td>`;
+                      break;
+                    default:
+                      temp += `<td>${mm["result3"]}</td>`;
+                  }
+                  temp += "<td>" + mm.result4 + "</td><td>" + mm.result5 + "</td><td>" + mm.result6 + "</td><td>";
+                  if (mm.status == 0) temp += "In Queue";
+                  else if (mm.status == 2) temp += "Error";
+                  else if (mm.status == 3) temp += "Done";
+                  temp += "</td>";
+                }
+                temp += "</tr>";
+              }
+            }
+            $(tmp9).html(temp);
+          }
+        },
+        error: function (response) {},
+      });
+    }, 2000);
+  });
+
+  //copy action
+  function copy_result(m_batchID, type) {
+    //type:0-all, 1-Success only , 2-Fail only, 3-Error Only
+    var m_checkedStr = "";
+    tmpStr = "gl_cpy_checkbox_" + m_batchID;
+    m_resulStr = "";
+    var markedCheckbox = document.getElementsByName(tmpStr);
+    var cnt = 0;
+    for (var checkbox of markedCheckbox) {
+      if (checkbox.checked) {
+        cnt++;
+        if (checkbox.value == "DI") m_resulStr += "Data as Inserted;";
+        else if (checkbox.value == "SF1") m_resulStr += "Phone Response;";
+        else if (checkbox.value == "SF2") m_resulStr += "3DS Response;";
+        else if (checkbox.value == "SF3") m_resulStr += "PUK-CODE Response;";
+        else if (checkbox.value == "SF4") m_resulStr += "AVS Response ( soon );";
+        else if (checkbox.value == "SF5") m_resulStr += "Cost;";
+        else if (checkbox.value == "SF6") m_resulStr += "Bin Info;";
+        else if (checkbox.value == "ST") m_resulStr += "status;";
+
+        if (cnt == 1) m_checkedStr += checkbox.value;
+        else m_checkedStr += "#" + checkbox.value;
+      }
+    }
+    m_resulStr = m_resulStr.slice(0, -1);
+
+    if (m_checkedStr == "") {
+      alert("Please select row");
+    } else {
+      $.ajax({
+        type: "POST",
+        url: "/gl_copy_result",
+        data: {
+          seleted_data: m_checkedStr,
+          btType: type,
+          batchID: m_batchID,
+          csrfmiddlewaretoken: getCookie("csrftoken"),
+        },
+        success: function (response) {
+          var $temp = $("<textarea>");
+          var sss = m_resulStr + "\r\n" + response.result;
+          $("body").append($temp);
+          $temp.val(sss).select();
+
+          document.execCommand("copy");
+          $temp.remove();
+
+          showInfoToast("Data Copied to clipboard.");
+        },
+        error: function (response) {},
+      });
+    }
+  }
+
+  // Preview Data
+  function GateLink_Send_Preview_Data() {
+    var getSelectedValue = document.querySelector('input[name="radio"]:checked');
+    str_pre = document.getElementById("gatelink_previewData_oh").value;
+    tmp_inserted_data = str_pre.trim().split("\n");
+    if (str_pre.trim() == "") return;
+    $("#preview-spinner").show();
+    $("#btn-preview").attr("disabled", true);
+    tmp_inserted_real_data = [];
+    var cnt = 0;
+    for (kk in tmp_inserted_data) {
+      tmp_id_str = "";
+      if (tmp_inserted_data[kk].trim() != "") {
+        for (kkk in tmp_inserted_data[kk]) {
+          if (tmp_inserted_data[kk][kkk] == " ") {
+            tmp_id_str += "*#*";
+          } else {
+            tmp_id_str += tmp_inserted_data[kk][kkk];
+          }
+        }
+        tmp_inserted_real_data.push(tmp_id_str);
+      }
+    }
+    if (getSelectedValue == null) {
+      document.getElementById("gl_error_preivewData").innerHTML = "<a >Error!Select Format Check</a>";
+      $("#preview-spinner").hide();
+      $("#btn-preview").attr("disabled", false);
+    } else {
+      var tmp_name = document.getElementById("now_page_name").value;
+      $.ajax({
+        type: "POST",
+        url: "/GateLink_Send_Preview_Data",
+        data: {
+          page_name: tmp_name,
+          seleted_data: getSelectedValue.value,
+          gatelink_previewData_oo: str_pre,
+          csrfmiddlewaretoken: getCookie("csrftoken"),
+        },
+        success: function (response) {
+          $("#database_insert_error").empty();
+          temp_str111 = '<div class = "Phone-body"><div style="overflow-y: auto; width: 100%; overflow-x: auto; max-height: 550px;"> ';
+          temp_str111 += '<table class="table table-bordered" style="text-align: center;"><thead><tr><th>id</th>';
+          for (kk in response.format_array) {
+            temp_str111 += "<th>" + response.format_array[kk] + "</th>";
+          }
+          temp_str111 += "<th>CHECK</th></tr></thead><tbody>";
+          var tmp_id = 0;
+          var cnt = 0;
+          var cnt1 = 0;
+          for (kk in response.data_array) {
+            cnt++;
+            tmp_id = parseInt(kk) + 1;
+            var temp_return_str = "";
+            temp_str111 += "<tr><td>" + tmp_id.toString() + "</td>";
+            temp_return_str = tmp_inserted_real_data[kk].toString() + "##";
+
+            for (k in response.format_array) {
+              if (k == 0) {
+                temp_return_str += response.data_array[kk][response.format_array[k]];
+                temp_str111 += "<td>" + response.data_array[kk][response.format_array[k]] + '<p style="text-align: center;color: red;">';
+                temp_str111 += response.data_array[kk].error + "</p></td>";
+              } else {
+                temp_return_str += "#" + response.data_array[kk][response.format_array[k]];
+                temp_str111 += "<td>" + response.data_array[kk][response.format_array[k]] + "</td>";
+              }
+            }
+
+            if (response.data_array[kk].error == "") {
+              temp_str111 += '<td><input type="checkbox" value =' + temp_return_str;
+              temp_str111 += ' name = "check" checked></td></tr>';
+            } else {
+              cnt1++;
+              temp_str111 += "<td></td></tr>";
+            }
+          }
+          temp_str111 += '</table></div><hr></hr><div style ="text-align:right;">';
+          if (cnt > cnt1) {
+            temp_str111 +=
+              '<div class="spinner text-muted" id="spinner-insert"></div> <button class="btn btn-primary" id="btn-insert-data" onclick="gateLink_get_batch_data(4,\'{{Name}}\',0)"  value="ok" >Insert Data</button>';
+          }
+          temp_str111 += "</div></div>";
+          $("#gatelink_result_data").empty();
+          if (tmp_id != 0) $("#gatelink_result_data").append(temp_str111);
+
+          checkToolbar();
+
+          $("#preview-spinner").hide();
+          $("#btn-preview").attr("disabled", false);
+        },
+        error: function (response) {
+          $("#preview-spinner").hide();
+          $("#btn-preview").attr("disabled", false);
+        },
+      });
+    }
+  }
+
+  function gateLink_get_batch_data(m_type, name, batch_id) {
+    if (m_type == 2 || m_type == 3) {
+      $("#loader-wrapper").show();
+    }
+    m_tmpCheck = "";
+    if (m_type == 4) {
+      $("#spinner-insert").show();
+      $("#btn-insert-data").attr("disabled", true);
+      var markedCheckbox = document.getElementsByName("check");
+      cnt = 0;
+      for (var checkbox of markedCheckbox) {
+        if (checkbox.checked) {
+          cnt++;
+          if (cnt == 1) m_tmpCheck += checkbox.value;
+          else m_tmpCheck += "$$$" + checkbox.value;
+        }
+      }
+      batch_id = m_tmpCheck;
+    }
+    $.ajax({
+      type: "POST",
+      url: "/gateLink_get_batch_data",
+      data: {
+        type: m_type,
+        name: name,
+        batch_id: batch_id,
+        csrfmiddlewaretoken: getCookie("csrftoken"),
+      },
+      complete: function () {},
+      success: function (response) {
+        if (JSON.stringify(response).includes("trans_array")) {
+        } else {
+          $("#input_running_batch_array").html(response.runnig_array);
+          tmp = "";
+
+          m_runningBatch_array = [];
+          cnt = 0;
+          flag = false;
+          for (key in response.batch_array) {
+            cnt++;
+            m_cnt = response.batch_array.length - cnt + 1;
+            dateT = new Date(response.batch_array[key]["start_time"]);
+            s_time = dateT.toLocaleString();
+            dateT1 = new Date(response.batch_array[key]["finish_time"]);
+            f_time = dateT1.toLocaleString();
+            if (response.batch_array[key]["status"] == "Running") {
+              last_batch_id = response.batch_array[key]["batch_id"];
+              m_runningBatch_array.push(response.batch_array[key]["batch_id"]);
+              tmp +=
+                '<div class="col-sm-12 grid-margin"><div class="Phone"><div class="Phone-header"><div class ="row"> <input type ="hidden" id ="msg_running_batch_id' +
+                response.batch_array[key]["batch_id"] +
+                '"  value =';
+              tmp += response.batch_array[key]["batch_id"] + '> <div class ="col-sm-1" id="glb_batch_id"> Batch ID:' + m_cnt + "</div>";
+              tmp +=
+                '<div class ="col-sm-4" style="text-align: center;"><a onclick ="gateLink_get_batch_data(1,\'{{Name}}\',' +
+                response.batch_array[key]["batch_id"] +
+                ')" name= "status_info" style="color: red;cursor: pointer;">STOP the process of this batch click here</a></div>';
+              tmp += '<div class ="col-sm-3" style="text-align: center;" id="glb_batch_start_time' + response.batch_array[key]["batch_id"] + '" >Start time:' + s_time + "</div>";
+              tmp += '<div class ="col-sm-2" style="text-align: right;" id="glb_batch_finish_time' + response.batch_array[key]["batch_id"] + '">Finish time:--:--:--</div>';
+              if (cnt == 1 || response.batch_array[key]["batch_id"] == last_batch_id) {
+                tmp +=
+                  '<div class ="col-sm-2 " data-toggle="collapse" style = "text-align: right;" href="#col_gate_link_' +
+                  response.batch_array[key]["batch_id"] +
+                  '" aria-expanded="true" ><a style="cursor: pointer;"></a></div>';
+              } else {
+                tmp +=
+                  '<div class ="col-sm-2 " data-toggle="collapse" style = "text-align: right;" href="#col_gate_link_' +
+                  response.batch_array[key]["batch_id"] +
+                  '" aria-expanded="false" ><a style="cursor: pointer;"></a></div>';
+              }
+              tmp += '</div> </div> <div class="Phone-body"> <div class ="row">';
+
+              tmp +=
+                '<div class ="col d-flex align-items-center" id = "glb_batch_status' +
+                response.batch_array[key]["batch_id"] +
+                '">Status:' +
+                response.batch_array[key]["status"] +
+                "<img src='/static/assets/images/loading.gif' width='36' height='36'/> </div>";
+              tmp += '<div class ="col" id = "glb_batch_total' + response.batch_array[key]["batch_id"] + '">Total:' + response.batch_array[key]["total"] + "</div>";
+              tmp +=
+                '<div class ="col" style="color: green;" id = "glb_batch_success' +
+                response.batch_array[key]["batch_id"] +
+                '">Approved:' +
+                response.batch_array[key]["succeed"] +
+                "</div>";
+              <!-- tmp += '<div class ="col" id = "glb_batch_done' + response.batch_array[key]["batch_id"] + '">Done:' + response.batch_array[key]["done"] + "</div>"; -->
+              tmp += '<div class ="col text-danger" id = "glb_batch_fail' + response.batch_array[key]["batch_id"] + '">Declined:' + response.batch_array[key]["fail"] + "</div>";
+              tmp += '<div class ="col text-warning" id = "glb_batch_error' + response.batch_array[key]["batch_id"] + '">Error:' + response.batch_array[key]["retry"] + "</div>";
+              tmp += '<div class ="col" id = "glb_batch_remains' + response.batch_array[key]["batch_id"] + '">Remains:' + response.batch_array[key]["remains"] + "</div></div>";
+              if (cnt == 1) tmp += '<div class="collapse show"  id="col_gate_link_' + response.batch_array[key]["batch_id"] + '">';
+              else tmp += '<div class="collapse show"  id="col_gate_link_' + response.batch_array[key]["batch_id"] + '">';
+              tmp +=
+                '<div class="table-responsive" style="overflow-x: auto; width: 100%; overflow-y: auto;max-height: 550px;"><table class="table table-bordered" style="text-align: center; border: 1px solid #2c2e33;">';
+              tmp +=
+                "<thead><tr><th>Data as Inserted</th><th> Phone Response</th><th> 3DS Response</th><th> PUK-CODE Response</th><th>AVS Response ( soon )</th><th> Cost</th><th> Bin Info</th><th> Status </th></tr></thead>";
+              tmp += '<tbody id ="glb_gate_body' + response.batch_array[key]["batch_id"] + '"></tbody></table></div>';
+              tmp +=
+                '<div style="margin-top:10px"><form><a style="margin-right: 2%;color: white;">Select Fields to be copied:</a><label class="checkbox-inline" style="margin-right:1%;">';
+              tmp += '<input type="checkbox" name = "gl_cpy_checkbox_' + response.batch_array[key]["batch_id"] + '"value="DI" checked>Data as Inserted</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"><input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF1" checked>Phone Response</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF2" checked>3DS Response</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF3" checked>PUK-CODE Response</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF4" checked>AVS Response ( soon )</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF5" checked>Cost</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF6" checked>Bin Info</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="ST" checked>Status</label></form></div>';
+              tmp += '<div class="row" style="text-align:center;">';
+              tmp +=
+                '<div class = "col-sm-2"><a onclick="copy_result(' +
+                response.batch_array[key]["batch_id"] +
+                ',0)" name="copy_all_result" class="btn btn-primary">Copy All Result</a> </div>';
+              tmp +=
+                '<div class = "col-sm-2"><a onclick="copy_result(' +
+                response.batch_array[key]["batch_id"] +
+                ',1)" name="copy_succeed_only" class="btn btn-success">Copy Approved Only</a> </div>';
+              tmp +=
+                '<div class = "col-sm-2"><a onclick="copy_result(' +
+                response.batch_array[key]["batch_id"] +
+                ',2)" name="copy_fail_only" class="btn btn-danger">Copy Declined Only</a> </div>';
+
+              tmp +=
+                '<div class = "col-sm-2"><a onclick="copy_result(' +
+                response.batch_array[key]["batch_id"] +
+                ',3)" name="copy_done_only" class="btn btn-warning">Copy Error Only</a> </div>';
+              tmp += "</div></div></div></div></div>";
+            } else {
+              tmp += '<div class="col-sm-12 grid-margin"><div class="Phone"><div class="Phone-header"><div class ="row"> <input type ="hidden" id ="msg_running_batch_id"  value =';
+              tmp +=
+                response.batch_array[key]["batch_id"] +
+                '> <div class ="col-sm-1" id="glb_batch_id"><input type="checkbox" class="form-check-input check-batch " batch-id="' +
+                response.batch_array[key]["batch_id"] +
+                '"/> Batch ID:' +
+                m_cnt +
+                "</div>";
+              tmp += '<div class ="col-sm-3" style="text-align: center;">';
+
+              if (response.batch_array[key]["status"] == "Stopped")
+                tmp +=
+                  "<a onclick =\"gateLink_get_batch_data(2,'{{Name}}'," +
+                  response.batch_array[key]["batch_id"] +
+                  ')" name= "gateLink_get_batch_status" style="color: red;cursor: pointer;">Resume the stopped Click here</a></div>';
+              else if (response.batch_array[key]["retry"] > 0)
+                tmp +=
+                  "<a onclick =\"gateLink_get_batch_data(3,'{{Name}}'," +
+                  response.batch_array[key]["batch_id"] +
+                  ')" name= "gateLink_get_batch_status" style="cursor: pointer;" class="text-warning">Retry the error ones again click here</a></div>';
+              else tmp += "</div>";
+
+              tmp += '<div class ="col-sm-3" style="text-align: center;">Start time:' + s_time + "</div>";
+              tmp += '<div class ="col-sm-3" style="text-align: right;">Finish time:' + f_time + "</div>";
+
+              if (response.batch_array[key]["status"] == "Stopped" || last_batch_id == response.batch_array[key]["batch_id"]) {
+                tmp +=
+                  '<div class ="col-sm-2" data-toggle="collapse" style = "text-align: right;" href="#col_gate_link_' +
+                  response.batch_array[key]["batch_id"] +
+                  '" aria-expanded="true" ><a style="cursor: pointer;"></a></div>';
+              } else {
+                tmp +=
+                  '<div class ="col-sm-2" data-toggle="collapse" style = "text-align: right;" href="#col_gate_link_' +
+                  response.batch_array[key]["batch_id"] +
+                  '" aria-expanded="false" ><a style="cursor: pointer;"></a></div>';
+              }
+              tmp += '</div> </div> <div class="Phone-body"> <div class ="row">';
+              tmp += '<div class ="col">Status:' + response.batch_array[key]["status"] + "</div>";
+              tmp += '<div class ="col">Total:' + response.batch_array[key]["total"] + "</div>";
+              tmp += '<div class ="col" style="color: #00d25b;">Approved:' + response.batch_array[key]["succeed"] + "</div>";
+    <!--          tmp += '<div class ="col">Done:' + response.batch_array[key]["done"] + "</div>";
+	-->
+              tmp += '<div class ="col text-danger">Declined:' + response.batch_array[key]["fail"] + "</div>";
+              tmp += '<div class ="col text-warning">Error:' + response.batch_array[key]["retry"] + "</div>";
+              tmp += '<div class ="col">Remains:' + response.batch_array[key]["remains"] + "</div></div>";
+              if (response.batch_array[key]["status"] == "Stopped" || last_batch_id == response.batch_array[key]["batch_id"])
+                tmp += '<div class="collapse show"  id="col_gate_link_' + response.batch_array[key]["batch_id"] + '">';
+              else {
+                flag = true;
+                tmp += '<div class="collapse"  id="col_gate_link_' + response.batch_array[key]["batch_id"] + '">';
+              }
+              view_flag = false;
+              tmp +=
+                '<div class="table-responsive" style="overflow-x: auto; width: 100%; overflow-y: auto;max-height: 550px;"><table class="table table-bordered" style="text-align: center; border: 1px solid #2c2e33;" >';
+              tmp +=
+                "<thead><tr><th>Data as Inserted</th><th> Phone Response</th><th> 3DS Response</th><th> PUK-CODE Response</th><th>AVS Response ( soon )</th><th> Cost</th><th> Bin Info</th><th> Status </th></tr></thead>";
+              tmp += '<tbody style="text-align: center;">';
+              for (kk in response.gate_array) {
+                if (response.gate_array[kk]["batch_id"] == response.batch_array[key]["batch_id"]) {
+                  tmp += "<tr><td>" + response.gate_array[kk]["inserted_text"] + "</td>";
+                  if (response.gate_array[kk]["status"] == 1) {
+                    tmp +=
+                      '<td><div class="spinner-border text-muted"></div> </td><td><div class="spinner-border text-muted"></div> </td><td><div class="spinner-border text-muted"></div> </td><td><div class="spinner-border text-muted"></div> </td><td><div class="spinner-border text-muted"></div> </td><td> Processing</td>';
+                  } else {
+                    switch (response.gate_array[kk]["result1"]) {
+                    case "Approved.":
+                    case "phone registered successfully":
+                    case "phone registered successfully222":
+                        tmp += `<td><span class="text-success">${response.gate_array[kk]["result1"]}</span></td>`;
+                        break;
+                    case "Phone Number is Valid / PUK-CODE No Match.":
+					case "Declined.":
+					case "Invalid Phone Number.":
+					case "Expired Phone Number.":
+					case "Unsupported Phone Type.":
+					case "phone registration fails":
+                        tmp += `<td><span class="text-danger">${response.gate_array[kk]["result1"]}</span></td>`;
+                        break;
+                    case "Please try again Later.":
+                    case "Unknown error please contact support.":
+                        tmp += `<td><span class="text-warning">${response.gate_array[kk]["result1"]}</span></td>`;
+                        break;
+                      default:
+                        tmp += `<td><span class="text-warning">${response.gate_array[kk]["result1"]}</span></td>`;
+                    }
+                    switch (response.gate_array[kk]["result2"]) {
+                      case "3DS Disabled.":
+                      case "accepted":
+                      case "data is valid":
+                        tmp += `<td><span class="text-success">${response.gate_array[kk]["result2"]}</span></td>`;
+                        break;
+                      case "3DS Enabled.":
+                      case "Inactive number":
+                      case "wrong number":
+                        tmp += `<td><span class="text-danger">${response.gate_array[kk]["result2"]}</span></td>`;
+                        break;
+                      default:
+                        tmp += `<td>${response.gate_array[kk]["result2"]}</td>`;
+                    }
+                    switch (response.gate_array[kk]["result3"]) {
+                      case "PUK-CODE Match.":
+                      case "zipcode is valid":
+                      case "zipcode matches":
+                        tmp += `<td><span class="text-success">${response.gate_array[kk]["result3"]}</span></td>`;
+                        break;
+                      case "PUK-CODE No Match.":
+                      case "zipcode is not valid":
+                      case "Invalid zipcode":
+                        tmp += `<td><span class="text-danger">${response.gate_array[kk]["result3"]}</span></td>`;
+                        break;
+                      default:
+                        tmp += `<td>${response.gate_array[kk]["result3"]}</td>`;
+                    }
+                    tmp += "</td><td>" + response.gate_array[kk]["result4"] + "</td><td>" + response.gate_array[kk]["result5"] + "</td>";
+                    tmp += "<td>" + response.gate_array[kk]["result6"] + "</td>";
+
+                    if (response.gate_array[kk]["status"] == 0) tmp += "<td>In Queue</td>";
+                    else if (response.gate_array[kk]["status"] == 2) tmp += "<td class='text-warning'>Error</td>";
+                    else if (response.gate_array[kk]["status"] == 3) tmp += "<td class='text-success'>Done</td>";
+                  }
+                  tmp += "</tr>";
+                }
+              }
+              tmp += "</tbody></table></div>";
+              tmp +=
+                '<div style="margin-top:10px"><form><a style="margin-right: 2%;color: white;">Select Fields to be copied:</a><label class="checkbox-inline" style="margin-right:1%;">';
+              tmp += '<input type="checkbox" name = "gl_cpy_checkbox_' + response.batch_array[key]["batch_id"] + '"value="DI" checked>Data as Inserted</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"><input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF1" checked>Phone Response</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF2" checked>3DS Response</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF3" checked>PUK-CODE Response</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF4" checked>AVS Response ( soon )</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF5" checked>Cost</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="SF6" checked>Bin Info</label>';
+              tmp +=
+                '<label class="checkbox-inline" style="margin-right:1%;"> <input type="checkbox" name = "gl_cpy_checkbox_' +
+                response.batch_array[key]["batch_id"] +
+                '" value="ST" checked>Status</label></form></div>';
+              tmp += '<div class="row" style="text-align:center;">';
+              tmp +=
+                '<div class = "col-sm-2"><a onclick="copy_result(' +
+                response.batch_array[key]["batch_id"] +
+                ',0)" name="copy_all_result" class="btn btn-primary">Copy All Result</a> </div>';
+              tmp +=
+                '<div class = "col-sm-2"><a onclick="copy_result(' +
+                response.batch_array[key]["batch_id"] +
+                ',1)" name="copy_succeed_only" class="btn btn-success">Copy Approved Only</a> </div>';
+              tmp +=
+                '<div class = "col-sm-2"><a onclick="copy_result(' +
+                response.batch_array[key]["batch_id"] +
+                ',2)" name="copy_fail_only" class="btn btn-danger">Copy Declined Only</a> </div>';
+
+              tmp +=
+                '<div class = "col-sm-2"><a onclick="copy_result(' +
+                response.batch_array[key]["batch_id"] +
+                ',3)" name="copy_done_only" class="btn btn-warning">Copy Error Only</a> </div>';
+              tmp += "</div></div></div></div></div>";
+            }
+          }
+          $("#gatelink_batch_data").html(tmp);
+          $("#gatelink_result_data").empty();
+          $("#loader-wrapper").hide();
+          checkToolbar();
+        }
+      },
+      error: function (response) {},
+    });
+  }
+</script>
+
+<div class="content-wrapper">
+  <div class="page-header">
+    <div class="row w-100 align-items-center">
+      <div class="col-sm-3">
+        <img src="{{logo.url}}" alt="" />
+      </div>
+      <div class="col-sm-6">
+        <h5 class="page-title">
+          {{Name}}
+          <input type="hidden" name="now_page_name" id="now_page_name" value="{{Name}}" />
+          <input type="hidden" name="input_running_batch_array" id="input_running_batch_array" value="123" />
+        </h5>
+      </div>
+      <div class="col-sm-3" style="text-align: right">
+        <span class="gate-link-cost">Cost:{{Cost}} USD</span>
+      </div>
+    </div>
+  </div>
+  <!-- [ Main Content ] start -->
+  <div class="row">
+    <!--[Select info] start-->
+    <div class="col-sm-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-header" style="text-align: Center">
+          <p style="font-size: 1.5rem; color: #ffffff">Please select insert format</p>
+        </div>
+        <div class="Phone-body">
+          <form>
+            {% for II in link_format %}
+            <div class="custom-control custom-radio" id="testppp">
+              {% if seleted_item == II.Admin_Setting %}
+              <input type="radio" id="{{II}}" name="radio" value="{{II}}" class="custom-control-input" checked data-help="{{II.Examples}}" />
+              {% else %}
+              <input type="radio" id="{{II}}" name="radio" value="{{II}}" class="custom-control-input" data-help="{{II.Examples}}" />
+              {% endif %}
+              <label class="custom-control-label" for="{{II}}"> {{II.Members_View_Format}}</label>
+            </div>
+            <hr />
+            {% endfor %}
+            <p style="color: red">#-delimiter,any 1 none -alphanumeric symbol(not letter or number)</p>
+          </form>
+        </div>
+        <div class="Phone-footer">
+          <div style="text-align: left"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-header">
+          <h4>Insert Data</h4>
+        </div>
+        <div class="Phone-body">
+          <div name="gatelink_preview_form">
+            <input type="hidden" name="status_inserted_format" id="status_inserted_format" value="" />
+            <div class="Phone-body">
+              <textarea name="gatelink_previewData_oh" id="gatelink_previewData_oh" rows="10" cols="30" style="width: 100%" placeholder=""></textarea>
+              <div style="text-align: right; color: red" id="gl_error_preivewData"></div>
+            </div>
+            <div class="Phone-footer">
+              <div class="row">
+                <div class="col-md-12 d-flex justify-content-end">
+                  <div class="spinner-border text-muted mr-4" id="preview-spinner" style="display: none"></div>
+                  <button onclick="GateLink_Send_Preview_Data()" id="btn-preview" class="btn btn-primary">Preview Data</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--[Gate1 Link] end-->
+    <!--[Preview Data] Start-->
+
+    <div class="col-sm-12 grid-margin">
+      <div class="Phone" id="gatelink_result_data"></div>
+    </div>
+    {% if segment == "gate_link_result_error" %}
+    <div class="col-sm-12 grid-margin" style="text-align: center" id="database_insert_error">
+      <p style="color: red; text-align: center">Data Insert, so you have to reinsert data!!</p>
+    </div>
+    {% endif %}
+    <div class="col-md-12">
+      <div class="row" id="toolbar-top" style="display: none">
+        <div class="col-md-12">
+          <span style="margin-left: 2rem"> <input type="checkbox" class="form-check-input" id="select-all" /> Select All </span>
+        </div>
+      </div>
+    </div>
+    <div id="gatelink_batch_data" class="col-md-12"></div>
+    <div class="col-md-12">
+      <div class="row" id="toolbar-bottom" style="display: none">
+        <div class="col-md-3">
+          <button class="btn btn-success" id="btn-download">Download Batches</button>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-danger" id="btn-delete-batches">Delete Selected Batches</button>
+        </div>
+        <div class="col-md-6">
+          <input type="checkbox" class="form-check-input" id="confirm-delete" /> I confirm that once I click on delete selected Batches it can't be restored, the Batch &amp;
+          records inside is gone forever and no way to be restored.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  jQuery(document).ready(function () {
+    $("#select-all").click(function () {
+      if ($(this).prop("checked")) {
+        $("input[batch-id]").prop("checked", true);
+      } else {
+        $("input[batch-id]").prop("checked", false);
+      }
+    });
+    $("#btn-download").click(function () {
+      let checked = [];
+      $("input[batch-id]").each(function () {
+        var $this = $(this);
+        if ($this.is(":checked")) {
+          checked.push($this.attr("batch-id"));
+        }
+      });
+      if (checked.length > 0) window.open("/download_selected_batches?selected_batch_ids=" + checked.join(","), "_blank");
+    });
+    $("#btn-delete-batches").click(function () {
+      if ($("#confirm-delete").prop("checked")) {
+        let checked = [];
+        $("input[batch-id]").each(function () {
+          var $this = $(this);
+          if ($this.is(":checked")) {
+            checked.push($this.attr("batch-id"));
+          }
+        });
+        $.ajax({
+          type: "POST",
+          url: "/delete_selected_batches",
+          data: {
+            selected_batch_ids: checked.join(","),
+            csrfmiddlewaretoken: getCookie("csrftoken"),
+          },
+          complete: function () {},
+          success: function (response) {
+            location.reload();
+          },
+        });
+      } else {
+        showDangerToast("To delete selected batches, you have to confirm below message");
+      }
+    });
+  });
+  jQuery(document).ready(function () {
+    $("#testppp input").click(function () {
+      $("#gatelink_previewData_oh").html("");
+      $("#gatelink_previewData_oh").attr("placeholder", $(this).attr("data-help"));
+    });
+    $("#gatelink_previewData_oh").focus(() => {
+      $("#gatelink_previewData_oh").attr("placeholder", "");
+    });
+    $("input[checked]").trigger("click");
+  });
+</script>
+{% endblock content %}

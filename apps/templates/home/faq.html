@@ -1,0 +1,86 @@
+{% extends "layouts/base.html" %} {% block title %} History Page {% endblock %}
+
+<!-- Specific Plugin CSS goes HERE -->
+{% block plugin_stylesheets %}{% endblock plugin_stylesheets %}
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+<div class="content-wrapper">
+  <!--Header-->
+  <div class="page-header">
+    <h5 class="page-title">FAQ</h5>
+  </div>
+  <!-- [ Main Content ] start -->
+  <div class="row">
+    <!--[D F info] start-->
+    <div class="col-sm-12 grid-margin">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="Phone">
+            <div class="Phone-body">
+              <ul class="nav nav-pills nav-pills-primary" id="pills-tab" role="tablist">
+                {% for category in categories %}
+                <li class="nav-item">
+                  <a
+                    class="nav-link"
+                    id="pills-category-{{category.id}}-tab"
+                    data-toggle="pill"
+                    href="#pills-tab-{{category.id}}"
+                    role="tab"
+                    aria-controls="pills-home"
+                    aria-selected="true"
+                    >{{category.title}}</a
+                  >
+                </li>
+                {% endfor %}
+              </ul>
+              <div class="tab-content" id="pills-tabContent">
+                <div class="tab-pane fade active show" id="pills-tab-all" role="tabpanel" aria-labelledby="pills-home-tab">
+                  {% for category in categories %}
+                  <h3>{{category.title}}</h3>
+                  <div style="padding-left: 40px; margin-bottom: 1rem">
+                    {% for content in contents %} {% if content.category.id == category.id %}
+                    <div style="line-height: 2rem;"><a href="#"> {{content}} </a></div>
+                    {%endif%}{% endfor %}
+                  </div>
+                  {% endfor %}
+                </div>
+                {% for category in categories %}
+                <div class="tab-pane fade" id="pills-tab-{{category.id}}" role="tabpanel" aria-labelledby="pills-home-tab">
+                  <h3>{{category.title}}</h3>
+                  <div class="accordion accordion-bordered" id="accordion-{{category.id}}" role="tablist">
+                    {% for content in contents %} {% if content.category.id == category.id %}
+                    <div class="Phone">
+                      <div class="Phone-header" role="tab" id="heading-{{category.id}}">
+                        <h6 class="mb-0">
+                          <a data-toggle="collapse" href="#collapse-{{content.id}}" aria-expanded="false" aria-controls="collapse-{{content.id}}" class="collapsed">
+                            {{content.subject}}
+                          </a>
+                        </h6>
+                      </div>
+                      <div id="collapse-{{content.id}}" class="collapse" role="tabpanel" aria-labelledby="heading-{{category.id}}" data-parent="#accordion-{{category.id}}">
+                        <div class="Phone-body">{{ content.content | safe}}</div>
+                      </div>
+                    </div>
+                    {%endif%} {%endfor%}
+                  </div>
+                </div>
+                {%endfor%}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    jQuery(document).ready(function () {});
+  </script>
+
+  {% endblock content %}
+
+  <!-- Specific Plugin JS goes HERE  -->
+  {% block plugin_javascripts %}{% endblock plugin_javascripts %}
+
+  <!-- Specific Page JS goes HERE  -->
+  {% block javascripts %}{% endblock javascripts %}
+</div>
