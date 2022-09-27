@@ -1,12 +1,12 @@
+from decimal import Decimal
 import datetime
-from itertools import product
-from operator import mod
-from tkinter import CASCADE
 
 from django.db import models
 from django.contrib.auth.models import User
 from encrypted_model_fields.fields import EncryptedIntegerField
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models.signals import pre_save, post_save, m2m_changed
+from django.db.models import Sum
 # from apps.home import models
 
 day_list = [(each, each) for each in range(1, 32)]
@@ -49,41 +49,102 @@ class Batch(models.Model):
 
 
 class Shop_data(models.Model):
-    Phone =         EncryptedIntegerField(null=False)
+    Phone =         EncryptedIntegerField(blank=False)
     Exp_day =       models.IntegerField(choices=day_list)
     Exp_month =     models.IntegerField(choices=month_list)
     Exp_year =      models.IntegerField(choices=year_list)
     Puk_code =      models.DecimalField(decimal_places=0, max_digits=8)
     First_name =    models.CharField(max_length=100)
     Last_name =     models.CharField(max_length=100)
-    Gender =        models.CharField(default='M', choices=[('M', 'Man'), ('F', 'Female')], max_length=2)
+    Gender =        models.CharField(default='U', choices=[('M', 'Man'), ('F', 'Female'), ('U', 'Unknown')], max_length=2, blank=True, null=False)
     Address =       models.CharField(max_length=255)
     City =          models.CharField(max_length=100)
     State =         models.CharField(max_length=100)
-    Zipcode =       models.CharField(max_length=10, null=False)
-    Extra1 =        models.CharField(max_length=255)
-    Extra2 =        models.CharField(max_length=255)
-    Extra3 =        models.CharField(max_length=255)
-    Extra4 =        models.CharField(max_length=255)
-    Extra5 =        models.CharField(max_length=255)
+    Zipcode =       models.CharField(max_length=10, blank=False)
+    Extra1 =        models.CharField(max_length=255, blank=True, null=False, default='')
+    Extra2 =        models.CharField(max_length=255, blank=True, null=False, default='')
+    Extra3 =        models.CharField(max_length=255, blank=True, null=False, default='')
+    Extra4 =        models.CharField(max_length=255, blank=True, null=False, default='')
+    Extra5 =        models.CharField(max_length=255, blank=True, null=False, default='')
     Price =         models.DecimalField(decimal_places=2, max_digits=10)
     Batch =         models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='batch_product_list', null=False)
 
     Areaf1 =        models.CharField(max_length=255, null=False)
     Areaf2 =        models.CharField(max_length=255, null=False)
     Areaf3 =        models.CharField(max_length=255, null=False)
-    Areaf4 =        models.CharField(max_length=255, null=True)
-    Areaf5 =        models.CharField(max_length=255, null=True)
-    Areaf6 =        models.CharField(max_length=255, null=True)
+    Areaf4 =        models.CharField(max_length=255, blank=True)
+    Areaf5 =        models.CharField(max_length=255, blank=True)
+    Areaf6 =        models.CharField(max_length=255, blank=True)
     Area_code =     models.DecimalField(decimal_places=0, max_digits=6, null=False)
 
     Sold_unsold =   models.CharField(choices=[('UNSOLD', 'UNSOLD'), ('SOLD', 'SOLD'), ('REFUND', 'REFUND')], default='UNSOLD', max_length=7)
-    Insert_date =   models.DateTimeField(auto_now_add=True, null=False)
-    Sold_date =     models.DateTimeField(null=True)
-    User =          models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    Insert_date =   models.DateTimeField(auto_now_add=True)
+    Sold_date =     models.DateTimeField(blank=True, null=True)
+    User =          models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
 
     def __str__(self):
         return str(self.Area_code)
+        
+
+class CartManager(models.Manager):
+    def new_or_get(self, request):
+        cart_id = request.session.get("cart_id", None)
+        qs = self.get_queryset().filter(id=cart_id)
+        if qs.count() == 1:
+            new_obj = False
+            cart_obj = qs.first()
+            # if request.user.is_authenticated() and cart_obj.user is None:
+            #     cart_obj.user = request.user
+            #     cart_obj.save()
+        else:
+            cart_obj = Cart.objects.new(user=request.user)
+            new_obj = True
+            request.session['cart_id'] = cart_obj.id
+        return cart_obj, new_obj
+
+    def new(self, user):
+        # user_obj = None
+        # if user is not None:
+        #     if user.is_authenticated():
+        #         user_obj = user
+        return self.model.objects.create(user=user)
+
+
+class Cart(models.Model):
+    user        = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    products    = models.ManyToManyField(Shop_data,
+                                         blank=True)
+    subtotal    = models.DecimalField(default=0.00, max_digits=10, decimal_places=2)
+    total       = models.DecimalField(default=0.00, max_digits=10, decimal_places=2)
+    updated     = models.DateTimeField(auto_now=True)
+    timestamp   = models.DateTimeField(auto_now_add=True)
+
+    objects = CartManager()
+
+    def __str__(self):
+        return str(self.id)
+
+def m2m_changed_cart_receiver(sender, instance, action, *args, **kwargs):
+    if action == 'post_add' or action == 'post_remove' or action == 'post_clear':        
+        total = instance.products.aggregate(total_price=Sum('product__Price'))['total_price']
+        # products = instance.products.all()
+        # total = 0
+        # for each in products:
+        #     total += float(each.Price)
+        if instance.subtotal != total:
+            instance.subtotal = total
+            instance.save()
+
+m2m_changed.connect(m2m_changed_cart_receiver, sender=Cart.products.through)
+
+
+def pre_save_cart_receiver(sender, instance, *args, **kwargs):
+    if instance.subtotal > 0:
+        instance.total = Decimal(instance.subtotal) * Decimal(1.08) # 8% tax
+    else:
+        instance.total = 0.00
+
+pre_save.connect(pre_save_cart_receiver, sender=Cart)
 
 
 # class Cart(models.Model):

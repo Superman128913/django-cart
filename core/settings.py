@@ -95,9 +95,9 @@ DATABASES = {
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
-        'NAME': 'MyDatabase-andrew',                 # <-- UPDATED line
+        'NAME': 'MyDatabase',               # 'MyDatabase-andrew',   # <-- UPDATED line
         'USER': 'root',                     # <-- UPDATED line
-        'PASSWORD': ']f3PW3[*@,F2d3oCx',              # <-- UPDATED line
+        'PASSWORD': '',                     # ']f3PW3[*@,F2d3oCx',   # <-- UPDATED line
         'HOST': 'localhost',                # <-- UPDATED line
         'PORT': '3306',
     }
@@ -168,3 +168,5 @@ HELPDESK_SUBMIT_A_TICKET_PUBLIC = True
 HELPDESK_ACTIVATE_API_ENDPOINT = True
 
 FIELD_ENCRYPTION_KEY = 'VmREnqyJTsRtQt7x0OHRm0e_LwYMf2EVJrIsoYJIhWo='
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240

@@ -11,4 +11,5 @@ urlpatterns = [
     # The home page
     path('search', search, name='search'),
     path('search_result', search_result, name='search_result'),
+    path('cart', cart_home, name='cart'),
 ]

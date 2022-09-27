@@ -28,10 +28,11 @@ def search(request):
         if request.is_ajax():
             try:
                 object = request.POST.get('object')
+                query = Shop_data.objects.filter(Sold_unsold='UNSOLD')
                 if object == 'batch':
                     batch_list = request.POST.getlist('batch_list[]')
                     batch_list = list(map(int, batch_list))
-                    query = Shop_data.objects.filter(Batch__in=batch_list).values('Areaf1').distinct().all()
+                    query = query.filter(Batch__in=batch_list).values('Areaf1').all().annotate(product_num=Count('Areaf1')).order_by('Areaf1')
                     areaf1_list = Areaf1Serializer(query, many=True).data
                     # query = Shop_data.objects.filter(Batch__in=batch_list).values('Areaf1').distinct().all()
                     # areaf1_list = [{ 'Areaf1': each['Areaf1'], 'product_num': Shop_data.objects.aggregate(product_num=Count('Areaf1', filter=Q(Areaf1=each['Areaf1'])))['product_num'] } for each in query]
@@ -49,7 +50,7 @@ def search(request):
                     areaf1_list = list(map(str, areaf1_list))
                     batch_list = request.POST.getlist('batch_list[]')
                     batch_list = list(map(int, batch_list))
-                    query = Shop_data.objects.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).values('Areaf2').distinct().all()
+                    query = query.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).values('Areaf2').all().annotate(product_num=Count('Areaf2')).order_by('Areaf2')
                     areaf2_list = Areaf2Serializer(query, many=True).data
                     data = {
                         'areaf2_list': areaf2_list,
@@ -61,7 +62,7 @@ def search(request):
                     areaf1_list = list(map(str, areaf1_list))
                     batch_list = request.POST.getlist('batch_list[]')
                     batch_list = list(map(int, batch_list))
-                    query = Shop_data.objects.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).filter(Areaf2__in=areaf2_list).values('Areaf3').distinct().all()
+                    query = query.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).filter(Areaf2__in=areaf2_list).values('Areaf3').all().annotate(product_num=Count('Areaf3')).order_by('Areaf3')
                     areaf3_list = Areaf3Serializer(query, many=True).data
                     data = {
                         'areaf3_list': areaf3_list,
@@ -75,7 +76,7 @@ def search(request):
                     areaf1_list = list(map(str, areaf1_list))
                     batch_list = request.POST.getlist('batch_list[]')
                     batch_list = list(map(int, batch_list))
-                    query = Shop_data.objects.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).filter(Areaf2__in=areaf2_list).filter(Areaf3__in=areaf3_list).values('Areaf4').distinct().all()
+                    query = query.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).filter(Areaf2__in=areaf2_list).filter(Areaf3__in=areaf3_list).values('Areaf4').all().annotate(product_num=Count('Areaf4')).order_by('Areaf4')
                     areaf4_list = Areaf4Serializer(query, many=True).data
                     data = {
                         'areaf4_list': areaf4_list,
@@ -91,7 +92,7 @@ def search(request):
                     areaf1_list = list(map(str, areaf1_list))
                     batch_list = request.POST.getlist('batch_list[]')
                     batch_list = list(map(int, batch_list))
-                    query = Shop_data.objects.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).filter(Areaf2__in=areaf2_list).filter(Areaf3__in=areaf3_list).filter(Areaf4__in=areaf4_list).values('Areaf5').distinct().all()
+                    query = query.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).filter(Areaf2__in=areaf2_list).filter(Areaf3__in=areaf3_list).filter(Areaf4__in=areaf4_list).values('Areaf5').all().annotate(product_num=Count('Areaf5')).order_by('Areaf5')
                     areaf5_list = Areaf5Serializer(query, many=True).data
                     data = {
                         'areaf5_list': areaf5_list,
@@ -109,7 +110,7 @@ def search(request):
                     areaf1_list = list(map(str, areaf1_list))
                     batch_list = request.POST.getlist('batch_list[]')
                     batch_list = list(map(int, batch_list))
-                    query = Shop_data.objects.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).filter(Areaf2__in=areaf2_list).filter(Areaf3__in=areaf3_list).filter(Areaf4__in=areaf4_list).filter(Areaf5__in=areaf5_list).values('State').distinct().all()
+                    query = query.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).filter(Areaf2__in=areaf2_list).filter(Areaf3__in=areaf3_list).filter(Areaf4__in=areaf4_list).filter(Areaf5__in=areaf5_list).values('State').all().annotate(product_num=Count('State')).order_by('State')
                     state_list = StateSerializer(query, many=True).data
                     data = {
                         'state_list': state_list,
@@ -129,7 +130,7 @@ def search(request):
                     areaf1_list = list(map(str, areaf1_list))
                     batch_list = request.POST.getlist('batch_list[]')
                     batch_list = list(map(int, batch_list))
-                    query = Shop_data.objects.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).filter(Areaf2__in=areaf2_list).filter(Areaf3__in=areaf3_list).filter(Areaf4__in=areaf4_list).filter(Areaf5__in=areaf5_list).filter(State__in=state_list).values('City').distinct().all()
+                    query = query.filter(Batch__in=batch_list).filter(Areaf1__in=areaf1_list).filter(Areaf2__in=areaf2_list).filter(Areaf3__in=areaf3_list).filter(Areaf4__in=areaf4_list).filter(Areaf5__in=areaf5_list).filter(State__in=state_list).values('City').all().annotate(product_num=Count('City')).order_by('City')
                     city_list = CitySerializer(query, many=True).data
                     data = {
                         'city_list': city_list,
@@ -153,14 +154,15 @@ def search(request):
 def search_result(request):
     if request.is_ajax():
         try:
+            # search by batch
             batch_list = request.POST.getlist('batch_list[]')
             if len(batch_list):
                 query = Shop_data.objects.filter(Batch__in=batch_list)
-
+                # search by gender
                 gender_list = request.POST.getlist('gender_list[]')
                 if len(gender_list):
                     query = query.filter(Gender__in=gender_list)
-
+                    # search by price
                     price_min = request.POST.get('price_min')
                     price_max = request.POST.get('price_max')
                     print(price_min)
@@ -179,16 +181,60 @@ def search_result(request):
                         pass
                     else:
                         query = query.filter(Price__range=[price_min, price_max])
-                        
+                    #search by extra
+                    extra1 = request.POST.get('extra1')
+                    if extra1=='true':
+                        query = query.exclude(Extra1='')
+                    extra2 = request.POST.get('extra2')
+                    if extra2=='true':
+                        query = query.exclude(Extra2='')
+                    extra3 = request.POST.get('extra3')
+                    if extra3=='true':
+                        query = query.exclude(Extra3='')
+                    extra4 = request.POST.get('extra4')
+                    if extra4=='true':
+                        query = query.exclude(Extra4='')
+                    extra5 = request.POST.get('extra5')
+                    if extra5=='true':
+                        query = query.exclude(Extra5='')
+                    #search by area code
                     area_code_list = request.POST.getlist('area_code_list[]')
+                    area_code_list = [each[:6] for each in area_code_list]
                     if len(area_code_list):
                         print(area_code_list)
                         query = query.filter(Area_code__in=area_code_list)
+                        product_list = query.order_by('-id').all()
                     else:
-                        zipcode_list = request.POST.getlist('zipcode_list[]')                        
+                        zipcode_list = request.POST.getlist('zipcode_list[]')
                         if len(zipcode_list):
-                            print(zipcode_list)
-                            query = query.filter(Zipcode__in=zipcode_list)
+                            # search by batch and gender
+                            where = ' WHERE Batch_id IN {} AND Gender IN {}'.format(repr(tuple(batch_list)), repr(tuple(gender_list)))
+                            # search by price
+                            if price_min == 0 and price_max == 0:
+                                pass
+                            else:
+                                where += ' AND Price>={} AND Price<={}'.format(price_min, price_max)
+                            # search by extra
+                            if extra1=='true':
+                                where += ' AND Extra1!=""'
+                            if extra2=='true':
+                                where += ' AND Extra2!=""'
+                            if extra3=='true':
+                                where += ' AND Extra3!=""'
+                            if extra4=='true':
+                                where += ' AND Extra4!=""'
+                            if extra5=='true':
+                                where += ' AND Extra5!=""'
+                                
+                            for idx, zipcode in enumerate(zipcode_list):
+                                if idx == 0:
+                                    where += " AND (Zipcode LIKE '%%{}%%'".format(zipcode)
+                                else:
+                                    where += " OR Zipcode LIKE '%%{}%%'".format(zipcode)
+                            where += ')'
+                            sql = 'SELECT * FROM cart_shop_data{} ORDER BY id DESC'.format(where)
+                            product_list = Shop_data.objects.raw(sql)
+                            # query = query.filter(Zipcode__in=zipcode_list)
                         else:
                             areaf1_list = request.POST.getlist('areaf1_list[]')
                             areaf2_list = request.POST.getlist('areaf2_list[]')
@@ -199,24 +245,30 @@ def search_result(request):
                             city_list = request.POST.getlist('city_list[]')                     
                             if len(city_list):
                                 query = query.filter(City__in=city_list)
-                            elif len(state_list):
+                            if len(state_list):
                                 query = query.filter(State__in=state_list)
-                            elif len(areaf5_list):
+                            if len(areaf5_list):
                                 query = query.filter(Areaf5__in=areaf5_list)
-                            elif len(areaf4_list):
+                            if len(areaf4_list):
                                 query = query.filter(Areaf4__in=areaf4_list)
-                            elif len(areaf3_list):
+                            if len(areaf3_list):
                                 query = query.filter(Areaf3__in=areaf3_list)
-                            elif len(areaf2_list):
+                            if len(areaf2_list):
                                 query = query.filter(Areaf2__in=areaf2_list)
-                            elif len(areaf1_list):
+                            if len(areaf1_list):
                                 query = query.filter(Areaf1__in=areaf1_list)
-
-                    product_list = query.all()
+                            product_list = query.filter(Sold_unsold='UNSOLD').order_by('-id').all()
                     data = ProductSerializer(product_list, many=True).data
+                    data_length = len(data)
+                    page = int(request.POST.get('page'))
+                    start = page * 10
+                    end = min((page + 1) * 10, data_length + 1)
+                    data = data[start:end]
+                    print(start, end)
                     returnData = {
                         'state': 'OK',
-                        'data': data
+                        'data': data,
+                        'length': data_length
                     }
                 else:
                     returnData = {
@@ -234,3 +286,36 @@ def search_result(request):
                 'error': repr(e)
             }
         return JsonResponse(returnData)
+
+        
+# Create your views here.
+@login_required(login_url="/login/")
+@require_http_methods(["GET", "POST"])
+def cart_home(request):
+    if request.method == 'GET':
+        cart_obj, new_obj = Cart.objects.new_or_get(request)
+        product_list = cart_obj.products.all()
+        context = {
+            'product_list': product_list
+        }
+        html_template = loader.get_template('search.html')
+        return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
+    else:
+        if request.is_ajax():
+            try:
+                object = request.POST.get('object')
+                if object == 'batch':
+                    batch_list = request.POST.getlist('batch_list[]')
+                    batch_list = list(map(int, batch_list))
+                    query = Shop_data.objects.filter(Batch__in=batch_list).values('Areaf1').distinct().all()
+                    data = Areaf1Serializer(query, many=True).data
+                returnData = {
+                    'state': 'OK',
+                    'data': data
+                }
+            except Exception as e:
+                returnData = {
+                    'state': "FAIL",
+                    'error': repr(e)
+                }
+            return JsonResponse(returnData)
