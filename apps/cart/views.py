@@ -203,7 +203,7 @@ def search_result(request):
                     if len(area_code_list):
                         print(area_code_list)
                         query = query.filter(Area_code__in=area_code_list)
-                        product_list = query.order_by('-id').all()
+                        product_list = query.filter(Sold_unsold='UNSOLD').order_by('-id').all()
                     else:
                         zipcode_list = request.POST.getlist('zipcode_list[]')
                         if len(zipcode_list):
@@ -231,7 +231,7 @@ def search_result(request):
                                     where += " AND (Zipcode LIKE '%%{}%%'".format(zipcode)
                                 else:
                                     where += " OR Zipcode LIKE '%%{}%%'".format(zipcode)
-                            where += ')'
+                            where += ') AND Sold_unsold="UNSOLD"'
                             sql = 'SELECT * FROM cart_shop_data{} ORDER BY id DESC'.format(where)
                             product_list = Shop_data.objects.raw(sql)
                             # query = query.filter(Zipcode__in=zipcode_list)

@@ -467,20 +467,36 @@
     })
     input_list = $('.batch-list input')
     var checked_len = input_list.length
-    var num_text = ''
+    $('#selected_batch_num').text('')
+    var buf = ''
+    var show_num = 0
+    var show = true
     for(i = 0; i < checked_len; i++)
     {
-      if(i == 0)
-        num_text += input_list.eq(i).attr('batch_name')
-      else if(i < 3)
-        num_text += ' / ' + input_list.eq(i).attr('batch_name')
+      if(show)
+      {
+        buf = $('#selected_batch_num').text()
+        if(i == 0)
+          $('#selected_batch_num').text(buf + input_list.eq(i).attr('batch_name'))
+        else
+          $('#selected_batch_num').text(buf + ' / ' + input_list.eq(i).attr('batch_name'))
+        if($('#selected_batch_num').width() > $('#batch').width() - 130)
+        {
+          show = false
+          $('#selected_batch_num').text(buf)
+        }
+        else{
+          show_num = i + 1            
+        }
+      }
       batch_list_const.push(input_list.eq(i).attr('batch_id'))
     }
-    if(i > 3)
-        num_text += ' /(+' + (checked_len - 3) + ' selected)'
-    if(num_text == '')
-      num_text = '(0 selected)'
-    $('#selected_batch_num').text(num_text)
+    if(checked_len == 0)
+      $('#selected_batch_num').text('(0 selected)')
+    else if(show_num == 0)
+      $('#selected_batch_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+    else if(show_num < checked_len)
+      $('#selected_batch_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
     update_batch()
   }
 
@@ -489,28 +505,44 @@
     input_list = $('.batch-list:visible input')
     var len = input_list.length
     var checked_len = 0
-    var num_text = ''
+    $('#selected_batch_num').text('')
+    var buf = ''
+    var show_num = 0
+    var show = true
     for(i = 0; i < len; i++)
     {
       if(input_list.eq(i).prop('checked'))
       {
-        if(checked_len == 0)
-          num_text += input_list.eq(i).attr('batch_name')
-        else if(checked_len < 3)
-          num_text += ' / ' + input_list.eq(i).attr('batch_name')
+        if(show)
+        {
+          buf = $('#selected_batch_num').text()
+          if(checked_len == 0)
+            $('#selected_batch_num').text(buf + input_list.eq(i).attr('batch_name'))
+          else
+            $('#selected_batch_num').text(buf + ' / ' + input_list.eq(i).attr('batch_name'))
+          if($('#selected_batch_num').width() > $('#batch').width() - 130)
+          {
+            show = false
+            $('#selected_batch_num').text(buf)
+          }
+          else{
+            show_num = checked_len + 1            
+          }
+        }
         checked_len++
         batch_list_const.push(input_list.eq(i).attr('batch_id'))
       }
     }
-    if(checked_len > 3)
-        num_text += ' /(+' + (checked_len - 1) + ' selected)'
+    if(checked_len == 0)
+      $('#selected_batch_num').text('(0 selected)')
+    else if(show_num == 0)
+      $('#selected_batch_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+    else if(show_num < checked_len)
+      $('#selected_batch_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
     if(checked_len == len)
       $('#any_batch').prop('checked', true)
     else
       $('#any_batch').prop('checked', false)
-    if(num_text == '')
-      num_text = '(0 selected)'
-    $('#selected_batch_num').text(num_text)
     update_batch()
   }
 
@@ -645,20 +677,36 @@
 
       input_list = $('.areaf1-list input')
       var checked_len = input_list.length
-      var num_text = ''
+      $('#selected_areaf1_num').text('')
+      var buf = ''
+      var show_num = 0
+      var show = true
       for(i = 0; i < checked_len; i++)
       {
-        if(i == 0)
-          num_text += input_list.eq(i).attr('areaf1')
-        else if(i < 3)
-          num_text += ' / ' + input_list.eq(i).attr('areaf1')
+        if(show)
+        {
+          buf = $('#selected_areaf1_num').text()
+          if(i == 0)
+            $('#selected_areaf1_num').text(buf + input_list.eq(i).attr('areaf1'))
+          else
+            $('#selected_areaf1_num').text(buf + ' / ' + input_list.eq(i).attr('areaf1'))
+          if($('#selected_areaf1_num').width() > $('#areaf1').width() - 130)
+          {
+            show = false
+            $('#selected_areaf1_num').text(buf)
+          }
+          else{
+            show_num = i + 1            
+          }
+        }
         areaf1_list_const.push(input_list.eq(i).attr('areaf1'))
       }
-      if(i > 3)
-          num_text += ' /(+' + (checked_len - 3) + ' selected)'
-      if(num_text == '')
-        num_text = '(0 selected)'
-      $('#selected_areaf1_num').text(num_text)
+      if(checked_len == 0)
+        $('#selected_areaf1_num').text('(0 selected)')
+      else if(show_num == 0)
+        $('#selected_areaf1_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+      else if(show_num < checked_len)
+        $('#selected_areaf1_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
       update_areaf1()
     }
   }
@@ -668,28 +716,44 @@
     input_list = $('.areaf1-list:visible input')
     var len = input_list.length
     var checked_len = 0
-    var num_text = ''
+    $('#selected_areaf1_num').text('')
+    var buf = ''
+    var show_num = 0
+    var show = true
     for(i = 0; i < len; i++)
     {
       if(input_list.eq(i).prop('checked'))
       {
-        if(checked_len == 0)
-          num_text += input_list.eq(i).attr('areaf1')
-        else if(checked_len < 3)
-          num_text += ' / ' + input_list.eq(i).attr('areaf1')
+        if(show)
+        {
+          buf = $('#selected_areaf1_num').text()
+          if(checked_len == 0)
+            $('#selected_areaf1_num').text(buf + input_list.eq(i).attr('areaf1'))
+          else
+            $('#selected_areaf1_num').text(buf + ' / ' + input_list.eq(i).attr('areaf1'))
+          if($('#selected_areaf1_num').width() > $('#areaf1').width() - 130)
+          {
+            show = false
+            $('#selected_areaf1_num').text(buf)
+          }
+          else{
+            show_num = checked_len + 1            
+          }
+        }
         checked_len++
         areaf1_list_const.push(input_list.eq(i).attr('areaf1'))
       }
     }
-    if(checked_len > 3)
-        num_text += ' /(+' + (checked_len - 1) + ' selected)'
+    if(checked_len == 0)
+      $('#selected_areaf1_num').text('(0 selected)')
+    else if(show_num == 0)
+      $('#selected_areaf1_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+    else if(show_num < checked_len)
+      $('#selected_areaf1_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
     if(checked_len == len)
       $('#any_areaf1').prop('checked', true)
     else
       $('#any_areaf1').prop('checked', false)
-    if(num_text == '')
-      num_text = '(0 selected)'
-    $('#selected_areaf1_num').text(num_text)
     update_areaf1()
   }
 
@@ -795,54 +859,86 @@
       $('.areaf2-list input').change(function (){
           check_areaf2()
       })
-      
+
       input_list = $('.areaf2-list input')
       var checked_len = input_list.length
-      var num_text = ''
+      $('#selected_areaf2_num').text('')
+      var buf = ''
+      var show_num = 0
+      var show = true
       for(i = 0; i < checked_len; i++)
       {
-        if(i == 0)
-          num_text += input_list.eq(i).attr('areaf2')
-        else if(i < 3)
-          num_text += ' / ' + input_list.eq(i).attr('areaf2')
+        if(show)
+        {
+          buf = $('#selected_areaf2_num').text()
+          if(i == 0)
+            $('#selected_areaf2_num').text(buf + input_list.eq(i).attr('areaf2'))
+          else
+            $('#selected_areaf2_num').text(buf + ' / ' + input_list.eq(i).attr('areaf2'))
+          if($('#selected_areaf2_num').width() > $('#areaf2').width() - 130)
+          {
+            show = false
+            $('#selected_areaf2_num').text(buf)
+          }
+          else{
+            show_num = i + 1            
+          }
+        }
         areaf2_list_const.push(input_list.eq(i).attr('areaf2'))
       }
-      if(i > 3)
-          num_text += ' /(+' + (checked_len - 3) + ' selected)'
-      if(num_text == '')
-        num_text = '(0 selected)'
-      $('#selected_areaf2_num').text(num_text)
+      if(checked_len == 0)
+        $('#selected_areaf2_num').text('(0 selected)')
+      else if(show_num == 0)
+        $('#selected_areaf2_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+      else if(show_num < checked_len)
+        $('#selected_areaf2_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
       update_areaf2()
-    }
-  }
+      }
+      }
 
   function check_areaf2(){
     areaf2_list_const = []
     input_list = $('.areaf2-list:visible input')
     var len = input_list.length
     var checked_len = 0
-    var num_text = ''
+    $('#selected_areaf2_num').text('')
+    var buf = ''
+    var show_num = 0
+    var show = true
     for(i = 0; i < len; i++)
     {
       if(input_list.eq(i).prop('checked'))
       {
-        if(checked_len == 0)
-          num_text += input_list.eq(i).attr('areaf2')
-        else if(checked_len < 3)
-          num_text += ' / ' + input_list.eq(i).attr('areaf2')
+        if(show)
+        {
+          buf = $('#selected_areaf2_num').text()
+          if(checked_len == 0)
+            $('#selected_areaf2_num').text(buf + input_list.eq(i).attr('areaf2'))
+          else
+            $('#selected_areaf2_num').text(buf + ' / ' + input_list.eq(i).attr('areaf2'))
+          if($('#selected_areaf2_num').width() > $('#areaf2').width() - 130)
+          {
+            show = false
+            $('#selected_areaf2_num').text(buf)
+          }
+          else{
+            show_num = checked_len + 1            
+          }
+        }
         checked_len++
         areaf2_list_const.push(input_list.eq(i).attr('areaf2'))
       }
     }
-    if(checked_len > 3)
-        num_text += ' /(+' + (checked_len - 1) + ' selected)'
+    if(checked_len == 0)
+    $('#selected_areaf2_num').text('(0 selected)')
+    else if(show_num == 0)
+    $('#selected_areaf2_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+    else if(show_num < checked_len)
+    $('#selected_areaf2_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
     if(checked_len == len)
-      $('#any_areaf2').prop('checked', true)
+    $('#any_areaf2').prop('checked', true)
     else
-      $('#any_areaf2').prop('checked', false)
-    if(num_text == '')
-      num_text = '(0 selected)'
-    $('#selected_areaf2_num').text(num_text)
+    $('#any_areaf2').prop('checked', false)
     update_areaf2()
   }
 
@@ -948,54 +1044,86 @@
       $('.areaf3-list input').change(function (){
           check_areaf3()
       })
-      
+
       input_list = $('.areaf3-list input')
       var checked_len = input_list.length
-      var num_text = ''
+      $('#selected_areaf3_num').text('')
+      var buf = ''
+      var show_num = 0
+      var show = true
       for(i = 0; i < checked_len; i++)
       {
-        if(i == 0)
-          num_text += input_list.eq(i).attr('areaf3')
-        else if(i < 3)
-          num_text += ' / ' + input_list.eq(i).attr('areaf3')
+        if(show)
+        {
+          buf = $('#selected_areaf3_num').text()
+          if(i == 0)
+            $('#selected_areaf3_num').text(buf + input_list.eq(i).attr('areaf3'))
+          else
+            $('#selected_areaf3_num').text(buf + ' / ' + input_list.eq(i).attr('areaf3'))
+          if($('#selected_areaf3_num').width() > $('#areaf3').width() - 130)
+          {
+            show = false
+            $('#selected_areaf3_num').text(buf)
+          }
+          else{
+            show_num = i + 1            
+          }
+        }
         areaf3_list_const.push(input_list.eq(i).attr('areaf3'))
       }
-      if(i > 3)
-          num_text += ' /(+' + (checked_len - 3) + ' selected)'
-      if(num_text == '')
-        num_text = '(0 selected)'
-      $('#selected_areaf3_num').text(num_text)
+      if(checked_len == 0)
+        $('#selected_areaf3_num').text('(0 selected)')
+      else if(show_num == 0)
+        $('#selected_areaf3_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+      else if(show_num < checked_len)
+        $('#selected_areaf3_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
       update_areaf3()
-    }
-  }
+      }
+      }
 
   function check_areaf3(){
     areaf3_list_const = []
     input_list = $('.areaf3-list:visible input')
     var len = input_list.length
     var checked_len = 0
-    var num_text = ''
+    $('#selected_areaf3_num').text('')
+    var buf = ''
+    var show_num = 0
+    var show = true
     for(i = 0; i < len; i++)
     {
       if(input_list.eq(i).prop('checked'))
       {
-        if(checked_len == 0)
-          num_text += input_list.eq(i).attr('areaf3')
-        else if(checked_len < 3)
-          num_text += ' / ' + input_list.eq(i).attr('areaf3')
+        if(show)
+        {
+          buf = $('#selected_areaf3_num').text()
+          if(checked_len == 0)
+            $('#selected_areaf3_num').text(buf + input_list.eq(i).attr('areaf3'))
+          else
+            $('#selected_areaf3_num').text(buf + ' / ' + input_list.eq(i).attr('areaf3'))
+          if($('#selected_areaf3_num').width() > $('#areaf3').width() - 130)
+          {
+            show = false
+            $('#selected_areaf3_num').text(buf)
+          }
+          else{
+            show_num = checked_len + 1            
+          }
+        }
         checked_len++
         areaf3_list_const.push(input_list.eq(i).attr('areaf3'))
       }
     }
-    if(checked_len > 3)
-        num_text += ' /(+' + (checked_len - 1) + ' selected)'
+    if(checked_len == 0)
+    $('#selected_areaf3_num').text('(0 selected)')
+    else if(show_num == 0)
+    $('#selected_areaf3_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+    else if(show_num < checked_len)
+    $('#selected_areaf3_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
     if(checked_len == len)
-      $('#any_areaf3').prop('checked', true)
+    $('#any_areaf3').prop('checked', true)
     else
-      $('#any_areaf3').prop('checked', false)
-    if(num_text == '')
-      num_text = '(0 selected)'
-    $('#selected_areaf3_num').text(num_text)
+    $('#any_areaf3').prop('checked', false)
     update_areaf3()
   }
 
@@ -1101,54 +1229,86 @@
       $('.areaf4-list input').change(function (){
           check_areaf4()
       })
-      
+
       input_list = $('.areaf4-list input')
       var checked_len = input_list.length
-      var num_text = ''
+      $('#selected_areaf4_num').text('')
+      var buf = ''
+      var show_num = 0
+      var show = true
       for(i = 0; i < checked_len; i++)
       {
-        if(i == 0)
-          num_text += input_list.eq(i).attr('areaf4')
-        else if(i < 3)
-          num_text += ' / ' + input_list.eq(i).attr('areaf4')
+        if(show)
+        {
+          buf = $('#selected_areaf4_num').text()
+          if(i == 0)
+            $('#selected_areaf4_num').text(buf + input_list.eq(i).attr('areaf4'))
+          else
+            $('#selected_areaf4_num').text(buf + ' / ' + input_list.eq(i).attr('areaf4'))
+          if($('#selected_areaf4_num').width() > $('#areaf4').width() - 130)
+          {
+            show = false
+            $('#selected_areaf4_num').text(buf)
+          }
+          else{
+            show_num = i + 1            
+          }
+        }
         areaf4_list_const.push(input_list.eq(i).attr('areaf4'))
       }
-      if(i > 3)
-          num_text += ' /(+' + (checked_len - 3) + ' selected)'
-      if(num_text == '')
-        num_text = '(0 selected)'
-      $('#selected_areaf4_num').text(num_text)
+      if(checked_len == 0)
+        $('#selected_areaf4_num').text('(0 selected)')
+      else if(show_num == 0)
+        $('#selected_areaf4_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+      else if(show_num < checked_len)
+        $('#selected_areaf4_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
       update_areaf4()
-    }
-  }
+      }
+      }
 
   function check_areaf4(){
     areaf4_list_const = []
     input_list = $('.areaf4-list:visible input')
     var len = input_list.length
     var checked_len = 0
-    var num_text = ''
+    $('#selected_areaf4_num').text('')
+    var buf = ''
+    var show_num = 0
+    var show = true
     for(i = 0; i < len; i++)
     {
       if(input_list.eq(i).prop('checked'))
       {
-        if(checked_len == 0)
-          num_text += input_list.eq(i).attr('areaf4')
-        else if(checked_len < 3)
-          num_text += ' / ' + input_list.eq(i).attr('areaf4')
+        if(show)
+        {
+          buf = $('#selected_areaf4_num').text()
+          if(checked_len == 0)
+            $('#selected_areaf4_num').text(buf + input_list.eq(i).attr('areaf4'))
+          else
+            $('#selected_areaf4_num').text(buf + ' / ' + input_list.eq(i).attr('areaf4'))
+          if($('#selected_areaf4_num').width() > $('#areaf4').width() - 130)
+          {
+            show = false
+            $('#selected_areaf4_num').text(buf)
+          }
+          else{
+            show_num = checked_len + 1            
+          }
+        }
         checked_len++
         areaf4_list_const.push(input_list.eq(i).attr('areaf4'))
       }
     }
-    if(checked_len > 3)
-        num_text += ' /(+' + (checked_len - 1) + ' selected)'
+    if(checked_len == 0)
+    $('#selected_areaf4_num').text('(0 selected)')
+    else if(show_num == 0)
+    $('#selected_areaf4_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+    else if(show_num < checked_len)
+    $('#selected_areaf4_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
     if(checked_len == len)
-      $('#any_areaf4').prop('checked', true)
+    $('#any_areaf4').prop('checked', true)
     else
-      $('#any_areaf4').prop('checked', false)
-    if(num_text == '')
-      num_text = '(0 selected)'
-    $('#selected_areaf4_num').text(num_text)
+    $('#any_areaf4').prop('checked', false)
     update_areaf4()
   }
 
@@ -1254,54 +1414,86 @@
       $('.areaf5-list input').change(function (){
           check_areaf5()
       })
-      
+
       input_list = $('.areaf5-list input')
       var checked_len = input_list.length
-      var num_text = ''
+      $('#selected_areaf5_num').text('')
+      var buf = ''
+      var show_num = 0
+      var show = true
       for(i = 0; i < checked_len; i++)
       {
-        if(i == 0)
-          num_text += input_list.eq(i).attr('areaf5')
-        else if(i < 3)
-          num_text += ' / ' + input_list.eq(i).attr('areaf5')
+        if(show)
+        {
+          buf = $('#selected_areaf5_num').text()
+          if(i == 0)
+            $('#selected_areaf5_num').text(buf + input_list.eq(i).attr('areaf5'))
+          else
+            $('#selected_areaf5_num').text(buf + ' / ' + input_list.eq(i).attr('areaf5'))
+          if($('#selected_areaf5_num').width() > $('#areaf5').width() - 130)
+          {
+            show = false
+            $('#selected_areaf5_num').text(buf)
+          }
+          else{
+            show_num = i + 1            
+          }
+        }
         areaf5_list_const.push(input_list.eq(i).attr('areaf5'))
       }
-      if(i > 3)
-          num_text += ' /(+' + (checked_len - 3) + ' selected)'
-      if(num_text == '')
-        num_text = '(0 selected)'
-      $('#selected_areaf5_num').text(num_text)
+      if(checked_len == 0)
+        $('#selected_areaf5_num').text('(0 selected)')
+      else if(show_num == 0)
+        $('#selected_areaf5_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+      else if(show_num < checked_len)
+        $('#selected_areaf5_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
       update_areaf5()
-    }
-  }
+      }
+      }
 
   function check_areaf5(){
     areaf5_list_const = []
     input_list = $('.areaf5-list:visible input')
     var len = input_list.length
     var checked_len = 0
-    var num_text = ''
+    $('#selected_areaf5_num').text('')
+    var buf = ''
+    var show_num = 0
+    var show = true
     for(i = 0; i < len; i++)
     {
       if(input_list.eq(i).prop('checked'))
       {
-        if(checked_len == 0)
-          num_text += input_list.eq(i).attr('areaf5')
-        else if(checked_len < 3)
-          num_text += ' / ' + input_list.eq(i).attr('areaf5')
+        if(show)
+        {
+          buf = $('#selected_areaf5_num').text()
+          if(checked_len == 0)
+            $('#selected_areaf5_num').text(buf + input_list.eq(i).attr('areaf5'))
+          else
+            $('#selected_areaf5_num').text(buf + ' / ' + input_list.eq(i).attr('areaf5'))
+          if($('#selected_areaf5_num').width() > $('#areaf5').width() - 130)
+          {
+            show = false
+            $('#selected_areaf5_num').text(buf)
+          }
+          else{
+            show_num = checked_len + 1            
+          }
+        }
         checked_len++
         areaf5_list_const.push(input_list.eq(i).attr('areaf5'))
       }
     }
-    if(checked_len > 3)
-        num_text += ' /(+' + (checked_len - 1) + ' selected)'
+    if(checked_len == 0)
+    $('#selected_areaf5_num').text('(0 selected)')
+    else if(show_num == 0)
+    $('#selected_areaf5_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+    else if(show_num < checked_len)
+    $('#selected_areaf5_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
     if(checked_len == len)
-      $('#any_areaf5').prop('checked', true)
+    $('#any_areaf5').prop('checked', true)
     else
-      $('#any_areaf5').prop('checked', false)
-    if(num_text == '')
-      num_text = '(0 selected)'
-    $('#selected_areaf5_num').text(num_text)
+    $('#any_areaf5').prop('checked', false)
     update_areaf5()
   }
 
@@ -1407,54 +1599,86 @@
       $('.state-list input').change(function (){
           check_state()
       })
-      
+
       input_list = $('.state-list input')
       var checked_len = input_list.length
-      var num_text = ''
+      $('#selected_state_num').text('')
+      var buf = ''
+      var show_num = 0
+      var show = true
       for(i = 0; i < checked_len; i++)
       {
-        if(i == 0)
-          num_text += input_list.eq(i).attr('state')
-        else if(i < 3)
-          num_text += ' / ' + input_list.eq(i).attr('state')
+        if(show)
+        {
+          buf = $('#selected_state_num').text()
+          if(i == 0)
+            $('#selected_state_num').text(buf + input_list.eq(i).attr('state'))
+          else
+            $('#selected_state_num').text(buf + ' / ' + input_list.eq(i).attr('state'))
+          if($('#selected_state_num').width() > $('#state').width() - 130)
+          {
+            show = false
+            $('#selected_state_num').text(buf)
+          }
+          else{
+            show_num = i + 1            
+          }
+        }
         state_list_const.push(input_list.eq(i).attr('state'))
       }
-      if(i > 3)
-          num_text += ' /(+' + (checked_len - 3) + ' selected)'
-      if(num_text == '')
-        num_text = '(0 selected)'
-      $('#selected_state_num').text(num_text)
+      if(checked_len == 0)
+        $('#selected_state_num').text('(0 selected)')
+      else if(show_num == 0)
+        $('#selected_state_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+      else if(show_num < checked_len)
+        $('#selected_state_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
       update_state()
-    }
-  }
+      }
+      }
 
   function check_state(){
     state_list_const = []
     input_list = $('.state-list:visible input')
     var len = input_list.length
     var checked_len = 0
-    var num_text = ''
+    $('#selected_state_num').text('')
+    var buf = ''
+    var show_num = 0
+    var show = true
     for(i = 0; i < len; i++)
     {
       if(input_list.eq(i).prop('checked'))
       {
-        if(checked_len == 0)
-          num_text += input_list.eq(i).attr('state')
-        else if(checked_len < 3)
-          num_text += ' / ' + input_list.eq(i).attr('state')
+        if(show)
+        {
+          buf = $('#selected_state_num').text()
+          if(checked_len == 0)
+            $('#selected_state_num').text(buf + input_list.eq(i).attr('state'))
+          else
+            $('#selected_state_num').text(buf + ' / ' + input_list.eq(i).attr('state'))
+          if($('#selected_state_num').width() > $('#state').width() - 130)
+          {
+            show = false
+            $('#selected_state_num').text(buf)
+          }
+          else{
+            show_num = checked_len + 1            
+          }
+        }
         checked_len++
         state_list_const.push(input_list.eq(i).attr('state'))
       }
     }
-    if(checked_len > 3)
-        num_text += ' /(+' + (checked_len - 1) + ' selected)'
+    if(checked_len == 0)
+    $('#selected_state_num').text('(0 selected)')
+    else if(show_num == 0)
+    $('#selected_state_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+    else if(show_num < checked_len)
+    $('#selected_state_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
     if(checked_len == len)
-      $('#any_state').prop('checked', true)
+    $('#any_state').prop('checked', true)
     else
-      $('#any_state').prop('checked', false)
-    if(num_text == '')
-      num_text = '(0 selected)'
-    $('#selected_state_num').text(num_text)
+    $('#any_state').prop('checked', false)
     update_state()
   }
 
@@ -1560,53 +1784,86 @@
       $('.city-list input').change(function (){
           check_city()
       })
-      
+
       input_list = $('.city-list input')
       var checked_len = input_list.length
-      var num_text = ''
+      $('#selected_city_num').text('')
+      var buf = ''
+      var show_num = 0
+      var show = true
       for(i = 0; i < checked_len; i++)
       {
-        if(i == 0)
-          num_text += input_list.eq(i).attr('city')
-        else if(i < 3)
-          num_text += ' / ' + input_list.eq(i).attr('city')
+        if(show)
+        {
+          buf = $('#selected_city_num').text()
+          if(i == 0)
+            $('#selected_city_num').text(buf + input_list.eq(i).attr('city'))
+          else
+            $('#selected_city_num').text(buf + ' / ' + input_list.eq(i).attr('city'))
+          if($('#selected_city_num').width() > $('#city').width() - 130)
+          {
+            show = false
+            $('#selected_city_num').text(buf)
+          }
+          else{
+            show_num = i + 1            
+          }
+        }
         city_list_const.push(input_list.eq(i).attr('city'))
       }
-      if(i > 3)
-          num_text += ' /(+' + (checked_len - 3) + ' selected)'
-      if(num_text == '')
-        num_text = '(0 selected)'
-      $('#selected_city_num').text(num_text)
-    }
-  }
+      if(checked_len == 0)
+        $('#selected_city_num').text('(0 selected)')
+      else if(show_num == 0)
+        $('#selected_city_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+      else if(show_num < checked_len)
+        $('#selected_city_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
+      update_city()
+      }
+      }
 
   function check_city(){
     city_list_const = []
     input_list = $('.city-list:visible input')
     var len = input_list.length
     var checked_len = 0
-    var num_text = ''
+    $('#selected_city_num').text('')
+    var buf = ''
+    var show_num = 0
+    var show = true
     for(i = 0; i < len; i++)
     {
       if(input_list.eq(i).prop('checked'))
       {
-        if(checked_len == 0)
-          num_text += input_list.eq(i).attr('city')
-        else if(checked_len < 3)
-          num_text += ' / ' + input_list.eq(i).attr('city')
+        if(show)
+        {
+          buf = $('#selected_city_num').text()
+          if(checked_len == 0)
+            $('#selected_city_num').text(buf + input_list.eq(i).attr('city'))
+          else
+            $('#selected_city_num').text(buf + ' / ' + input_list.eq(i).attr('city'))
+          if($('#selected_city_num').width() > $('#city').width() - 130)
+          {
+            show = false
+            $('#selected_city_num').text(buf)
+          }
+          else{
+            show_num = checked_len + 1            
+          }
+        }
         checked_len++
         city_list_const.push(input_list.eq(i).attr('city'))
       }
     }
-    if(checked_len > 3)
-        num_text += ' /(+' + (checked_len - 1) + ' selected)'
+    if(checked_len == 0)
+    $('#selected_city_num').text('(0 selected)')
+    else if(show_num == 0)
+    $('#selected_city_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
+    else if(show_num < checked_len)
+    $('#selected_city_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
     if(checked_len == len)
-      $('#any_city').prop('checked', true)
+    $('#any_city').prop('checked', true)
     else
-      $('#any_city').prop('checked', false)
-    if(num_text == '')
-      num_text = '(0 selected)'
-    $('#selected_city_num').text(num_text)
+    $('#any_city').prop('checked', false)
   }
   //////////////////////////////////////////////////////////////////////
 
@@ -1802,8 +2059,9 @@
     if(page_num - start >= 2)
       start = page_num - 2
     if(start + 5 >= page_len)
-      start = page_len - 5    
-    var end = start + 5;
+      start = Math.max(page_len - 5, 0)
+      
+    var end = Math.min(start + 5, page_len);
     for(i = start; i < end; i++)
     {
       if(i == page_num)
