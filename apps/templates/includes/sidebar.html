@@ -44,15 +44,15 @@
             >
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="{% url 'cart' %}">
               <span class="menu-icon">
-                <i class="mdi mdi-cart-outline"></i>
+                <i class="mdi mdi-cart"></i>
               </span>
-              Show Cart (8)</a
+              Show Cart (<b class="count_product">{{count_product}}</b>)</a
             >
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="{% url 'order_history' %}">
               <span class="menu-icon">
                 <i class="mdi mdi-history"></i>
               </span>

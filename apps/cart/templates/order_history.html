@@ -1,0 +1,246 @@
+{% extends "layouts/base.html" %} {% block title %} Order History {% endblock %}
+{% load static %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<link
+  rel="stylesheet"
+  href="{% static 'assets/vendors/select2/select2.min.css' %}"
+/>
+{% endblock stylesheets %} {% block modals %} {% endblock modals %}
+{% block content %}
+
+<div class="content-wrapper">
+  <!--Header-->
+  <div class="page-header">
+    <h1 class="page-title">Order History</h1>
+  </div>
+
+  <!-- [ Main Content ] start -->
+  <div class="row" id="search_result">
+    <!--[D F info] start-->
+    <div class="col-sm-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-header">
+          <div>Search Result: <b id="records_num"></b></div>
+        </div>
+        <div class="Phone-body">
+          <div class="row">
+            <div class="col-md-12 overflow-auto">
+              <table class="table table-bordered table-striped">
+                <thead class="text-center">
+                  <tr>
+                    <th>Phone Number</th>
+                    <th>
+                      Exp Date<br>
+                      Puk Code<br>
+                      Item Cost
+                    </th>
+                    <th>
+                      Areaf1<br>
+                      Areaf2<br>
+                      Areaf3<br>
+                      Areaf4
+                    </th>
+                    <th>Areaf5</th>
+                    <th>
+                      Address<br>
+                      City<br>
+                      State<br>
+                      Zipcode
+                    </th>
+                    <th>
+                        Fist Name<br>
+                        Last Name<br>
+                        (Gender)
+                    </th>
+                    <th>
+                      Extra1<br>
+                      Extra2<br>
+                      Extra3<br>
+                      Extra4<br>
+                      Extra5
+                    </th>
+                    <th>
+                      Batch ID<br>
+                      Batch Name<br>
+                      Publish Date
+                    </th>
+                    <th>
+                      Checker Name<br>
+                      Checker Cost<br>
+                      Checker Status<br>
+                      Check Date
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="text-left"></tbody>
+              </table>
+            </div>
+            <!--------------------------- Pagination-HTML --------------------------------->
+            <div
+              class="col-md-12 col-sm-6 grid-margin stretch-card"
+              id="pagination"
+            >
+              <div class="Phone">
+                <div class="Phone-body">
+                  <nav>
+                    <ul
+                      class="pagination justify-content-end flat"
+                      id="page_button"
+                    ></ul>
+                  </nav>
+                </div>
+              </div>
+            </div>
+            <!-------------------------------------------------------------------------->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  var page_num = 0;
+  var page_len = 0;
+  jQuery(document).ready(function () {
+    show_result();
+  });
+  function show_result(page = 0) {
+    postData = {
+      page: page,
+    };
+    $(".circle-loader").show();
+    $.ajax({
+      url: "/order_history",
+      type: "POST",
+      dataType: "json",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      data: postData,
+      success: function (result) {
+        $(".circle-loader").hide();
+        var state = result["state"];
+        if (state == "OK") {
+          var product_list = result["data"];
+          $("#records_num").text(result["length"] + " records found");
+          console.log(product_list);
+          page_num = page;
+          var len = product_list.length;
+          if (len) {
+            product_list.forEach(function (each) {
+              var appendHTML = "";
+              appendHTML += "<tr>";
+              appendHTML += '<td class="text-center">' + each['Phone'] + '</td>'
+              appendHTML += '<td>' + each['Exp_day'] + '/' + each['Exp_month'] + '/' + each['Exp_year'] + '<br>' + each['Puk_code'] + '<br>' + each['Item_cost'] + '$</td>'
+              appendHTML += '<td>' + each['Areaf1'] + '<br>' + each['Areaf2'] + '<br>' + each['Areaf3'] + '<br>' + each['Areaf4'] + '</td>'
+              appendHTML += '<td class="text-center"><img src="static/assets/vendors/flag-icon-css/flags/4x3/' + each['Areaf6'] + '.svg" alt="' + each['Areaf6'] + '.svg"><br>' + each['Areaf5'] + '</td>'
+              appendHTML += '<td>' + each['Address'] + '<br>' + each['City'] + '<br>' + each['State'] + '<br>' + each['Zipcode'] + '</td>'
+              appendHTML += '<td>' + each['First_name'] + '<br>' + each['Last_name'] + '<br>(' + each['Gender'] + ')</td>'
+              appendHTML += '<td>' + each['Extra1'] + '<br>' + each['Extra2'] + '<br>' + each['Extra3'] + '<br>' + each['Extra4'] + '<br>' + each['Extra5'] + '</td>'
+              var Batch_Publish_date = new Date(each['Batch_Publish_date']);
+              appendHTML += '<td>' + each['Batch_id'] + '<br>' + each['Batch_Name'] + '<br>' + (Batch_Publish_date.getDate()).toString().padStart(2, '0') + '/' + (Batch_Publish_date.getMonth() + 1).toString().padStart(2, '0') + '/' + Batch_Publish_date.getFullYear() + '</td>'
+              var Check_date = new Date(each['Sold_date'])
+              appendHTML += '<td>' + each["Checker_name"] + '<br>' + each['Checker_cost'] + '$<br>' + each['Checker_status'] + '<br>' + (Check_date.getDate()).toString().padStart(2, '0') + '/' + (Check_date.getMonth() + 1).toString().padStart(2, '0') + '/' + Check_date.getFullYear() + "</td>";
+              appendHTML += "</tr>";
+              $("#search_result .table tbody").append(appendHTML);
+            });
+            pagination_init(result["length"]);
+          } else
+            $("#search_result .table tbody").append(
+              '<tr><td colspan="17" class="text-center">No Data</td></tr>'
+            );
+        } else if (state == "FAIL") showDangerToast(result["error"], "Failed");
+        else showDangerToast("Cause an unknown error.", "Failed");
+      },
+      error: function (xhr, status, error) {
+        $(".circle-loader").hide();
+        showDangerToast(xhr.status + " " + xhr.statusText, "Failed");
+      },
+    });
+  }
+  ////////////////////////////////////////////// Pagination-Javascript //////////////////////////////////////////////////
+  function pagination_init(len) {
+    $("#pagination").show();
+    $("#page_button").empty();
+    $("#page_button").append(
+      '<li class="page-item"><a class="page-link" id="page-first" href="javascript:void(0);"><<</a></li>'
+    );
+    $("#page_button").append(
+      '<li class="page-item"><a class="page-link" id="page-prev" href="javascript:void(0);"><</a></li>'
+    );
+    page_len = Math.floor((len - 1) / 10) + 1;
+    var start = 0;
+    if (page_num - start >= 2) start = page_num - 2;
+    if (start + 5 >= page_len) start = Math.max(page_len - 5, 0);
+
+    var end = Math.min(start + 5, page_len);
+    for (i = start; i < end; i++) {
+      if (i == page_num)
+        $("#page_button").append(
+          '<li class="page-item active"><a class="page-link page-num" href="javascript:void(0);" page=' +
+            i +
+            ">" +
+            (i + 1) +
+            "</a></li>"
+        );
+      else
+        $("#page_button").append(
+          '<li class="page-item"><a class="page-link page-num" href="javascript:void(0);" page=' +
+            i +
+            ">" +
+            (i + 1) +
+            "</a></li>"
+        );
+    }
+    $("#page_button").append(
+      '<li class="page-item"><a class="page-link" id="page-next" href="javascript:void(0);">></a></li>'
+    );
+    $("#page_button").append(
+      '<li class="page-item"><a class="page-link" id="page-end" href="javascript:void(0);">>></a></li>'
+    );
+    $(".page-num").click(function () {
+      if (page_num == $(this).attr("page")) return;
+      page_num = $(this).attr("page");
+      show_result(page_num);
+    });
+    $("#page-first").click(function () {
+      if (page_num == 0) return;
+      page_num = 0;
+      show_result(page_num);
+    });
+    $("#page-end").click(function () {
+      if (page_num == page_len - 1) return;
+      page_num = page_len - 1;
+      show_result(page_num);
+    });
+    $("#page-prev").click(function () {
+      if (page_num == 0) return;
+      page_num -= 1;
+      show_result(page_num);
+    });
+    $("#page-next").click(function () {
+      if (page_num == page_len - 1) return;
+      page_num += 1;
+      show_result(page_num);
+    });
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+</script>
+
+{% endblock content %} {% block plugin_javascripts %}
+
+<script src="{% static 'assets/vendors/select2/select2.min.js' %}"></script>
+
+{% endblock plugin_javascripts %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<script src="{% static 'assets/js/file-upload.js' %}"></script>
+
+<script src="{% static 'assets/vendors/inputmask/jquery.inputmask.bundle.js' %}"></script>
+<script src="{% static 'assets/js/inputmask.js' %}"></script>
+
+{% endblock javascripts %}

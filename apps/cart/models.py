@@ -88,26 +88,12 @@ class Shop_data(models.Model):
 
 class CartManager(models.Manager):
     def new_or_get(self, request):
-        cart_id = request.session.get("cart_id", None)
-        qs = self.get_queryset().filter(id=cart_id)
+        qs = self.get_queryset().filter(user=request.user)
         if qs.count() == 1:
-            new_obj = False
             cart_obj = qs.first()
-            # if request.user.is_authenticated() and cart_obj.user is None:
-            #     cart_obj.user = request.user
-            #     cart_obj.save()
         else:
-            cart_obj = Cart.objects.new(user=request.user)
-            new_obj = True
-            request.session['cart_id'] = cart_obj.id
-        return cart_obj, new_obj
-
-    def new(self, user):
-        # user_obj = None
-        # if user is not None:
-        #     if user.is_authenticated():
-        #         user_obj = user
-        return self.model.objects.create(user=user)
+            cart_obj = Cart.objects.create(user=request.user)
+        return cart_obj
 
 
 class Cart(models.Model):
@@ -126,11 +112,11 @@ class Cart(models.Model):
 
 def m2m_changed_cart_receiver(sender, instance, action, *args, **kwargs):
     if action == 'post_add' or action == 'post_remove' or action == 'post_clear':        
-        total = instance.products.aggregate(total_price=Sum('product__Price'))['total_price']
-        # products = instance.products.all()
-        # total = 0
-        # for each in products:
-        #     total += float(each.Price)
+        # total = instance.products.aggregate(total_price=Sum('Shop_data__Price'))['total_price']
+        products = instance.products.all()
+        total = 0
+        for each in products:
+            total += float(each.Price)
         if instance.subtotal != total:
             instance.subtotal = total
             instance.save()
@@ -147,18 +133,15 @@ def pre_save_cart_receiver(sender, instance, *args, **kwargs):
 pre_save.connect(pre_save_cart_receiver, sender=Cart)
 
 
-# class Cart(models.Model):
-#     User =          models.ForeignKey(User, on_delete=models.CASCADE)
-#     Product = models.ForeignKey(Shop_data, on_delete=models.CASCADE)
+class Order_history(models.Model):
+    User =          models.ForeignKey(User, on_delete=models.CASCADE)
+    Product = models.ForeignKey(Shop_data, on_delete=models.CASCADE)
 
-#     Checker = models.ForeignKey(Checker, on_delete=models.CASCADE)
-#     Checker_status = models.CharField(choices=[
-#                             ('Queue', 'Queue'),
-#                             ('Processing', 'Processing'),
-#                             ('Error', 'Error'),
-#                             ('Done', 'Done'),
-#                             ('Fail', 'Fail')
-#                             ], max_length=12, default='Queue')
-#     Checker_response_text = models.TextField()
-#     Checker_response_full = models.TextField()
-#     Checker_date = models.DateTimeField(auto_created=True, auto_now=True)
+    Checker = models.ForeignKey(Checker, on_delete=models.CASCADE)
+    Checker_status = models.CharField(choices=[
+                            ('Done', 'Done'),
+                            ('Fail', 'Fail')
+                            ], max_length=12, default='Done')
+    Checker_response_text = models.TextField()
+    Checker_response_full = models.TextField()
+    Checker_date = models.DateTimeField(auto_created=True, auto_now=True)

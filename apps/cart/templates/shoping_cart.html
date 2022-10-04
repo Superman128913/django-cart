@@ -4,6 +4,15 @@
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
 <link rel="stylesheet" href="{% static 'assets/vendors/select2/select2.min.css' %}" />
+
+<style>
+  .cart-icon {
+    font-size: xx-large;
+  }
+  .col-md-2-4 {
+    width: 20%;
+  }
+</style>
 {% endblock stylesheets %}
 {% block modals %}
 {% endblock modals %}
@@ -16,43 +25,91 @@
   </div>
 
   <!-- [ Main Content ] start -->
-  <div class="row" id="search_result">
+  <div class="row">
     <!--[D F info] start-->
     <div class="col-sm-12 grid-margin">
       <div class="Phone">
         <div class="Phone-header">
-          <h5>Product List</h5>
+          <div class="row">
+            <div>Result: <b class="count_product">{{ count_product }}</b> items</div>
+          </div>
         </div>
         <div class="Phone-body">
           <div class="row">
-            <div class="col-md-12 overflow-auto">
+            <div class="col-md-12 col-sm-10 stretch-card">
+              <div class="circle-loader"></div>
+            </div>
+            <div class="col-md-3">
+              <div class="row mt-3">
+                <div class="form-check">
+                  <div class="col-sm-12">
+                    <label class="form-label">
+                      Choose your checker:  
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-9">
+              <div class="form-group">
+                <div class="row mt-3">
+                  <div class="col-md-2-4 form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="checkerRadio" id="checker1" value="1" checked> Checker1 <i class="input-helper"></i></label>
+                  </div>
+                  <div class="col-md-2-4 form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="checkerRadio" id="checker2" value="2"> Checker2 <i class="input-helper"></i></label>
+                  </div>
+                  <div class="col-md-2-4 form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="checkerRadio" id="checker3" value="3"> Checker3 <i class="input-helper"></i></label>
+                  </div>
+                  <div class="col-md-2-4 form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="checkerRadio" id="checker4" value="4"> Checker4 <i class="input-helper"></i></label>
+                  </div>
+                  <div class="col-md-2-4 form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="checkerRadio" id="checker5" value="5"> Checker5 <i class="input-helper"></i></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-12 overflow-auto" id="search_result">
               <table class="table table-bordered table-striped">
                 <thead class="text-center">
                   <tr>
                     <th>Area Code</th>
                     <th>Exp Date</th>
-                    <th>Zipcode</th>
                     <th>
                       Areaf1<br>
                       Areaf2<br>
-                      Areaf3 / Areaf4
+                      Areaf3<br>
+                      Areaf4
                     </th>
                     <th>Areaf5</th>
-                    <th>State</th>
-                    <th>City</th>
+                    <th>
+                      City<br>
+                      State<br>
+                      Zipcode
+                    </th>
                     <th>First Name</th>
                     <th>Gender</th>
-                    <th>Extra1</th>
-                    <th>Extra2</th>
-                    <th>Extra3</th>
-                    <th>Extra4</th>
-                    <th>Extra5</th>
+                    <th>
+                      Extra1<br>
+                      Extra2<br>
+                      Extra3<br>
+                      Extra4<br>
+                      Extra5
+                    </th>
                     <th>
                       Batch ID<br>
                       Batch Name<br>
                       Publish Date
                     </th>
                     <th>Price</th>
+                    <th>Check</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -67,956 +124,20 @@
   </div>
 </div>
 <script>
-  var batch_list_const = []
-  var areaf1_list_const = []
-  var areaf2_list_const = []
-  var areaf3_list_const = []
-  var areaf4_list_const = []
-  var areaf5_list_const = []
-  var state_list_const = []
-  var city_list_const = []
-  var gender_list_const = []
   jQuery(document).ready(function () {
-    $('#search_result').hide()    
-    init_batch_selection()   
-    init_gender_selection()
+    show_result()
   })
 
-  
-  ///////////////////////Batch Selection///////////////////////////
-  function init_batch_selection(){
-    $('#any_batch').change(function (){
-      if($(this).prop('checked'))
-        $('#batch_selection input').prop('checked', true)
-      else
-        $('#batch_selection input').prop('checked', false)
-    })
-    $('#batch_selection input').change(function (){
-      if($(this).attr('id') == 'any_batch')
-        check_batch()
-      else
-      {
-        if($('#any_batch').prop('checked'))
-          $('#any_batch').prop('checked', false)
-        else
-        {
-          input_list = $('#batch_selection input')
-          var len = input_list.length
-          for(i = 1; i < len; i++)
-          {
-            if(!input_list.eq(i).prop('checked'))
-            {
-              $('#any_batch').prop('checked', false)
-              break
-            }
-          }
-          if(i == len)
-            $('#any_batch').prop('checked', true)
-        }
-        check_batch()
-      }
-    })
-  }
-
-  function check_batch(){
-    batch_list_const = []
-    input_list = $('#batch_selection input')
-    var len = input_list.length
-    for(i = 1; i < len; i++)
-    {
-      if(input_list.eq(i).prop('checked'))
-        batch_list_const.push(input_list.eq(i).attr('batch_id'))
-    }
-    $('#selected_batch_num').text(batch_list_const.length)
-    update_batch()
-  }
-
-  function update_batch(){
-    postData = {
-      object: 'batch', //batch, areaf1, areaf2, ...
-      batch_list: batch_list_const
-    }
-    $.ajax({
-        url: "",
-        type: "POST",
-        dataType: "json",
-        headers:{
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
-        data: postData,
-        success: function(result){
-            var state = result['state']
-            if(state == "OK")
-            {
-              data = result['data']
-              areaf1_list = data['areaf1_list']
-              init_areaf1_selection(areaf1_list)
-              init_areaf2_selection()
-              init_areaf3_selection()
-              init_areaf4_selection()
-              init_areaf5_selection()
-              init_state_selection()
-              init_city_selection()
-              
-              // $('#zip_code').empty('')
-              // zipcode_list = data['zipcode_list']
-              // len = zipcode_list.length
-              // for(i = 0; i < len; i++)
-              // {
-              //   var optionElement = document.createElement('option')
-              //   optionElement.setAttribute('disabled', 'disabled')
-              //   optionElement.setAttribute('value', zipcode_list[i]['Zipcode'])
-              //   optionElement.innerText = zipcode_list[i]['Zipcode']
-              //   $('#zip_code').append(optionElement)
-              // }
-              
-              // $('#area_code').empty('')
-              // area_code_list = data['area_code_list']
-              // len = area_code_list.length
-              // var optionElement = document.createElement('option')
-              // optionElement.setAttribute('disabled', 'disabled')
-              // optionElement.innerText = 'Examples:'
-              // $('#area_code').append(optionElement)
-              // for(i = 0; i < len; i++)
-              // {
-              //   optionElement = document.createElement('option')
-              //   optionElement.setAttribute('value', area_code_list[i]['Area_code'])
-              //   optionElement.innerText = area_code_list[i]['Area_code']
-              //   $('#area_code').append(optionElement)
-              // }
-            }
-            else if(state == "FAIL")
-              showDangerToast(result['error'], 'Failed')
-            else
-              showDangerToast('Cause an unknown error.', 'Failed')
-        },
-        error: function(xhr, status, error){                
-          showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
-        }
-    });
-  }
-  ///////////////////////////////////////////////////////////////////////
-
-  
-  ///////////////////////Areaf1 Selection///////////////////////////////
-  function init_areaf1_selection(areaf1_list=null){
-    areaf1_list_const = []
-    $('#areaf1_selection').empty()
-    $('#selected_areaf1_num').text(0)
-    
-    if(areaf1_list==null)
-      return
-
-    var len = areaf1_list.length
-    if(len)
-    {
-      var appendHTML = ''
-      
-      appendHTML += '<h6 class="dropdown-header"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" id="any_areaf1"> Any Areaf1</label></div></h6><div class="dropdown-divider"></div>'
-      for(i = 0; i < len; i++)
-      {
-        var each = areaf1_list[i]
-        appendHTML += '<div class="dropdown-item"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" areaf1="' + each['Areaf1'] + '"> ' + each['Areaf1'] + '</label></div></div>'
-      }
-      $('#areaf1_selection').append(appendHTML)
-
-      $('#any_areaf1').change(function (){
-        if($(this).prop('checked'))
-          $('#areaf1_selection input').prop('checked', true)
-        else
-          $('#areaf1_selection input').prop('checked', false)
-      })
-      $('#areaf1_selection input').change(function (){
-        if($(this).attr('id') == 'any_areaf1')
-          check_areaf1()
-        else
-        {
-          if($('#any_areaf1').prop('checked'))
-            $('#any_areaf1').prop('checked', false)
-          else
-          {
-            input_list = $('#areaf1_selection input')
-            var len = input_list.length
-            for(i = 1; i < len; i++)
-            {
-              if(!input_list.eq(i).prop('checked'))
-              {
-                $('#any_areaf1').prop('checked', false)
-                break
-              }
-            }
-            if(i == len)
-              $('#any_areaf1').prop('checked', true)
-          }
-          check_areaf1()
-        }
-      })
-    }
-  }
-
-  function check_areaf1(){
-    areaf1_list_const = []
-    input_list = $('#areaf1_selection input')
-    var len = input_list.length
-    for(i = 1; i < len; i++)
-    {
-      if(input_list.eq(i).prop('checked'))
-        areaf1_list_const.push(input_list.eq(i).attr('areaf1'))
-    }
-    $('#selected_areaf1_num').text(areaf1_list_const.length)
-    update_areaf1()
-  }
-
-  function update_areaf1(){
-    postData = {
-      object: 'areaf1', //batch, areaf1, areaf2, ...
-      batch_list: batch_list_const,
-      areaf1_list: areaf1_list_const
-    }
-    $.ajax({
-        url: "",
-        type: "POST",
-        dataType: "json",
-        headers:{
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
-        data: postData,
-        success: function(result){
-            var state = result['state']
-            if(state == "OK")
-            {
-              data = result['data']
-              
-              areaf2_list = data['areaf2_list']
-              init_areaf2_selection(areaf2_list)
-              init_areaf3_selection()
-              init_areaf4_selection()
-              init_areaf5_selection()
-              init_state_selection()
-              init_city_selection()
-            }
-            else if(state == "FAIL")
-              showDangerToast(result['error'], 'Failed')
-            else
-              showDangerToast('Cause an unknown error.', 'Failed')
-        },
-        error: function(xhr, status, error){                
-          showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
-        }
-    });
-  }
-  //////////////////////////////////////////////////////////////////////
-
-  
-  ///////////////////////Areaf2 Selection///////////////////////////////
-  function init_areaf2_selection(areaf2_list=null){
-    areaf2_list_const = []
-    $('#areaf2_selection').empty()
-    $('#selected_areaf2_num').text(0)
-    
-    if(areaf2_list==null)
-      return
-    
-    var len = areaf2_list.length
-    if(len)
-    {
-      var appendHTML = ''
-      
-      appendHTML += '<h6 class="dropdown-header"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" id="any_areaf2"> Any Areaf2</label></div></h6><div class="dropdown-divider"></div>'
-      for(i = 0; i < len; i++)
-      {
-        var each = areaf2_list[i]
-        appendHTML += '<div class="dropdown-item"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" areaf2="' + each['Areaf2'] + '"> ' + each['Areaf2'] + '</label></div></div>'
-      }
-      $('#areaf2_selection').append(appendHTML)
-
-      $('#any_areaf2').change(function (){
-        if($(this).prop('checked'))
-          $('#areaf2_selection input').prop('checked', true)
-        else
-          $('#areaf2_selection input').prop('checked', false)
-      })
-      $('#areaf2_selection input').change(function (){
-        if($(this).attr('id') == 'any_areaf2')
-          check_areaf2()
-        else
-        {
-          if($('#any_areaf2').prop('checked'))
-            $('#any_areaf2').prop('checked', false)
-          else
-          {
-            input_list = $('#areaf2_selection input')
-            var len = input_list.length
-            for(i = 1; i < len; i++)
-            {
-              if(!input_list.eq(i).prop('checked'))
-              {
-                $('#any_areaf2').prop('checked', false)
-                break
-              }
-            }
-            if(i == len)
-              $('#any_areaf2').prop('checked', true)
-          }
-          check_areaf2()
-        }
-      })
-    }
-  }
-
-  function check_areaf2(){
-    areaf2_list_const = []
-    input_list = $('#areaf2_selection input')
-    var len = input_list.length
-    for(i = 1; i < len; i++)
-    {
-      if(input_list.eq(i).prop('checked'))
-        areaf2_list_const.push(input_list.eq(i).attr('areaf2'))
-    }
-    $('#selected_areaf2_num').text(areaf2_list_const.length)
-    update_areaf2()
-  }
-
-  function update_areaf2(){
-    postData = {
-      object: 'areaf2', //batch, areaf1, areaf2, ...
-      batch_list: batch_list_const,
-      areaf1_list: areaf1_list_const,
-      areaf2_list: areaf2_list_const
-    }
-    $.ajax({
-        url: "",
-        type: "POST",
-        dataType: "json",
-        headers:{
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
-        data: postData,
-        success: function(result){
-            var state = result['state']
-            if(state == "OK")
-            {
-              data = result['data']
-              
-              areaf3_list = data['areaf3_list']
-              init_areaf3_selection(areaf3_list)
-              init_areaf4_selection()
-              init_areaf5_selection()
-              init_state_selection()
-              init_city_selection()
-            }
-            else if(state == "FAIL")
-              showDangerToast(result['error'], 'Failed')
-            else
-              showDangerToast('Cause an unknown error.', 'Failed')
-        },
-        error: function(xhr, status, error){                
-          showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
-        }
-    });
-  }
-  //////////////////////////////////////////////////////////////////////
-
-  
-  ///////////////////////Areaf3 Selection///////////////////////////////
-  function init_areaf3_selection(areaf3_list=null){
-    areaf3_list_const = []
-    $('#areaf3_selection').empty()
-    $('#selected_areaf3_num').text(0)
-    
-    if(areaf3_list==null)
-      return
-    
-    var len = areaf3_list.length
-    if(len)
-    {
-      var appendHTML = ''
-      
-      appendHTML += '<h6 class="dropdown-header"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" id="any_areaf3"> Any Areaf3</label></div></h6><div class="dropdown-divider"></div>'
-      for(i = 0; i < len; i++)
-      {
-        var each = areaf3_list[i]
-        appendHTML += '<div class="dropdown-item"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" areaf3="' + each['Areaf3'] + '"> ' + each['Areaf3'] + '</label></div></div>'
-      }
-      $('#areaf3_selection').append(appendHTML)
-
-      $('#any_areaf3').change(function (){
-        if($(this).prop('checked'))
-          $('#areaf3_selection input').prop('checked', true)
-        else
-          $('#areaf3_selection input').prop('checked', false)
-      })
-      $('#areaf3_selection input').change(function (){
-        if($(this).attr('id') == 'any_areaf3')
-          check_areaf3()
-        else
-        {
-          if($('#any_areaf3').prop('checked'))
-            $('#any_areaf3').prop('checked', false)
-          else
-          {
-            input_list = $('#areaf3_selection input')
-            var len = input_list.length
-            for(i = 1; i < len; i++)
-            {
-              if(!input_list.eq(i).prop('checked'))
-              {
-                $('#any_areaf3').prop('checked', false)
-                break
-              }
-            }
-            if(i == len)
-              $('#any_areaf3').prop('checked', true)
-          }
-          check_areaf3()
-        }
-      })
-    }
-  }
-
-  function check_areaf3(){
-    areaf3_list_const = []
-    input_list = $('#areaf3_selection input')
-    var len = input_list.length
-    for(i = 1; i < len; i++)
-    {
-      if(input_list.eq(i).prop('checked'))
-        areaf3_list_const.push(input_list.eq(i).attr('areaf3'))
-    }
-    $('#selected_areaf3_num').text(areaf3_list_const.length)
-    update_areaf3()
-  }
-
-  function update_areaf3(){
-    postData = {
-      object: 'areaf3', //batch, areaf1, areaf2, ...
-      batch_list: batch_list_const,
-      areaf1_list: areaf1_list_const,
-      areaf2_list: areaf2_list_const,
-      areaf3_list: areaf3_list_const
-    }
-    $.ajax({
-        url: "",
-        type: "POST",
-        dataType: "json",
-        headers:{
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
-        data: postData,
-        success: function(result){
-            var state = result['state']
-            if(state == "OK")
-            {
-              data = result['data']
-              
-              areaf4_list = data['areaf4_list']
-              init_areaf4_selection(areaf4_list)
-              init_areaf5_selection()
-              init_state_selection()
-              init_city_selection()
-            }
-            else if(state == "FAIL")
-              showDangerToast(result['error'], 'Failed')
-            else
-              showDangerToast('Cause an unknown error.', 'Failed')
-        },
-        error: function(xhr, status, error){                
-          showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
-        }
-    });
-  }
-  //////////////////////////////////////////////////////////////////////
-
-  
-  ///////////////////////Areaf4 Selection///////////////////////////////
-  function init_areaf4_selection(areaf4_list=null){
-    areaf4_list_const = []
-    $('#areaf4_selection').empty()
-    $('#selected_areaf4_num').text(0)
-    
-    if(areaf4_list==null)
-      return
-    
-    var len = areaf4_list.length
-    if(len)
-    {
-      var appendHTML = ''
-      
-      appendHTML += '<h6 class="dropdown-header"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" id="any_areaf4"> Any Areaf4</label></div></h6><div class="dropdown-divider"></div>'
-      for(i = 0; i < len; i++)
-      {
-        var each = areaf4_list[i]
-        appendHTML += '<div class="dropdown-item"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" areaf4="' + each['Areaf4'] + '"> ' + each['Areaf4'] + '</label></div></div>'
-      }
-      $('#areaf4_selection').append(appendHTML)
-
-      $('#any_areaf4').change(function (){
-        if($(this).prop('checked'))
-          $('#areaf4_selection input').prop('checked', true)
-        else
-          $('#areaf4_selection input').prop('checked', false)
-      })
-      $('#areaf4_selection input').change(function (){
-        if($(this).attr('id') == 'any_areaf4')
-          check_areaf4()
-        else
-        {
-          if($('#any_areaf4').prop('checked'))
-            $('#any_areaf4').prop('checked', false)
-          else
-          {
-            input_list = $('#areaf4_selection input')
-            var len = input_list.length
-            for(i = 1; i < len; i++)
-            {
-              if(!input_list.eq(i).prop('checked'))
-              {
-                $('#any_areaf4').prop('checked', false)
-                break
-              }
-            }
-            if(i == len)
-              $('#any_areaf4').prop('checked', true)
-          }
-          check_areaf4()
-        }
-      })
-    }
-  }
-
-  function check_areaf4(){
-    areaf4_list_const = []
-    input_list = $('#areaf4_selection input')
-    var len = input_list.length
-    for(i = 1; i < len; i++)
-    {
-      if(input_list.eq(i).prop('checked'))
-        areaf4_list_const.push(input_list.eq(i).attr('areaf4'))
-    }
-    $('#selected_areaf4_num').text(areaf4_list_const.length)
-    update_areaf4()
-  }
-
-  function update_areaf4(){
-    postData = {
-      object: 'areaf4', //batch, areaf1, areaf2, ...
-      batch_list: batch_list_const,
-      areaf1_list: areaf1_list_const,
-      areaf2_list: areaf2_list_const,
-      areaf3_list: areaf3_list_const,
-      areaf4_list: areaf4_list_const
-    }
-    $.ajax({
-        url: "",
-        type: "POST",
-        dataType: "json",
-        headers:{
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
-        data: postData,
-        success: function(result){
-            var state = result['state']
-            if(state == "OK")
-            {
-              data = result['data']
-              
-              areaf5_list = data['areaf5_list']
-              init_areaf5_selection(areaf5_list)
-              init_state_selection()
-              init_city_selection()
-            }
-            else if(state == "FAIL")
-              showDangerToast(result['error'], 'Failed')
-            else
-              showDangerToast('Cause an unknown error.', 'Failed')
-        },
-        error: function(xhr, status, error){                
-          showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
-        }
-    });
-  }
-  //////////////////////////////////////////////////////////////////////
-
-  
-  ///////////////////////Areaf5 Selection///////////////////////////////
-  function init_areaf5_selection(areaf5_list=null){
-    areaf5_list_const = []
-    $('#areaf5_selection').empty()
-    $('#selected_areaf5_num').text(0)
-    
-    if(areaf5_list==null)
-      return
-    
-    var len = areaf5_list.length
-    if(len)
-    {
-      var appendHTML = ''
-      
-      appendHTML += '<h6 class="dropdown-header"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" id="any_areaf5"> Any Areaf5</label></div></h6><div class="dropdown-divider"></div>'
-      for(i = 0; i < len; i++)
-      {
-        var each = areaf5_list[i]
-        appendHTML += '<div class="dropdown-item"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" areaf5="' + each['Areaf5'] + '"> ' + each['Areaf5'] + '</label></div></div>'
-      }
-      $('#areaf5_selection').append(appendHTML)
-
-      $('#any_areaf5').change(function (){
-        if($(this).prop('checked'))
-          $('#areaf5_selection input').prop('checked', true)
-        else
-          $('#areaf5_selection input').prop('checked', false)
-      })
-      $('#areaf5_selection input').change(function (){
-        if($(this).attr('id') == 'any_areaf5')
-          check_areaf5()
-        else
-        {
-          if($('#any_areaf5').prop('checked'))
-            $('#any_areaf5').prop('checked', false)
-          else
-          {
-            input_list = $('#areaf5_selection input')
-            var len = input_list.length
-            for(i = 1; i < len; i++)
-            {
-              if(!input_list.eq(i).prop('checked'))
-              {
-                $('#any_areaf5').prop('checked', false)
-                break
-              }
-            }
-            if(i == len)
-              $('#any_areaf5').prop('checked', true)
-          }
-          check_areaf5()
-        }
-      })
-    }
-  }
-
-  function check_areaf5(){
-    areaf5_list_const = []
-    input_list = $('#areaf5_selection input')
-    var len = input_list.length
-    for(i = 1; i < len; i++)
-    {
-      if(input_list.eq(i).prop('checked'))
-        areaf5_list_const.push(input_list.eq(i).attr('areaf5'))
-    }
-    $('#selected_areaf5_num').text(areaf5_list_const.length)
-    update_areaf5()
-  }
-
-  function update_areaf5(){
-    postData = {
-      object: 'areaf5', //batch, areaf1, areaf2, ...
-      batch_list: batch_list_const,
-      areaf1_list: areaf1_list_const,
-      areaf2_list: areaf2_list_const,
-      areaf3_list: areaf3_list_const,
-      areaf4_list: areaf4_list_const,
-      areaf5_list: areaf5_list_const
-    }
-    $.ajax({
-        url: "",
-        type: "POST",
-        dataType: "json",
-        headers:{
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
-        data: postData,
-        success: function(result){
-            var state = result['state']
-            if(state == "OK")
-            {
-              data = result['data']
-              
-              state_list = data['state_list']
-              init_state_selection(state_list)
-              init_city_selection()
-            }
-            else if(state == "FAIL")
-              showDangerToast(result['error'], 'Failed')
-            else
-              showDangerToast('Cause an unknown error.', 'Failed')
-        },
-        error: function(xhr, status, error){                
-          showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
-        }
-    });
-  }
-  //////////////////////////////////////////////////////////////////////
-
-  
-  ///////////////////////User State Selection///////////////////////////////
-  function init_state_selection(state_list=null){
-    state_list_const = []
-    $('#state_selection').empty()
-    $('#selected_state_num').text(0)
-    
-    if(state_list==null)
-      return
-    
-    var len = state_list.length
-    if(len)
-    {
-      var appendHTML = ''
-      
-      appendHTML += '<h6 class="dropdown-header"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" id="any_state"> Any State</label></div></h6><div class="dropdown-divider"></div>'
-      for(i = 0; i < len; i++)
-      {
-        var each = state_list[i]
-        appendHTML += '<div class="dropdown-item"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" state="' + each['State'] + '"> ' + each['State'] + '</label></div></div>'
-      }
-      $('#state_selection').append(appendHTML)
-
-      $('#any_state').change(function (){
-        if($(this).prop('checked'))
-          $('#state_selection input').prop('checked', true)
-        else
-          $('#state_selection input').prop('checked', false)
-      })
-      $('#state_selection input').change(function (){
-        if($(this).attr('id') == 'any_state')
-          check_state()
-        else
-        {
-          if($('#any_state').prop('checked'))
-            $('#any_state').prop('checked', false)
-          else
-          {
-            input_list = $('#state_selection input')
-            var len = input_list.length
-            for(i = 1; i < len; i++)
-            {
-              if(!input_list.eq(i).prop('checked'))
-              {
-                $('#any_state').prop('checked', false)
-                break
-              }
-            }
-            if(i == len)
-              $('#any_state').prop('checked', true)
-          }
-          check_state()
-        }
-      })
-    }
-  }
-
-  function check_state(){
-    state_list_const = []
-    input_list = $('#state_selection input')
-    var len = input_list.length
-    for(i = 1; i < len; i++)
-    {
-      if(input_list.eq(i).prop('checked'))
-        state_list_const.push(input_list.eq(i).attr('state'))
-    }
-    $('#selected_state_num').text(state_list_const.length)
-    update_state()
-  }
-
-  function update_state(){
-    postData = {
-      object: 'state', //batch, areaf1, areaf2, ...
-      batch_list: batch_list_const,
-      areaf1_list: areaf1_list_const,
-      areaf2_list: areaf2_list_const,
-      areaf3_list: areaf3_list_const,
-      areaf4_list: areaf4_list_const,
-      areaf5_list: areaf5_list_const,
-      state_list: state_list_const
-    }
-    $.ajax({
-        url: "",
-        type: "POST",
-        dataType: "json",
-        headers:{
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
-        data: postData,
-        success: function(result){
-            var state = result['state']
-            if(state == "OK")
-            {
-              data = result['data']
-              
-              city_list = data['city_list']
-              init_city_selection(city_list)
-            }
-            else if(state == "FAIL")
-              showDangerToast(result['error'], 'Failed')
-            else
-              showDangerToast('Cause an unknown error.', 'Failed')
-        },
-        error: function(xhr, status, error){                
-          showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
-        }
-    });
-  }
-  //////////////////////////////////////////////////////////////////////
-
-  
-  ///////////////////////User City Selection///////////////////////////////
-  function init_city_selection(city_list=null){
-    city_list_const = []
-    $('#city_selection').empty()
-    $('#selected_city_num').text(0)
-    
-    if(city_list==null)
-      return
-    
-    var len = city_list.length
-    if(len)
-    {
-      var appendHTML = ''
-      
-      appendHTML += '<h6 class="dropdown-header"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" id="any_city"> Any City</label></div></h6><div class="dropdown-divider"></div>'
-      for(i = 0; i < len; i++)
-      {
-        var each = city_list[i]
-        appendHTML += '<div class="dropdown-item"><div class="form-check-group"><label class="form-check-label"><input type="checkbox" class="form-check-input" city="' + each['City'] + '"> ' + each['City'] + '</label></div></div>'
-      }
-      $('#city_selection').append(appendHTML)
-
-      $('#any_city').change(function (){
-        if($(this).prop('checked'))
-          $('#city_selection input').prop('checked', true)
-        else
-          $('#city_selection input').prop('checked', false)
-      })
-      $('#city_selection input').change(function (){
-        if($(this).attr('id') == 'any_city')
-          check_city()
-        else
-        {
-          if($('#any_city').prop('checked'))
-            $('#any_city').prop('checked', false)
-          else
-          {
-            input_list = $('#city_selection input')
-            var len = input_list.length
-            for(i = 1; i < len; i++)
-            {
-              if(!input_list.eq(i).prop('checked'))
-              {
-                $('#any_city').prop('checked', false)
-                break
-              }
-            }
-            if(i == len)
-              $('#any_city').prop('checked', true)
-          }
-          check_city()
-        }
-      })
-    }
-  }
-
-  function check_city(){
-    city_list_const = []
-    input_list = $('#city_selection input')
-    var len = input_list.length
-    for(i = 1; i < len; i++)
-    {
-      if(input_list.eq(i).prop('checked'))
-        city_list_const.push(input_list.eq(i).attr('city'))
-    }
-    $('#selected_city_num').text(city_list_const.length)
-  }
-  //////////////////////////////////////////////////////////////////////
-
-  
-  ///////////////////////User Gender Selection///////////////////////////////
-  function init_gender_selection(){
-    $('#any_gender').change(function (){
-      if($(this).prop('checked'))
-        $('#gender_selection input').prop('checked', true)
-      else
-        $('#gender_selection input').prop('checked', false)
-    })
-    $('#gender_selection input').change(function (){
-      if($(this).attr('id') == 'any_gender')
-        check_gender()
-      else
-      {
-        if($('#any_gender').prop('checked'))
-          $('#any_gender').prop('checked', false)
-        else
-        {
-          input_list = $('#gender_selection input')
-          var len = input_list.length
-          for(i = 1; i < len; i++)
-          {
-            if(!input_list.eq(i).prop('checked'))
-            {
-              $('#any_gender').prop('checked', false)
-              break
-            }
-          }
-          if(i == len)
-            $('#any_gender').prop('checked', true)
-        }
-        check_gender()
-      }
-    })
-  }
-
-  function check_gender(){
-    gender_list_const = []
-    input_list = $('#gender_selection input')
-    var len = input_list.length
-    for(i = 1; i < len; i++)
-    {
-      if(input_list.eq(i).prop('checked'))
-        gender_list_const.push(input_list.eq(i).attr('gender'))
-    }
-    $('#selected_gender_num').text(gender_list_const.length)
-  }
-  //////////////////////////////////////////////////////////////////////
-
-  function show_result(){
-    if(batch_list_const == [])
-    {
-      showInfoToast('Please select the batch', 'Notification')
-      return
-    }
-    if(gender_list_const == [])
-    {
-      showInfoToast('Please select the gender', 'Notification')
-      return
-    }
-
-    area_code_list = $('#area_code').val()
-    if(area_code_list == '')
-      area_code_list = []
-    else
-      area_code_list = area_code_list.split('\n')
-    zipcode_list = $('#zip_code').val()
-    if(zipcode_list == '')
-      zipcode_list = []
-    else
-      zipcode_list = zipcode_list.split('\n')
-    $('#search_result').show()
+  function show_result(page=0){
+    $('#search_result').hide()
+    $('.circle-loader').show()
     $('#search_result .table tbody').empty()
+    
     postData = {
-      area_code_list: area_code_list,
-      zipcode_list: zipcode_list,
-      batch_list: batch_list_const,
-      areaf1_list: areaf1_list_const,
-      areaf2_list: areaf2_list_const,
-      areaf3_list: areaf3_list_const,
-      areaf4_list: areaf4_list_const,
-      areaf5_list: areaf5_list_const,
-      state_list: state_list_const,
-      city_list: city_list_const,
-      gender_list: gender_list_const,
-      price_min: $('#price_min').val(),
-      price_max: $('#price_max').val()
+      type: 'get'
     }
     $.ajax({
-        url: "/search_result",
+        url: "/cart",
         type: "POST",
         dataType: "json",
         headers:{
@@ -1027,49 +148,147 @@
             var state = result['state']
             if(state == "OK")
             {
+              $('#search_result').show()
+              $('.circle-loader').hide() 
               var product_list = result['data']
-              console.log(product_list)
               var len = product_list.length
+              console.log(product_list)
               if(len)
               {
                 product_list.forEach(function(each){
+                  each['Extra1'] = each['Extra1'] == '' || each['Extra1'] == null ? '' : 'Extra1 included'
+                  each['Extra2'] = each['Extra2'] == '' || each['Extra2'] == null ? '' : 'Extra2 included'
+                  each['Extra3'] = each['Extra3'] == '' || each['Extra3'] == null ? '' : 'Extra3 included'
+                  each['Extra4'] = each['Extra4'] == '' || each['Extra4'] == null ? '' : 'Extra4 included'
+                  each['Extra5'] = each['Extra5'] == '' || each['Extra5'] == null ? '' : 'Extra5 included'
+                  each['Extra'] = ''
+                  each['Extra'] += each['Extra1']
+                  each['Extra'] += each['Extra1'] == '' ? each['Extra2'] : '<br>' + each['Extra2']
+                  each['Extra'] += each['Extra2'] == '' ? each['Extra3'] : '<br>' + each['Extra3']
+                  each['Extra'] += each['Extra3'] == '' ? each['Extra4'] : '<br>' + each['Extra4']
+                  each['Extra'] += each['Extra4'] == '' ? each['Extra5'] : '<br>' + each['Extra5']
+
                   var appendHTML = ''
                   appendHTML += '<tr>'
                   appendHTML += '<td class="text-center">' + each['Area_code'] + '</td>'
                   appendHTML += '<td class="text-center">' + each['Exp_day'] + '/' + each['Exp_month'] + '/' + each['Exp_year'] + '</td>'
-                  appendHTML += '<td class="text-center">' + each['Zipcode'] + '</td>'
-                  appendHTML += '<td>' + each['Areaf1'] + '<br>' + each['Areaf2'] + '<br>' + each['Areaf3'] + '/' + each['Areaf4'] + '</td>'
-                  appendHTML += '<td>' + each['Areaf5'] + '</td>'
-                  appendHTML += '<td>' + each['State'] + '</td>'
-                  appendHTML += '<td>' + each['City'] + '</td>'
+                  appendHTML += '<td>' + each['Areaf1'] + '<br>' + each['Areaf2'] + '<br>' + each['Areaf3'] + '<br>' + each['Areaf4'] + '</td>'
+                  appendHTML += '<td class="text-center"><img src="static/assets/vendors/flag-icon-css/flags/4x3/' + each['Areaf6'] + '.svg" alt="' + each['Areaf6'] + '.svg"><br>' + each['Areaf5'] + '</td>'
+                  appendHTML += '<td>' + each['City'] + '<br>' + each['State'] + '<br>' + each['Zipcode'] + '</td>'
                   appendHTML += '<td>' + each['First_name'] + '</td>'
                   appendHTML += '<td class="text-center">' + each['Gender'] + '</td>'
-                  appendHTML += '<td>' + each['Extra1'] + '</td>'
-                  appendHTML += '<td>' + each['Extra2'] + '</td>'
-                  appendHTML += '<td>' + each['Extra3'] + '</td>'
-                  appendHTML += '<td>' + each['Extra4'] + '</td>'
-                  appendHTML += '<td>' + each['Extra5'] + '</td>'
+                  appendHTML += '<td class="text-center">' + each['Extra'] + '</td>'
                   var Batch_Publish_date = new Date(each['Batch_Publish_date']);
                   appendHTML += '<td>' + each['Batch_id'] + '<br>' + each['Batch_Name'] + '<br>' + (Batch_Publish_date.getDate()).toString().padStart(2, '0') + '/' + (Batch_Publish_date.getMonth() + 1).toString().padStart(2, '0') + '/' + Batch_Publish_date.getFullYear() + '</td>'
                   appendHTML += '<td class="text-right">' + each['Price'] + '$</td>'
-                  if(each.Sold_unsold == 'SOLD')
-                    appendHTML += '<td class="text-center"><button type="button" class="btn btn-success btn-fw">Add to Cart</button></td>'
-                  else
-                    appendHTML += '<td class="text-center"><button type="button" class="btn btn-warning btn-fw">Remove from Cart</button></td>'
+                  appendHTML += '<td class="text-right"><button type="button" class="btn btn-success" onclick="check_and_finalize(' + each['id'] + ')">Check<br>&<br>Finalize</button></td>'
+                  appendHTML += '<td class="text-center"><button type="button" class="btn btn-warning" onclick="remove_product(' + each['id'] + ')"><i class="mdi mdi-cart-minus cart-icon"></i></button></td>'
                   appendHTML += '</tr>'
                   $('#search_result .table tbody').append(appendHTML)
                 })
-                
               }
               else
                 $('#search_result .table tbody').append('<tr><td colspan="17" class="text-center">No Data</td></tr>')
             }
             else if(state == "FAIL")
+            {
+              $('#search_result').show()
+              $('.circle-loader').hide() 
+              showDangerToast(result['error'], 'Failed')
+            }
+            else
+            {
+              $('#search_result').show()
+              $('.circle-loader').hide() 
+              showDangerToast('Cause an unknown error.', 'Failed')
+            }
+        },
+        error: function(xhr, status, error){  
+          $('#search_result').show()
+          $('.circle-loader').hide() 
+          showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
+        }
+    })
+  }
+
+  function remove_product(product_id){
+    postData = {
+      type: 'remove',
+      product_id: product_id
+    }
+    $.ajax({
+        url: "/cart",
+        type: "POST",
+        dataType: "json",
+        headers:{
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        data: postData,
+        success: function(result){
+            var state = result['state']
+            if(state == "OK")
+            {
+              $('[onclick="remove_product(' + product_id + ')"]').parents('tr').remove()
+              $('.count_product').text(result['data']['count_product'])
+              $('#balance').text('Balance: ' + result['data']['balance'] + ' $')
+              if(result['data']['count_product'] == 0)
+                $('#search_result .table tbody').append('<tr><td colspan="17" class="text-center">No Data</td></tr>')
+              showSuccessToast('Removed item from cart', 'Success')
+            }
+            else if(state == "FAIL")
               showDangerToast(result['error'], 'Failed')
             else
               showDangerToast('Cause an unknown error.', 'Failed')
         },
-        error: function(xhr, status, error){                
+        error: function(xhr, status, error){  
+          showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
+        }
+    })
+  }
+
+  function check_and_finalize(product_id){
+    var td_element = $('[onclick="check_and_finalize(' + product_id + ')"]').parents('td')
+    var btn_html = '<button type="button" class="btn btn-success" onclick="check_and_finalize(' + product_id + ')">Check<br>&<br>Finalize</button>'
+    var loader_html = '<div class="circle-loader"></div>'
+    td_element.html(loader_html)
+    postData = {
+      checker_id: $('input[name="checkerRadio"]:checked').val(),
+      product_id: product_id
+    }
+    $.ajax({
+        url: "/check",
+        type: "POST",
+        dataType: "json",
+        headers:{
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        data: postData,
+        success: function(result){
+            td_element.html(btn_html)
+            var state = result['state']
+            if(state == "OK")
+            {
+              td_element.parents('tr').remove()
+              showSuccessToast('checker_id: ' + postData['checker_id'] + '<br>product_id: ' + postData['product_id'], 'Success')
+              $('.count_product').text(result['data']['count_product'])
+              $('#balance').text('Balance: ' + result['data']['balance'] + ' $')
+              if(result['data']['count_product'] == 0)
+                $('#search_result .table tbody').append('<tr><td colspan="17" class="text-center">No Data</td></tr>')
+            }
+            else if(state == "FAIL")
+            {
+              td_element.parents('tr').remove()
+              showWarningToast(result['error'], 'Failed')
+              $('.count_product').text(result['data']['count_product'])
+              $('#balance').text('Balance: ' + result['data']['balance'] + ' $')
+              if(result['data']['count_product'] == 0)
+                $('#search_result .table tbody').append('<tr><td colspan="17" class="text-center">No Data</td></tr>')
+            }
+            else
+              showDangerToast('Problem while checking your Phone. Please try again or select a differant checker.', 'Failed')
+        },
+        error: function(xhr, status, error){
+          td_element.html(btn_html)
           showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
         }
     })

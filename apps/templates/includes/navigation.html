@@ -10,15 +10,16 @@
     </button>
     <ul class="navbar-nav w-100">
       <li class="nav-item w-100">
-        <a>Balance :{{balance}} $ </a>
+        <!-- Modified by Andrew (for shoping cart) -->
+        <a id="balance">Balance: {{balance}} $</a>
         <a href="{% url 'depositFunds' %}" style="margin-left: 10px" class="text-success">Deposit Funds</a>
       </li>
     </ul>
     <ul class="navbar-nav navbar-nav-right">
       <li class="nav-item dropdown border-left">
-        <a class="nav-link count-indicator" href="{% url 'onlineSupport' %}">
+        <a class="nav-link count-indicator" href="{% url 'cart' %}">
           <i class="mdi mdi-cart"></i>
-          <span class="count-number bg-success">4</span>
+          <span class="count-number bg-success count_product">{{count_product}}</span>
         </a>
       </li>
       <li class="nav-item dropdown border-left">

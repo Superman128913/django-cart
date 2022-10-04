@@ -12,4 +12,6 @@ urlpatterns = [
     path('search', search, name='search'),
     path('search_result', search_result, name='search_result'),
     path('cart', cart_home, name='cart'),
+    path('check', check_product, name='check'),
+    path('order_history', order_history, name='order_history')
 ]

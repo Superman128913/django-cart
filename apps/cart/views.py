@@ -1,4 +1,5 @@
-from logging import exception
+from datetime import datetime
+
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.template import loader
@@ -6,6 +7,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.db.models import F, Q, Count
+from apps.home.models import balance
 
 from apps.home.views import get_default_page_context
 from .models import *
@@ -258,13 +260,18 @@ def search_result(request):
                             if len(areaf1_list):
                                 query = query.filter(Areaf1__in=areaf1_list)
                             product_list = query.filter(Sold_unsold='UNSOLD').order_by('-id').all()
+                    
                     data = ProductSerializer(product_list, many=True).data
-                    data_length = len(data)
+                    cart_obj = Cart.objects.new_or_get(request)
                     page = int(request.POST.get('page'))
+                    ############### ? Pagination##################
+                    data_length = len(data)
                     start = page * 10
                     end = min((page + 1) * 10, data_length + 1)
                     data = data[start:end]
-                    print(start, end)
+                    ##############################################
+                    for each in data:
+                        each['incart'] = cart_obj.products.filter(id=each['id']).exists()
                     returnData = {
                         'state': 'OK',
                         'data': data,
@@ -288,27 +295,53 @@ def search_result(request):
         return JsonResponse(returnData)
 
         
-# Create your views here.
 @login_required(login_url="/login/")
 @require_http_methods(["GET", "POST"])
 def cart_home(request):
     if request.method == 'GET':
-        cart_obj, new_obj = Cart.objects.new_or_get(request)
-        product_list = cart_obj.products.all()
+        cart_obj = Cart.objects.new_or_get(request)
         context = {
-            'product_list': product_list
+            'count_product': cart_obj.products.count()
         }
-        html_template = loader.get_template('search.html')
+        html_template = loader.get_template('shoping_cart.html')
         return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
     else:
         if request.is_ajax():
             try:
-                object = request.POST.get('object')
-                if object == 'batch':
-                    batch_list = request.POST.getlist('batch_list[]')
-                    batch_list = list(map(int, batch_list))
-                    query = Shop_data.objects.filter(Batch__in=batch_list).values('Areaf1').distinct().all()
-                    data = Areaf1Serializer(query, many=True).data
+                cart_obj = Cart.objects.new_or_get(request)
+                type = request.POST.get('type')
+                if type == 'get':
+                    query = cart_obj.products.all()
+                    data = ProductSerializer(query, many=True).data
+                elif type == 'remove':
+                    product_id = int(request.POST.get('product_id', None))
+                    product_obj = Shop_data.objects.get(id=product_id)
+                    cart_obj.products.remove(product_obj)
+                    balance_obj = balance.objects.get(user=request.user)
+                    balance_obj.balance = round(balance_obj.balance + float(product_obj.Price), 2)
+                    balance_obj.save()
+                    data = {
+                        'balance': balance_obj.balance,
+                        'count_product': cart_obj.products.count()
+                    }
+                elif type == 'add':
+                    product_id = int(request.POST.get('product_id', None))
+                    product_obj = Shop_data.objects.get(id=product_id)
+                    balance_obj = balance.objects.get(user=request.user)
+                    if float(product_obj.Price) > balance_obj.balance:
+                        data = {
+                            'over_balance': True
+                        }
+                    else:
+                        cart_obj.products.add(product_obj)
+                        balance_obj.balance = round(balance_obj.balance - float(product_obj.Price), 2)
+                        balance_obj.save()
+                        data = {
+                            'over_balance': False,
+                            'balance': balance_obj.balance,
+                            'count_product': cart_obj.products.count()
+                        }
+
                 returnData = {
                     'state': 'OK',
                     'data': data
@@ -319,3 +352,86 @@ def cart_home(request):
                     'error': repr(e)
                 }
             return JsonResponse(returnData)
+
+        
+@login_required(login_url="/login/")
+@require_http_methods(["POST"])
+def check_product(request):
+    if request.is_ajax():
+        try:
+            checker_id = int(request.POST.get('checker_id', None))
+            product_id = int(request.POST.get('product_id', None))
+            cart_obj = Cart.objects.new_or_get(request)
+            product_obj = Shop_data.objects.get(id=product_id)
+            balance_obj = balance.objects.get(user=request.user)
+
+            if checker_id in (1, 3, 5):
+                new_history = Order_history(
+                    User=request.user,
+                    Product=product_obj,
+                    Checker=Checker.objects.get(id=checker_id),
+                    Checker_status='Done',
+                    Checker_response_text='Valid Phone'
+                )
+                new_history.save()
+                product_obj.Sold_unsold = 'Sold'
+                product_obj.Sold_date = datetime.now()
+                product_obj.save()
+                returnData = {
+                    'state': 'OK',
+                }
+            else:
+                balance_obj.balance = round(balance_obj.balance + float(product_obj.Price), 2)
+                balance_obj.save()
+                returnData = {
+                    'state': "FAIL",
+                    'error': "This is Invalid Phone. This item price has been refuned to your balance."
+                }
+
+            cart_obj.products.remove(product_obj)
+            data = {
+                'balance': balance_obj.balance,
+                'count_product': cart_obj.products.count()
+            }
+            returnData['data'] = data
+        except Exception as e:
+            returnData = {
+                'state': "ERROR",
+                'error': "Problem while checking your Phone. Please try again or select a differant checker."
+            }
+        return JsonResponse(returnData)
+
+        
+@login_required(login_url="/login/")
+@require_http_methods(["GET", "POST"])
+def order_history(request):
+    if request.method == 'GET':
+        cart_obj = Cart.objects.new_or_get(request)
+        context = {
+            'count_product': cart_obj.products.count()
+        }
+        html_template = loader.get_template('order_history.html')
+        return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
+    else:
+        if request.is_ajax():
+            try:
+                query = Order_history.objects.all()
+                data = HistorySerializer(query, many=True).data
+                page = int(request.POST.get('page'))
+                ############### ? Pagination##################
+                data_length = len(data)
+                start = page * 10
+                end = min((page + 1) * 10, data_length + 1)
+                data = data[start:end]
+                ##############################################
+                returnData = {
+                    'state': "OK",
+                    'data': data,
+                    'length': data_length
+                }
+            except Exception as e:
+                returnData = {
+                    'state': "FAIL",
+                    'error': repr(e)
+                }
+        return JsonResponse(returnData)

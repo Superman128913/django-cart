@@ -37,6 +37,7 @@ from helpdesk.models import Ticket, FollowUp
 
 from .forms import AreaCodeForm
 from .pages.ticket import CreateTicketForm
+from apps.cart.models import Cart
 
 
 def get_default_page_context(request):
@@ -58,6 +59,11 @@ def get_default_page_context(request):
 
     user = balance.objects.get(user=request.user)
 
+    # ? Modified by Andrew (for shoping cart)
+    cart_obj = Cart.objects.new_or_get(request)
+    count_product = cart_obj.products.count()
+
+
     liveGateLinks = None
     gm1 = Gate1Manage.objects.all()
     if len(gm1) == 0 or gm1[0].Gate_status == "ol":
@@ -76,6 +82,9 @@ def get_default_page_context(request):
         "serverUM": serverUM,
         "serverMsg": serverMsg,
         "balance": user.balance,
+        # ? Modified by Andrew (for shoping cart)
+        "count_product": count_product,
+
         "Admin_Status": 1,
         "gateLink": liveGateLinks,
         "Gate1_About_Image": {"url": "/static/assets/images/gate/gate1_about.png"},

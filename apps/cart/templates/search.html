@@ -54,6 +54,9 @@
   .Phone-header #records_num {
     font-size: 1rem;
   }
+  .cart-icon {
+    font-size: xx-large;
+  }
 </style>
 {% endblock stylesheets %}
 {% block modals %}
@@ -339,7 +342,8 @@
                     <th>
                       Areaf1<br>
                       Areaf2<br>
-                      Areaf3 / Areaf4
+                      Areaf3<br>
+                      Areaf4
                     </th>
                     <th>Areaf5</th>
                     <th>
@@ -369,6 +373,7 @@
                 </tbody>
               </table>
             </div>
+            <!--------------------------- Pagination-HTML --------------------------------->
             <div class="col-md-12 col-sm-6 grid-margin stretch-card" id="pagination">
               <div class="Phone">
                 <div class="Phone-body">
@@ -379,6 +384,7 @@
                 </div>
               </div>
             </div>
+            <!-------------------------------------------------------------------------->
           </div>
         </div>
       </div>
@@ -1817,7 +1823,6 @@
         $('#selected_city_num').text(buf + '(+' + (checked_len - show_num) + ' selected)')
       else if(show_num < checked_len)
         $('#selected_city_num').text(buf + ' /(+' + (checked_len - show_num) + ' selected)')
-      update_city()
       }
       }
 
@@ -1983,10 +1988,10 @@
         },
         data: postData,
         success: function(result){
+            $('.circle-loader').hide() 
             var state = result['state']
             if(state == "OK")
             {
-              $('.circle-loader').hide() 
               var product_list = result['data']
               $('#records_num').text(result['length'] + ' records found')
               console.log(product_list)
@@ -2011,7 +2016,7 @@
                   appendHTML += '<tr>'
                   appendHTML += '<td class="text-center">' + each['Area_code'] + '</td>'
                   appendHTML += '<td class="text-center">' + each['Exp_day'] + '/' + each['Exp_month'] + '/' + each['Exp_year'] + '</td>'
-                  appendHTML += '<td>' + each['Areaf1'] + '<br>' + each['Areaf2'] + '<br>' + each['Areaf3'] + ' / ' + each['Areaf4'] + '</td>'
+                  appendHTML += '<td>' + each['Areaf1'] + '<br>' + each['Areaf2'] + '<br>' + each['Areaf3'] + '<br>' + each['Areaf4'] + '</td>'
                   appendHTML += '<td class="text-center"><img src="static/assets/vendors/flag-icon-css/flags/4x3/' + each['Areaf6'] + '.svg" alt="' + each['Areaf6'] + '.svg"><br>' + each['Areaf5'] + '</td>'
                   appendHTML += '<td>' + each['City'] + '<br>' + each['State'] + '<br>' + each['Zipcode'] + '</td>'
                   appendHTML += '<td>' + each['First_name'] + '</td>'
@@ -2020,10 +2025,10 @@
                   var Batch_Publish_date = new Date(each['Batch_Publish_date']);
                   appendHTML += '<td>' + each['Batch_id'] + '<br>' + each['Batch_Name'] + '<br>' + (Batch_Publish_date.getDate()).toString().padStart(2, '0') + '/' + (Batch_Publish_date.getMonth() + 1).toString().padStart(2, '0') + '/' + Batch_Publish_date.getFullYear() + '</td>'
                   appendHTML += '<td class="text-right">' + each['Price'] + '$</td>'
-                  if(each.Sold_unsold == 'SOLD')
-                    appendHTML += '<td class="text-center"><button type="button" class="btn btn-success">Add <i class="mdi mdi-cart-plus"></i></button></td>'
+                  if(each['incart'])
+                    appendHTML += '<td class="text-center"><button type="button" class="btn btn-warning" onclick="remove_product(' + each['id'] + ')"><i class="mdi mdi-cart-minus cart-icon"></i></button></td>'
                   else
-                    appendHTML += '<td class="text-center"><button type="button" class="btn btn-warning">Remove <i class="mdi mdi-cart-minus"></i></button></td>'
+                    appendHTML += '<td class="text-center"><button type="button" class="btn btn-success" onclick="add_product(' + each['id'] + ')"><i class="mdi mdi-cart-plus cart-icon"></i></button></td>'
                   appendHTML += '</tr>'
                   $('#search_result .table tbody').append(appendHTML)
                 })
@@ -2033,28 +2038,23 @@
                 $('#search_result .table tbody').append('<tr><td colspan="17" class="text-center">No Data</td></tr>')
             }
             else if(state == "FAIL")
-            {
-              $('.circle-loader').hide() 
               showDangerToast(result['error'], 'Failed')
-            }
             else
-            {
-              $('.circle-loader').hide() 
               showDangerToast('Cause an unknown error.', 'Failed')
-            }
         },
-        error: function(xhr, status, error){                
+        error: function(xhr, status, error){
+          $('.circle-loader').hide() 
           showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
         }
     })
   }
-
+////////////////////////////////////////////// Pagination-Javascript //////////////////////////////////////////////////
   function pagination_init(len) {
     $('#pagination').show()
     $('#page_button').empty()
     $('#page_button').append('<li class="page-item"><a class="page-link" id="page-first" href="javascript:void(0);"><<</a></li>')
     $('#page_button').append('<li class="page-item"><a class="page-link" id="page-prev" href="javascript:void(0);"><</a></li>')
-    page_len = Math.floor(len / 10) + 1
+    page_len = Math.floor((len - 1) / 10) + 1
     var start = 0
     if(page_num - start >= 2)
       start = page_num - 2
@@ -2102,6 +2102,79 @@
       show_result(page_num)
     })
   }
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  function remove_product(product_id){
+    postData = {
+      type: 'remove',
+      product_id: product_id
+    }
+    $.ajax({
+        url: "/cart",
+        type: "POST",
+        dataType: "json",
+        headers:{
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        data: postData,
+        timeout: 180000,  // sets timeout to 3 minutes
+        success: function(result){
+            var state = result['state']
+            if(state == "OK")
+            {
+              $('[onclick="remove_product(' + product_id + ')"]').parents('td').html('<button type="button" class="btn btn-success" onclick="add_product(' + product_id + ')"><i class="mdi mdi-cart-plus cart-icon"></i></button></button>')
+              $('.count_product').text(result['data']['count_product'])
+              $('#balance').text('Balance: ' + result['data']['balance'] + ' $')
+              showSuccessToast('Removed item from cart', 'Success')
+            }
+            else if(state == "FAIL")
+              showDangerToast(result['error'], 'Failed')
+            else
+              showDangerToast('Cause an unknown error.', 'Failed')
+        },
+        error: function(xhr, status, error){  
+          showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
+        }
+    })
+  }
+
+function add_product(product_id){
+  postData = {
+    type: 'add',
+    product_id: product_id
+  }
+  $.ajax({
+      url: "/cart",
+      type: "POST",
+      dataType: "json",
+      headers:{
+          "X-CSRFToken": "{{ csrf_token }}"
+      },
+      data: postData,
+      success: function(result){
+          var state = result['state']
+          if(state == "OK")
+          {
+            if(result['data']['over_balance'])
+              showWarningToast('You are getting out of balance. Please recharge your balance.', 'Warning')
+            else
+            {
+              $('[onclick="add_product(' + product_id + ')"]').parents('td').html('<button type="button" class="btn btn-warning" onclick="remove_product(' + product_id + ')"><i class="mdi mdi-cart-minus cart-icon"></i></button>')
+              $('.count_product').text(result['data']['count_product'])
+              $('#balance').text('Balance: ' + result['data']['balance'] + ' $')
+            }
+            showSuccessToast('Add item to cart', 'Success')
+          }
+          else if(state == "FAIL")
+            showDangerToast(result['error'], 'Failed')
+          else
+            showDangerToast('Cause an unknown error.', 'Failed')
+      },
+      error: function(xhr, status, error){  
+        showDangerToast(xhr.status + " " + xhr.statusText, 'Failed')
+      }
+  })
+}
 </script>
 
 {% endblock content %} {% block plugin_javascripts %}
