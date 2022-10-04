@@ -266,16 +266,16 @@
         success: function(result){
             td_element.html(btn_html)
             var state = result['state']
-            if(state == "OK")
+            if(state == "Done")
             {
               td_element.parents('tr').remove()
-              showSuccessToast('checker_id: ' + postData['checker_id'] + '<br>product_id: ' + postData['product_id'], 'Success')
+              showSuccessToast('Phone Registered Successfully', 'Success')
               $('.count_product').text(result['data']['count_product'])
               $('#balance').text('Balance: ' + result['data']['balance'] + ' $')
               if(result['data']['count_product'] == 0)
                 $('#search_result .table tbody').append('<tr><td colspan="17" class="text-center">No Data</td></tr>')
             }
-            else if(state == "FAIL")
+            else if(state == "Fail")
             {
               td_element.parents('tr').remove()
               showWarningToast(result['error'], 'Failed')
@@ -285,7 +285,7 @@
                 $('#search_result .table tbody').append('<tr><td colspan="17" class="text-center">No Data</td></tr>')
             }
             else
-              showDangerToast('Problem while checking your Phone. Please try again or select a differant checker.', 'Failed')
+              showDangerToast(result['error'], 'Error')
         },
         error: function(xhr, status, error){
           td_element.html(btn_html)

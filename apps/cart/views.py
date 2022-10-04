@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from django.shortcuts import render
@@ -365,30 +366,30 @@ def check_product(request):
             product_obj = Shop_data.objects.get(id=product_id)
             balance_obj = balance.objects.get(user=request.user)
 
-            if checker_id in (1, 3, 5):
-                new_history = Order_history(
-                    User=request.user,
-                    Product=product_obj,
-                    Checker=Checker.objects.get(id=checker_id),
-                    Checker_status='Done',
-                    Checker_response_text='Valid Phone'
-                )
-                new_history.save()
-                product_obj.Sold_unsold = 'Sold'
-                product_obj.Sold_date = datetime.now()
-                product_obj.save()
+            check_status = checker_api(product_id, checker_id, request.user.id)
+            check_status = check_status[:4]
+            print(check_status)
+            if check_status == 'Done':
                 returnData = {
-                    'state': 'OK',
+                    'state': check_status,
                 }
+                cart_obj.products.remove(product_obj)
+            elif check_status == 'Fail':
+                balance_obj.balance = round(balance_obj.balance + float(product_obj.Price), 2)
+                balance_obj.save()
+                returnData = {
+                    'state': check_status,
+                    'error': "This is Invalid Phone. This item price has been refuned to your balance."
+                }
+                cart_obj.products.remove(product_obj)
             else:
                 balance_obj.balance = round(balance_obj.balance + float(product_obj.Price), 2)
                 balance_obj.save()
                 returnData = {
-                    'state': "FAIL",
-                    'error': "This is Invalid Phone. This item price has been refuned to your balance."
+                    'state': check_status,
+                    'error': "Problem while checking your Phone. Please try again or select a differant checker."
                 }
 
-            cart_obj.products.remove(product_obj)
             data = {
                 'balance': balance_obj.balance,
                 'count_product': cart_obj.products.count()
@@ -396,9 +397,14 @@ def check_product(request):
             returnData['data'] = data
         except Exception as e:
             returnData = {
-                'state': "ERROR",
+                'state': 'Error',
                 'error': "Problem while checking your Phone. Please try again or select a differant checker."
             }
+            data = {
+                'balance': balance_obj.balance,
+                'count_product': cart_obj.products.count()
+            }
+            returnData['data'] = data
         return JsonResponse(returnData)
 
         
@@ -435,3 +441,11 @@ def order_history(request):
                     'error': repr(e)
                 }
         return JsonResponse(returnData)
+
+
+def checker_api(product_id, checker_id, user_id):
+    commend = 'python checker.py %d %d %d' % (product_id, checker_id, user_id)
+    os.system(commend + ' > tmp')
+    result = open('tmp', 'r').read()
+    os.remove('tmp')
+    return result
