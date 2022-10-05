@@ -92,8 +92,6 @@ def check(product_id, checker_id, user_id):
     year =          str(product_obj[3])
     zipcode =       str(product_obj[4])
     gatelink =      str(checker_obj[0])
-    #! test
-    phonenumber =   str(5822229053)
 
     for each in range(10):
         m_result = checker_api(phonenumber, day, month, year, zipcode, gatelink)

@@ -3,7 +3,7 @@ import datetime
 
 from django.db import models
 from django.contrib.auth.models import User
-from encrypted_model_fields.fields import EncryptedIntegerField
+from encrypted_model_fields.fields import EncryptedBigIntegerField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models.signals import pre_save, post_save, m2m_changed
 from django.db.models import Sum
@@ -49,7 +49,7 @@ class Batch(models.Model):
 
 
 class Shop_data(models.Model):
-    Phone =         EncryptedIntegerField(blank=False)
+    Phone =         EncryptedBigIntegerField(blank=False)
     Exp_day =       models.IntegerField(choices=day_list)
     Exp_month =     models.IntegerField(choices=month_list)
     Exp_year =      models.IntegerField(choices=year_list)

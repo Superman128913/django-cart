@@ -362,6 +362,23 @@ def check_product(request):
         try:
             checker_id = int(request.POST.get('checker_id', None))
             product_id = int(request.POST.get('product_id', None))
+
+            #?#########################
+            if checker_id != 1:
+                returnData = {
+                    'state': 'Error',
+                    'error': "Only Checker1 works now."
+                }
+                cart_obj = Cart.objects.new_or_get(request)
+                balance_obj = balance.objects.get(user=request.user)
+                data = {
+                    'balance': balance_obj.balance,
+                    'count_product': cart_obj.products.count()
+                }
+                returnData['data'] = data
+                return JsonResponse(returnData)
+            #?#########################
+                
             cart_obj = Cart.objects.new_or_get(request)
             product_obj = Shop_data.objects.get(id=product_id)
             balance_obj = balance.objects.get(user=request.user)
@@ -383,8 +400,6 @@ def check_product(request):
                 }
                 cart_obj.products.remove(product_obj)
             else:
-                balance_obj.balance = round(balance_obj.balance + float(product_obj.Price), 2)
-                balance_obj.save()
                 returnData = {
                     'state': check_status,
                     'error': "Problem while checking your Phone. Please try again or select a differant checker."
