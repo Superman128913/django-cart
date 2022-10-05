@@ -78,7 +78,7 @@ def check(product_id, checker_id, user_id):
 
     mycursor = mydb.cursor(buffered=True)
 
-    tmp = "SELECT Phone, Exp_day, Exp_month, Exp_year, Zipcode FROM cart_shop_data WHERE id=%d" % (product_id)
+    tmp = "SELECT Phone, Exp_day, Exp_month, Exp_year, Zipcode, Price FROM cart_shop_data WHERE id=%d" % (product_id)
     mycursor.execute(tmp)
     product_obj = mycursor.fetchall()[0]
 
@@ -91,6 +91,7 @@ def check(product_id, checker_id, user_id):
     month =         str(product_obj[2])
     year =          str(product_obj[3])
     zipcode =       str(product_obj[4])
+    price =         float(product_obj[5])
     gatelink =      str(checker_obj[0])
 
     for each in range(10):
@@ -126,14 +127,24 @@ def check(product_id, checker_id, user_id):
     #? #################################################
 
     if check_status == 'Done':        
-        tmp = "INSERT INTO cart_order_history (User_id, Product_id, Checker_id, Checker_status, Checker_response_text, Checker_response_full) VALUES (%d, %d, %d, '%s', '%s', '%s')" % (user_id, product_id, checker_id, 'Done', checker_response_text, checker_response_full)
-        mycursor.execute(tmp)  
-
+        tmp = "INSERT INTO cart_order_history (User_id, Product_id, Checker_id, Checker_status, Checker_response_text, Checker_response_full, Checker_date) VALUES (%d, %d, %d, '%s', '%s', '%s', '%s')" % (user_id, product_id, checker_id, 'Done', checker_response_text, checker_response_full, str(datetime.now()))
+        mycursor.execute(tmp)
         tmp = "UPDATE cart_shop_data SET Sold_unsold='%s', Sold_date='%s' WHERE id=%d" % ('SOLD', str(datetime.now()), product_id)
         mycursor.execute(tmp)
+    elif check_status == 'Fail':     
+        tmp = "INSERT INTO cart_order_history (User_id, Product_id, Checker_id, Checker_status, Checker_response_text, Checker_response_full, Checker_date) VALUES (%d, %d, %d, '%s', '%s', '%s', '%s')" % (user_id, product_id, checker_id, 'Fail', checker_response_text, checker_response_full, str(datetime.now()))
+        mycursor.execute(tmp)
+        tmp = "UPDATE cart_shop_data SET Sold_unsold='%s', Sold_date='%s' WHERE id=%d" % ('REFUND', str(datetime.now()), product_id)
+        mycursor.execute(tmp)
+        tmp = "SELECT balance FROM home_balance WHERE user_id=%d" % (user_id)
+        mycursor.execute(tmp)
+        m_result = mycursor.fetchall()
+        m_userBalance = float(m_result[0][0])
+        m_userBalance = round(m_userBalance + price, 2)
+        tmp = "UPDATE home_balance SET balance=%f WHERE user_id=%d" % (m_userBalance, user_id)
+        mycursor.execute(tmp)
 
-        mydb.commit()
-
+    mydb.commit()
     mycursor.close()
     mydb.close()
     return check_status

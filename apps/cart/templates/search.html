@@ -2025,7 +2025,7 @@
                   var Batch_Publish_date = new Date(each['Batch_Publish_date']);
                   appendHTML += '<td>' + each['Batch_id'] + '<br>' + each['Batch_Name'] + '<br>' + (Batch_Publish_date.getDate()).toString().padStart(2, '0') + '/' + (Batch_Publish_date.getMonth() + 1).toString().padStart(2, '0') + '/' + Batch_Publish_date.getFullYear() + '</td>'
                   appendHTML += '<td class="text-right">' + each['Price'] + '$</td>'
-                  if(each['incart'])
+                  if(each['Sold_unsold'] == 'ON_CART')
                     appendHTML += '<td class="text-center"><button type="button" class="btn btn-warning" onclick="remove_product(' + each['id'] + ')"><i class="mdi mdi-cart-minus cart-icon"></i></button></td>'
                   else
                     appendHTML += '<td class="text-center"><button type="button" class="btn btn-success" onclick="add_product(' + each['id'] + ')"><i class="mdi mdi-cart-plus cart-icon"></i></button></td>'

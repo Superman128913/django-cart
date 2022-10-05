@@ -31,7 +31,7 @@ def search(request):
         if request.is_ajax():
             try:
                 object = request.POST.get('object')
-                query = Shop_data.objects.filter(Sold_unsold='UNSOLD')
+                query = Shop_data.objects.filter(Q(User=request.user) | Q(Sold_unsold='UNSOLD'))
                 if object == 'batch':
                     batch_list = request.POST.getlist('batch_list[]')
                     batch_list = list(map(int, batch_list))
@@ -206,7 +206,8 @@ def search_result(request):
                     if len(area_code_list):
                         print(area_code_list)
                         query = query.filter(Area_code__in=area_code_list)
-                        product_list = query.filter(Sold_unsold='UNSOLD').order_by('-id').all()
+                        query = query.filter(Q(User=request.user) | Q(Sold_unsold='UNSOLD'))
+                        product_list = query.order_by('-id').all()
                     else:
                         zipcode_list = request.POST.getlist('zipcode_list[]')
                         if len(zipcode_list):
@@ -234,7 +235,7 @@ def search_result(request):
                                     where += " AND (Zipcode LIKE '%%{}%%'".format(zipcode)
                                 else:
                                     where += " OR Zipcode LIKE '%%{}%%'".format(zipcode)
-                            where += ') AND Sold_unsold="UNSOLD"'
+                            where += ') AND (Sold_unsold="UNSOLD" OR User_id=%d)' % (request.user.id)
                             sql = 'SELECT * FROM cart_shop_data{} ORDER BY id DESC'.format(where)
                             product_list = Shop_data.objects.raw(sql)
                             # query = query.filter(Zipcode__in=zipcode_list)
@@ -260,7 +261,8 @@ def search_result(request):
                                 query = query.filter(Areaf2__in=areaf2_list)
                             if len(areaf1_list):
                                 query = query.filter(Areaf1__in=areaf1_list)
-                            product_list = query.filter(Sold_unsold='UNSOLD').order_by('-id').all()
+                            query = query.filter(Q(User=request.user) | Q(Sold_unsold='UNSOLD'))
+                            product_list = query.order_by('-id').all()
                     
                     data = ProductSerializer(product_list, many=True).data
                     cart_obj = Cart.objects.new_or_get(request)
@@ -271,8 +273,6 @@ def search_result(request):
                     end = min((page + 1) * 10, data_length + 1)
                     data = data[start:end]
                     ##############################################
-                    for each in data:
-                        each['incart'] = cart_obj.products.filter(id=each['id']).exists()
                     returnData = {
                         'state': 'OK',
                         'data': data,
@@ -312,15 +312,16 @@ def cart_home(request):
                 cart_obj = Cart.objects.new_or_get(request)
                 type = request.POST.get('type')
                 if type == 'get':
-                    query = cart_obj.products.all()
+                    query = cart_obj.products.order_by('-id').all()
                     data = ProductSerializer(query, many=True).data
                 elif type == 'remove':
                     product_id = int(request.POST.get('product_id', None))
                     product_obj = Shop_data.objects.get(id=product_id)
+                    product_obj.Sold_unsold = 'UNSOLD'
+                    product_obj.User = None
+                    product_obj.save()
                     cart_obj.products.remove(product_obj)
                     balance_obj = balance.objects.get(user=request.user)
-                    balance_obj.balance = round(balance_obj.balance + float(product_obj.Price), 2)
-                    balance_obj.save()
                     data = {
                         'balance': balance_obj.balance,
                         'count_product': cart_obj.products.count()
@@ -335,6 +336,9 @@ def cart_home(request):
                         }
                     else:
                         cart_obj.products.add(product_obj)
+                        product_obj.Sold_unsold = 'ON_CART'
+                        product_obj.User = request.user
+                        product_obj.save()
                         balance_obj.balance = round(balance_obj.balance - float(product_obj.Price), 2)
                         balance_obj.save()
                         data = {
@@ -381,10 +385,9 @@ def check_product(request):
                 
             cart_obj = Cart.objects.new_or_get(request)
             product_obj = Shop_data.objects.get(id=product_id)
-            balance_obj = balance.objects.get(user=request.user)
 
             check_status = checker_api(product_id, checker_id, request.user.id)
-            check_status = check_status[:4]
+            check_status = check_status[:-1]
             print(check_status)
             if check_status == 'Done':
                 returnData = {
@@ -392,8 +395,6 @@ def check_product(request):
                 }
                 cart_obj.products.remove(product_obj)
             elif check_status == 'Fail':
-                balance_obj.balance = round(balance_obj.balance + float(product_obj.Price), 2)
-                balance_obj.save()
                 returnData = {
                     'state': check_status,
                     'error': "This is Invalid Phone. This item price has been refuned to your balance."
@@ -405,6 +406,7 @@ def check_product(request):
                     'error': "Problem while checking your Phone. Please try again or select a differant checker."
                 }
 
+            balance_obj = balance.objects.get(user=request.user)
             data = {
                 'balance': balance_obj.balance,
                 'count_product': cart_obj.products.count()
@@ -436,7 +438,7 @@ def order_history(request):
     else:
         if request.is_ajax():
             try:
-                query = Order_history.objects.all()
+                query = Order_history.objects.filter(Checker_status='Done').all()
                 data = HistorySerializer(query, many=True).data
                 page = int(request.POST.get('page'))
                 ############### ? Pagination##################

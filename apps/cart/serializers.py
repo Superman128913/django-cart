@@ -12,7 +12,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Shop_data
-        fields = ['id', 'Area_code', 'Exp_day', 'Exp_month', 'Exp_year', 'Areaf1', 'Areaf2', 'Areaf3', 'Areaf4', 'Areaf5', 'Areaf6', 'City', 'State', 'Zipcode', 'First_name', 'Gender', 'Extra1', 'Extra2', 'Extra3', 'Extra4', 'Extra5', 'Batch_id', 'Batch_Name', 'Batch_Publish_date', 'Price']
+        fields = ['id', 'Area_code', 'Exp_day', 'Exp_month', 'Exp_year', 'Areaf1', 'Areaf2', 'Areaf3', 'Areaf4', 'Areaf5', 'Areaf6', 'City', 'State', 'Zipcode', 'First_name', 'Gender', 'Extra1', 'Extra2', 'Extra3', 'Extra4', 'Extra5', 'Batch_id', 'Batch_Name', 'Batch_Publish_date', 'Price', 'Sold_unsold']
 
     def get_Gender(self,obj):
         if obj.Gender == 'M':

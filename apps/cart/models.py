@@ -77,10 +77,15 @@ class Shop_data(models.Model):
     Areaf6 =        models.CharField(max_length=255, blank=True)
     Area_code =     models.DecimalField(decimal_places=0, max_digits=6, null=False)
 
-    Sold_unsold =   models.CharField(choices=[('UNSOLD', 'UNSOLD'), ('SOLD', 'SOLD'), ('REFUND', 'REFUND')], default='UNSOLD', max_length=7)
+    Sold_unsold =   models.CharField(choices=[
+        ('UNSOLD', 'UNSOLD'),
+        ('SOLD', 'SOLD'),
+        ('REFUND', 'REFUND'),
+        ('ON_CART', 'ON_CART')
+        ], default='UNSOLD', max_length=7)
     Insert_date =   models.DateTimeField(auto_now_add=True)
     Sold_date =     models.DateTimeField(blank=True, null=True)
-    User =          models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
+    User =          models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return str(self.Area_code)
