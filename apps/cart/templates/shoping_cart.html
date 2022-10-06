@@ -270,6 +270,7 @@
             {
               td_element.parents('tr').remove()
               showSuccessToast('Phone Registered Successfully', 'Success')
+              $('.count_product').text(result['data']['count_product'])
               if(result['data']['count_product'] == 0)
                 $('#search_result .table tbody').append('<tr><td colspan="17" class="text-center">No Data</td></tr>')
             }

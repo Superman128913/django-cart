@@ -388,19 +388,19 @@ def check_product(request):
 
             if cart_obj.products.filter(pk=product_obj.pk).exists():
                 #?#########################
-                if checker_id != 1:
-                    returnData = {
-                        'state': 'Error',
-                        'error': "Only Checker1 works now."
-                    }
-                    cart_obj = Cart.objects.new_or_get(request)
-                    balance_obj = balance.objects.get(user=request.user)
-                    data = {
-                        'balance': balance_obj.balance,
-                        'count_product': cart_obj.products.count()
-                    }
-                    returnData['data'] = data
-                    return JsonResponse(returnData)
+                # if checker_id != 1:
+                #     returnData = {
+                #         'state': 'Error',
+                #         'error': "Only Checker1 works now."
+                #     }
+                #     cart_obj = Cart.objects.new_or_get(request)
+                #     balance_obj = balance.objects.get(user=request.user)
+                #     data = {
+                #         'balance': balance_obj.balance,
+                #         'count_product': cart_obj.products.count()
+                #     }
+                #     returnData['data'] = data
+                #     return JsonResponse(returnData)
                 #?#########################
 
                 check_status = checker_api(product_id, checker_id, request.user.id)
@@ -456,7 +456,7 @@ def order_history(request):
     else:
         if request.is_ajax():
             try:
-                query = Order_history.objects.filter(Checker_status='Done').all()
+                query = Order_history.objects.filter(Checker_status='Done').order_by('-id').all()
                 data = HistorySerializer(query, many=True).data
                 page = int(request.POST.get('page'))
                 ############### ? Pagination##################
@@ -479,7 +479,8 @@ def order_history(request):
 
 
 def checker_api(product_id, checker_id, user_id):
-    commend = 'python checker.py %d %d %d' % (product_id, checker_id, user_id)
+    checker_name = Checker.objects.get(id=checker_id)
+    commend = 'python %s %d %d %d' % (checker_name, product_id, checker_id, user_id)
     os.system(commend + ' > tmp')
     result = open('tmp', 'r').read()
     os.remove('tmp')
