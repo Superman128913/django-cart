@@ -31,7 +31,7 @@ def search(request):
         if request.is_ajax():
             try:
                 object = request.POST.get('object')
-                query = Shop_data.objects.filter(Q(User=request.user) | Q(Sold_unsold='UNSOLD'))
+                query = Shop_data.objects.filter((Q(User=request.user) & Q(Sold_unsold='ON_CART')) | Q(Sold_unsold='UNSOLD'))
                 if object == 'batch':
                     batch_list = request.POST.getlist('batch_list[]')
                     batch_list = list(map(int, batch_list))
@@ -206,7 +206,7 @@ def search_result(request):
                     if len(area_code_list):
                         print(area_code_list)
                         query = query.filter(Area_code__in=area_code_list)
-                        query = query.filter(Q(User=request.user) | Q(Sold_unsold='UNSOLD'))
+                        query = query.filter((Q(User=request.user) & Q(Sold_unsold='ON_CART')) | Q(Sold_unsold='UNSOLD'))
                         product_list = query.order_by('-id').all()
                     else:
                         zipcode_list = request.POST.getlist('zipcode_list[]')
@@ -235,7 +235,7 @@ def search_result(request):
                                     where += " AND (Zipcode LIKE '%%{}%%'".format(zipcode)
                                 else:
                                     where += " OR Zipcode LIKE '%%{}%%'".format(zipcode)
-                            where += ') AND (Sold_unsold="UNSOLD" OR User_id=%d)' % (request.user.id)
+                            where += ') AND (Sold_unsold="UNSOLD" OR (User_id=%d AND Sold_unsold="ON_CART"))' % (request.user.id)
                             sql = 'SELECT * FROM cart_shop_data{} ORDER BY id DESC'.format(where)
                             product_list = Shop_data.objects.raw(sql)
                             # query = query.filter(Zipcode__in=zipcode_list)
@@ -261,7 +261,7 @@ def search_result(request):
                                 query = query.filter(Areaf2__in=areaf2_list)
                             if len(areaf1_list):
                                 query = query.filter(Areaf1__in=areaf1_list)
-                            query = query.filter(Q(User=request.user) | Q(Sold_unsold='UNSOLD'))
+                            query = query.filter((Q(User=request.user) & Q(Sold_unsold='ON_CART')) | Q(Sold_unsold='UNSOLD'))
                             product_list = query.order_by('-id').all()
                     
                     data = ProductSerializer(product_list, many=True).data
@@ -317,35 +317,52 @@ def cart_home(request):
                 elif type == 'remove':
                     product_id = int(request.POST.get('product_id', None))
                     product_obj = Shop_data.objects.get(id=product_id)
-                    product_obj.Sold_unsold = 'UNSOLD'
-                    product_obj.User = None
-                    product_obj.save()
-                    cart_obj.products.remove(product_obj)
-                    balance_obj = balance.objects.get(user=request.user)
-                    data = {
-                        'balance': balance_obj.balance,
-                        'count_product': cart_obj.products.count()
-                    }
-                elif type == 'add':
-                    product_id = int(request.POST.get('product_id', None))
-                    product_obj = Shop_data.objects.get(id=product_id)
-                    balance_obj = balance.objects.get(user=request.user)
-                    if float(product_obj.Price) > balance_obj.balance:
-                        data = {
-                            'over_balance': True
-                        }
-                    else:
-                        cart_obj.products.add(product_obj)
-                        product_obj.Sold_unsold = 'ON_CART'
-                        product_obj.User = request.user
+                    if cart_obj.products.filter(pk=product_obj.pk).exists():
+                        product_obj.Sold_unsold = 'UNSOLD'
+                        product_obj.User = None
                         product_obj.save()
-                        balance_obj.balance = round(balance_obj.balance - float(product_obj.Price), 2)
+                        cart_obj.products.remove(product_obj)
+                        balance_obj = balance.objects.get(user=request.user)
+                        balance_obj.balance = round(balance_obj.balance + float(product_obj.Price), 2)
                         balance_obj.save()
                         data = {
-                            'over_balance': False,
                             'balance': balance_obj.balance,
                             'count_product': cart_obj.products.count()
                         }
+                    else:
+                        returnData = {
+                            'state': "FAIL",
+                            'error': "This item has already removed from cart."
+                        }
+                        return JsonResponse(returnData)
+
+                elif type == 'add':
+                    product_id = int(request.POST.get('product_id', None))
+                    product_obj = Shop_data.objects.get(id=product_id)
+                    if cart_obj.products.filter(pk=product_obj.pk).exists():
+                        returnData = {
+                            'state': "FAIL",
+                            'error': "This item has already added to cart."
+                        }
+                        return JsonResponse(returnData)
+                    else:
+                        balance_obj = balance.objects.get(user=request.user)
+                        if float(product_obj.Price) > balance_obj.balance:
+                            data = {
+                                'over_balance': True
+                            }
+                        else:
+                            cart_obj.products.add(product_obj)
+                            product_obj.Sold_unsold = 'ON_CART'
+                            product_obj.User = request.user
+                            product_obj.save()
+                            balance_obj.balance = round(balance_obj.balance - float(product_obj.Price), 2)
+                            balance_obj.save()
+                            data = {
+                                'over_balance': False,
+                                'balance': balance_obj.balance,
+                                'count_product': cart_obj.products.count()
+                            }
 
                 returnData = {
                     'state': 'OK',
@@ -365,63 +382,64 @@ def check_product(request):
     if request.is_ajax():
         try:
             checker_id = int(request.POST.get('checker_id', None))
-            product_id = int(request.POST.get('product_id', None))
+            product_id = int(request.POST.get('product_id', None))                    
+            cart_obj = Cart.objects.new_or_get(request)
+            product_obj = Shop_data.objects.get(id=product_id)
 
-            #?#########################
-            if checker_id != 1:
-                returnData = {
-                    'state': 'Error',
-                    'error': "Only Checker1 works now."
-                }
-                cart_obj = Cart.objects.new_or_get(request)
+            if cart_obj.products.filter(pk=product_obj.pk).exists():
+                #?#########################
+                if checker_id != 1:
+                    returnData = {
+                        'state': 'Error',
+                        'error': "Only Checker1 works now."
+                    }
+                    cart_obj = Cart.objects.new_or_get(request)
+                    balance_obj = balance.objects.get(user=request.user)
+                    data = {
+                        'balance': balance_obj.balance,
+                        'count_product': cart_obj.products.count()
+                    }
+                    returnData['data'] = data
+                    return JsonResponse(returnData)
+                #?#########################
+
+                check_status = checker_api(product_id, checker_id, request.user.id)
+                check_status = check_status[:-1]
+                print(check_status)
+                if check_status == 'Done':
+                    returnData = {
+                        'state': check_status,
+                    }
+                    cart_obj.products.remove(product_obj)
+                elif check_status == 'Fail':
+                    returnData = {
+                        'state': check_status,
+                        'error': "This is Invalid Phone. This item price has been refuned to your balance."
+                    }
+                    cart_obj.products.remove(product_obj)
+                else:
+                    returnData = {
+                        'state': check_status,
+                        'error': "Problem while checking your Phone. Please try again or select a differant checker."
+                    }
+
                 balance_obj = balance.objects.get(user=request.user)
                 data = {
                     'balance': balance_obj.balance,
                     'count_product': cart_obj.products.count()
                 }
                 returnData['data'] = data
-                return JsonResponse(returnData)
-            #?#########################
-                
-            cart_obj = Cart.objects.new_or_get(request)
-            product_obj = Shop_data.objects.get(id=product_id)
-
-            check_status = checker_api(product_id, checker_id, request.user.id)
-            check_status = check_status[:-1]
-            print(check_status)
-            if check_status == 'Done':
-                returnData = {
-                    'state': check_status,
-                }
-                cart_obj.products.remove(product_obj)
-            elif check_status == 'Fail':
-                returnData = {
-                    'state': check_status,
-                    'error': "This is Invalid Phone. This item price has been refuned to your balance."
-                }
-                cart_obj.products.remove(product_obj)
             else:
                 returnData = {
-                    'state': check_status,
-                    'error': "Problem while checking your Phone. Please try again or select a differant checker."
+                    'state': "Error",
+                    'error': "This item has already removed from cart."
                 }
-
-            balance_obj = balance.objects.get(user=request.user)
-            data = {
-                'balance': balance_obj.balance,
-                'count_product': cart_obj.products.count()
-            }
-            returnData['data'] = data
+                return JsonResponse(returnData)
         except Exception as e:
             returnData = {
                 'state': 'Error',
                 'error': "Problem while checking your Phone. Please try again or select a differant checker."
             }
-            data = {
-                'balance': balance_obj.balance,
-                'count_product': cart_obj.products.count()
-            }
-            returnData['data'] = data
         return JsonResponse(returnData)
 
         
