@@ -132,6 +132,8 @@ def check(product_id, checker_id, user_id):
         mycursor.execute(tmp)
         tmp = "UPDATE cart_shop_data SET Sold_unsold='%s', Sold_date='%s' WHERE id=%d" % ('SOLD', str(datetime.now()), product_id)
         mycursor.execute(tmp)
+        tmp = "SELECT balance FROM home_balance WHERE user_id=%d" % (user_id)
+        mycursor.execute(tmp)
         m_result = mycursor.fetchall()
         m_userBalance = float(m_result[0][0])
         m_userBalance = round(m_userBalance - checker_price, 2)
