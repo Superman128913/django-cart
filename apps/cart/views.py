@@ -301,8 +301,10 @@ def search_result(request):
 def cart_home(request):
     if request.method == 'GET':
         cart_obj = Cart.objects.new_or_get(request)
+        checker_list = Checker.objects.all()
         context = {
-            'count_product': cart_obj.products.count()
+            'count_product': cart_obj.products.count(),
+            'checker_list': checker_list
         }
         html_template = loader.get_template('shoping_cart.html')
         return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
@@ -479,7 +481,7 @@ def order_history(request):
 
 
 def checker_api(product_id, checker_id, user_id):
-    checker_name = Checker.objects.get(id=checker_id)
+    checker_name = Checker.objects.get(id=checker_id).Name + '.py'
     commend = 'python %s %d %d %d' % (checker_name, product_id, checker_id, user_id)
     os.system(commend + ' > tmp')
     result = open('tmp', 'r').read()

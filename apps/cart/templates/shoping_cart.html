@@ -53,26 +53,12 @@
             <div class="col-md-9">
               <div class="form-group">
                 <div class="row mt-3">
+                  {% for checker in checker_list %}
                   <div class="col-md-2-4 form-check">
                     <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="checkerRadio" id="checker1" value="1" checked> Checker1 <i class="input-helper"></i></label>
+                      <input type="radio" class="form-check-input" name="checkerRadio" id="checker{{ checker.id }}" value="{{ checker.id }}" {% if checker == checker_list.first %}checked{% endif %}> {{ checker.Name }} <i class="input-helper"></i></label>
                   </div>
-                  <div class="col-md-2-4 form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="checkerRadio" id="checker2" value="2"> Checker2 <i class="input-helper"></i></label>
-                  </div>
-                  <div class="col-md-2-4 form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="checkerRadio" id="checker3" value="3"> Checker3 <i class="input-helper"></i></label>
-                  </div>
-                  <div class="col-md-2-4 form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="checkerRadio" id="checker4" value="4"> Checker4 <i class="input-helper"></i></label>
-                  </div>
-                  <div class="col-md-2-4 form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="checkerRadio" id="checker5" value="5"> Checker5 <i class="input-helper"></i></label>
-                  </div>
+                  {% endfor %}
                 </div>
               </div>
             </div>
