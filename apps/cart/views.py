@@ -487,3 +487,14 @@ def checker_api(product_id, checker_id, user_id):
     result = open('tmp', 'r').read()
     os.remove('tmp')
     return result
+
+        
+@login_required(login_url="/login/")
+@require_http_methods(["GET"])
+def store_info_view(request):
+    store_info = StoreInfoManage.objects.first()
+    context = {
+        'store_info': store_info,
+    }
+    html_template = loader.get_template('store_info.html')
+    return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))

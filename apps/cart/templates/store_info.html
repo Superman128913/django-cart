@@ -1,0 +1,24 @@
+{% extends "layouts/base.html" %}
+{% block title %} Store Info {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+{% block content %}
+<div class="content-wrapper">
+  <div class="page-header">
+    <h5 class="page-title">Store Info</h5>
+  </div>
+  <!-- [ Store Info ] start -->
+  <div class="row">
+    <div class="col-sm-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-header">
+          <h5>Store Info</h5>
+        </div>
+        <div class="Phone-body">{{store_info.Store_Info | safe}}</div>
+      </div>
+    </div>
+  </div>
+  <!--[ Store Info ] end-->
+</div>
+{% endblock content %}

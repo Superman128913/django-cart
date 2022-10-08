@@ -113,5 +113,5 @@ class HistorySerializer(serializers.ModelSerializer):
             return 'Male'
         elif obj.Product.Gender == 'F':
             return 'Female'
-        elif obj.Product.Gender == 'M':
+        elif obj.Product.Gender == 'U':
             return 'Unknown'

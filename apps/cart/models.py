@@ -3,14 +3,15 @@ import datetime
 
 from django.db import models
 from django.contrib.auth.models import User
-from encrypted_model_fields.fields import EncryptedBigIntegerField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models.signals import pre_save, post_save, m2m_changed
-from django.db.models import Sum
+
+from encrypted_model_fields.fields import EncryptedBigIntegerField
+from ckeditor.fields import RichTextField
 # from apps.home import models
 
 day_list = [(each, each) for each in range(1, 32)]
-month_list = [(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'), (6, 'Jun'), (7, 'July'), (8, 'August'), (9, 'September'), (10, 'October'), (11, 'Novemver'), (12, 'December')]
+month_list = [(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'), (6, 'Jun'), (7, 'July'), (8, 'August'), (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')]
 year_list = [(each, each) for each in range(int(datetime.date.today().strftime('%Y')), 2300 + 1)]
 
 # Create your models here.   
@@ -150,3 +151,10 @@ class Order_history(models.Model):
     Checker_response_text = models.TextField()
     Checker_response_full = models.TextField()
     Checker_date = models.DateTimeField(auto_created=True, auto_now=True)
+
+
+class StoreInfoManage(models.Model):
+    Store_Info = RichTextField()
+
+    def __str__(self):
+        return "Store Info Manage"
