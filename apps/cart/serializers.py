@@ -1,4 +1,5 @@
 from email.policy import default
+from secrets import choice
 from rest_framework import serializers
 from .models import Order_history, Shop_data
 from encrypted_model_fields.fields import EncryptedIntegerField
@@ -115,3 +116,9 @@ class HistorySerializer(serializers.ModelSerializer):
             return 'Female'
         elif obj.Product.Gender == 'U':
             return 'Unknown'
+
+
+class ShopDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Shop_data
+        fields = '__all__'

@@ -8,6 +8,38 @@
     <li class="nav-item nav-category">
       <span class="nav-link">Navigation</span>
     </li>
+    <!--ADMIN-->
+    {% if request.user.is_superuser %}
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="#admin_area">
+        <span class="menu-icon">
+          <i class="mdi mdi-laptop"></i>
+        </span>
+        <span class="menu-title">Admin Area</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="admin_area">
+        <ul class="nav sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'new_batch' %}">
+              <span class="menu-icon">
+                <i class="mdi mdi-archive"></i>
+              </span>
+              New Batch</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <span class="menu-icon">
+                <i class="mdi mdi-send"></i>
+              </span>
+              Manage Supplier</a
+            >
+          </li>
+        </ul>
+      </div>
+    </li>
+    {% endif %}
     <li class="nav-item menu-items">
       <a class="nav-link" href="{% url 'index' %}">
         <span class="menu-icon">
@@ -20,7 +52,7 @@
     <li class="nav-item menu-items">
       <a class="nav-link" data-toggle="collapse" href="#digital_store">
         <span class="menu-icon">
-          <i class="mdi mdi-check"></i>
+          <i class="mdi mdi-medical-bag"></i>
         </span>
         <span class="menu-title">Digital Store</span>
         <i class="menu-arrow"></i>

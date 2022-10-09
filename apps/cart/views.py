@@ -1,5 +1,7 @@
 import os
+from decimal import Decimal
 from datetime import datetime
+from unicodedata import decimal
 
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -498,3 +500,95 @@ def store_info_view(request):
     }
     html_template = loader.get_template('store_info.html')
     return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
+
+        
+@login_required(login_url="/login/")
+@require_http_methods(["GET", "POST"])
+def insert_batch(request):
+    if request.method == 'GET':
+        field_list = {
+            'Phone': 'Phone Number',
+            'Exp_day': 'Exp Day',
+            'Exp_month': 'Exp Month',
+            'Exp_year': 'Exp Year',
+            'Puk_code': 'Puk Code',
+            'First_name': 'First Name',
+            'Last_name': 'Last Name',
+            'Gender': 'Gender',
+            'Address': 'Address',
+            'City': 'City',
+            'State': 'State',
+            'Zipcode': 'Zipcode',
+            'Extra1': 'Extra1',
+            'Extra2': 'Extra2',
+            'Extra3': 'Extra3',
+            'Extra4': 'Extra4',
+            'Extra5': 'Extra5',
+            'Areaf1': 'Areaf1',
+            'Areaf2': 'Areaf2',
+            'Areaf3': 'Areaf3',
+            'Areaf4': 'Areaf4',
+            'Areaf5': 'Areaf5',
+            'Areaf6': 'Areaf6'
+        }
+        supplier_list = Supplier.objects.all()
+        context = {
+            'field_list': field_list,
+            'supplier_list': supplier_list
+        }
+        html_template = loader.get_template('new_batch.html')
+        return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
+    else:
+        if request.is_ajax():
+            try:
+                batch_num = int(request.POST.get('batch_num'))
+                field_list = request.POST.getlist('field_list[]')
+                batch_name = request.POST.get('batch_name')
+                percent = request.POST.get('percent')
+                percent = int(percent.split(' ')[0])
+                print(percent)
+                price = request.POST.get('price')
+                price = Decimal(price.split(' ')[1])
+                print(price)
+                supplier_id = int(request.POST.get('supplier_id'))
+                supplier = Supplier.objects.get(id=supplier_id)
+                new_batch = Batch(Name=batch_name, Supplier=supplier, Percent=percent)
+                new_batch.save()
+                print(new_batch.id)
+                data = []
+                for row in range(batch_num):
+                    batch_list = request.POST.getlist(f'batch_list[{row}][]')
+                    row_dic = dict(zip(field_list, batch_list))
+                    row_dic['Area_code'] = row_dic['Phone'][:6]
+                    row_dic['Batch'] = new_batch.id
+                    row_dic['Price'] = price
+                    if row_dic['Gender'] == 'Male':
+                        row_dic['Gender'] = 'M'
+                    elif row_dic['Gender'] == 'Female':
+                        row_dic['Gender'] = 'F'
+                    elif row_dic['Gender'] == 'Unknown':
+                        row_dic['Gender'] = 'U'
+                    data.append(row_dic)
+
+                many = isinstance(data, list)
+                serializer = ShopDataSerializer(data=data, many=many)
+                
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()                
+                    returnData = {
+                        'state': "OK",
+                        'data': data
+                    }
+                else:
+                    returnData = {
+                        'state': "FAIL",
+                        'error': serializer.errors
+                    }
+            except Exception as e:
+                if(new_batch):
+                    new_batch.delete()
+                returnData = {
+                    'state': "FAIL",
+                    'error': repr(e)
+                }
+        return JsonResponse(returnData)

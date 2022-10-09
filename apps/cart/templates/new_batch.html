@@ -1,0 +1,293 @@
+{% extends "layouts/base.html" %} {% block title %} Search {% endblock %}
+{% load static %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<link rel="stylesheet" href="{% static 'assets/vendors/select2/select2.min.css' %}" /> 
+<link rel="stylesheet" href="{% static 'assets/vendors/select2-bootstrap-theme/select2-bootstrap.min.css' %}">
+
+<style>
+  .form-control {
+    border-radius: 0.1875rem;
+  }
+  .form-control:disabled {
+    color: rgb(77, 75, 75);
+  }
+  .form-control option {
+    color: white;
+  }
+  .form-control option:disabled {
+    color: darkgray;
+  }
+  .form-control:focus {
+    color: white;
+  }
+  .Phone-header div {
+    font-size: 0.8rem;
+  }
+  .Phone-header #records_num {
+    font-size: 1rem;
+  }
+</style>
+{% endblock stylesheets %}
+{% block modals %}
+{% endblock modals %} {% block content %}
+
+<div class="content-wrapper">
+  <!--Header-->
+  <div class="page-header">
+    <h1 class="page-title">New Batch</h1>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-body">
+          <div class="template-demo">
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="row mt-3">
+                  <div class="col-md-12">
+                    <label class="col-sm-12" for="insert_batch">Insert New Batch:</label>
+                    <div class="col-sm-12">
+                      <textarea class="col-sm-12 form-control" rows="8" id="insert_batch" name="insert_batch" multiple></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">    
+              <div class="col-md-12 mt-5" style="float: right">
+                <button type="button" class="btn btn-success float-right" onclick="preview()">Preview and Set Fields</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- [ Main Content ] start -->
+  <div class="row" id="batch_preview">
+    <!--[D F info] start-->
+    <div class="col-sm-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-body">
+          <div class="row">
+            <div class="col-md-12 overflow-auto">
+              <table class="table table-bordered table-striped">
+                <thead class="text-center">
+                  <tr>
+                    {% for field in field_list %}
+                    <td>
+                      <select class="form-control form-control-md field-select" style="width: 100px">
+                        {% for key, name in field_list.items %}
+                        <option value="{{ key }}">{{ name }}</option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                    {% endfor %}
+                  </tr>
+                </thead>
+                <tbody class="text-left">
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="row mt-5">
+            <div class="col-md-7">
+              <div class="form-group row">
+                <label for="batch_name" class="col-sm-7 col-form-label">Supplier batch name:</label>
+                <div class="col-sm-5">
+                  <input type="text" class="form-control" id="batch_name" placeholder="Insert batch name...">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="supplier" class="col-sm-7 col-form-label">Select Supplier username to assgin the batch:</label>
+                <div class="col-sm-5">
+                  <select class="form-control form-control-md" id="supplier">
+                    {% for supplier in supplier_list %}
+                    <option value="{{ supplier.id }}">{{ supplier.Username }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="percent" class="col-sm-7 col-form-label">Supplier batch sales share(%):</label>
+                <div class="col-sm-5">
+                  <input type="text" class="form-control" id="percent" data-inputmask="'alias': 'percentage'" value="0">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="price" class="col-sm-7 col-form-label">Price for each phone number(USD):</label>
+                <div class="col-sm-5">
+                  <input type="text" class="form-control" data-inputmask="'alias': 'currency'" id="price" value="0">
+                </div>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <div class="row m-3" style="position: absolute; bottom: 0; right: 0">
+                <button type="button" class="btn btn-lg btn-info float-right" onclick="post_batch()">Insert/Assign Data</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  var selects = $('.field-select')
+  var valid = true
+  jQuery(document).ready(function () {
+    $('.select2').select2()
+    $('#batch_preview').hide()
+    var len = selects.length
+    for(i = 0; i < len; i++)
+    {
+      selects.eq(i).children('option').eq(i).prop('selected', true)
+    }
+    $('#preview_btn').click(function() {
+      preview()
+    })
+  })
+
+  function format_text(text){
+    var len = selects.length
+    var returnValue = []
+    valid = true
+    text.split('\n').forEach((row, index) => {
+      if(valid == false)
+        return
+      eachRow = []
+      row.split(';').forEach(field => {
+        eachRow.push(field)
+      })
+      if(eachRow.length != len)
+      {
+        showWarningToast('Row ' + (index + 1) + ': Number of parameter must be ' + len, "Warning")
+        valid = false
+        return
+      }
+
+      returnValue.push(eachRow)
+    })
+    return returnValue
+  }
+
+  function preview(){
+    text = $('#insert_batch').val()
+    if(text == '')
+    {
+      showInfoToast('Insert the new batch data', "Warning")
+      return
+    }
+    var batch_list = null
+    $('#batch_preview .table tbody').empty()
+    batch_list = format_text(text)
+    if(!valid)
+      return
+    $('#batch_preview').show()
+    var appendHTML = ''
+    batch_list.forEach(row => {
+      appendHTML += '<tr>'
+      row.forEach(field => {
+        appendHTML += '<td>'
+        appendHTML += field
+        appendHTML += '</td>'
+      })
+    })
+    // console.log(appendHTML)
+    $('#batch_preview .table tbody').append(appendHTML)
+  }
+
+  function post_batch(){
+    var batch_name = $('#batch_name').val()
+    if(batch_name == '')
+    {
+        showInfoToast('Please insert batch name', 'warning')
+        return
+    }
+    var supplier_id = $('#supplier').val()
+    if(!supplier_id)
+    {
+        showInfoToast('Please select supplier', 'warning')
+        return
+    }
+    var percent = $('#percent').val()
+    if(!percent)
+    {
+        showInfoToast('Please insert share percent', 'warning')
+        return
+    }
+    var price = $('#price').val()
+    if(!price)
+    {
+        showInfoToast('Please insert price', 'warning')
+        return
+    }
+    var batch_list = format_text($('#insert_batch').val())
+    if(!valid)
+      return
+    var field_list = []
+    var len = selects.length
+    for(i = 0; i < len; i++)
+    {
+      field_list.push(selects.eq(i).val())
+      if(hasDuplicates(field_list))
+      {
+        showWarningToast('You select ' + selects.eq(i).children("option").filter(":selected").text() + ' repeatedly.', "Warning")
+        return
+      }
+    }
+      
+    var postData = {
+      batch_list: batch_list,
+      field_list: field_list,
+      batch_num: batch_list.length,
+      batch_name: batch_name,
+      supplier_id: supplier_id,
+      percent: percent,
+      price: price
+    }
+    $.ajax({
+      url: "",
+      type: "POST",
+      dataType: "json",
+      headers: {
+        "X-CSRFToken": $('meta[name="csrf-token"]').attr('content'),
+      },
+      data: postData,
+      success: function (result) {
+        var state = result["state"];
+        if (state == "OK") {
+          showSuccessToast('Added new batches', "Success");
+          console.log(result['data'])
+        } else if (state == "FAIL")
+          showDangerToast(result["error"], "Failed");
+        else
+          showDangerToast("Cause an unknown error.", "Failed");
+      },
+      error: function (xhr, status, error) {
+        showDangerToast(xhr.status + " " + xhr.statusText, "Failed");
+      },
+    });
+  }
+
+  function hasDuplicates(array) {
+    return (new Set(array)).size !== array.length;
+  }
+</script>
+
+{% endblock content %} {% block plugin_javascripts %}
+
+<script src="{% static 'assets/vendors/select2/select2.min.js' %}"></script>
+<script src="{% static 'assets/vendors/inputmask/jquery.inputmask.bundle.js' %}"></script>
+
+{% endblock plugin_javascripts %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<script src="{% static 'assets/js/inputmask.js' %}"></script>
+
+{% endblock javascripts %}
