@@ -592,3 +592,15 @@ def insert_batch(request):
                     'error': repr(e)
                 }
         return JsonResponse(returnData)
+
+        
+@login_required(login_url="/login/")
+@require_http_methods(["GET", "POST"])
+def manage_supplier(request):
+    if request.method == 'GET':
+        supplier_list = Supplier.objects.all()
+        context = {
+            'supplier_list': supplier_list
+        }
+        html_template = loader.get_template('manage_supplier.html')
+        return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
