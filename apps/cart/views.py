@@ -471,7 +471,7 @@ def order_history(request):
 
 def checker_api(product_id, checker_id, user_id):
     checker_name = Checker.objects.get(id=checker_id).Name + '.py'
-    commend = 'python %s %d %d %d' % (checker_name, product_id, checker_id, user_id)
+    commend = 'python3 %s %d %d %d' % (checker_name, product_id, checker_id, user_id)
     os.system(commend + ' > tmp')
     result = open('tmp', 'r').read()
     os.remove('tmp')
