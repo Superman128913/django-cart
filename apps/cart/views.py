@@ -7,12 +7,14 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.template import loader
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.db.models import F, Q, Count
 from apps.home.models import balance
 
 from apps.home.views import get_default_page_context
+from apps.home.models import AreaCode
 from .models import *
 from .serializers import *
 
@@ -391,21 +393,6 @@ def check_product(request):
             product_obj = Shop_data.objects.get(id=product_id)
 
             if cart_obj.products.filter(pk=product_obj.pk).exists():
-                #?#########################
-                # if checker_id != 1:
-                #     returnData = {
-                #         'state': 'Error',
-                #         'error': "Only Checker1 works now."
-                #     }
-                #     cart_obj = Cart.objects.new_or_get(request)
-                #     balance_obj = balance.objects.get(user=request.user)
-                #     data = {
-                #         'balance': balance_obj.balance,
-                #         'count_product': cart_obj.products.count()
-                #     }
-                #     returnData['data'] = data
-                #     return JsonResponse(returnData)
-                #?#########################
 
                 check_status = checker_api(product_id, checker_id, request.user.id)
                 check_status = check_status[:-1]
@@ -505,35 +492,12 @@ def store_info_view(request):
 @login_required(login_url="/login/")
 @require_http_methods(["GET", "POST"])
 def insert_batch(request):
+    user = User.objects.get(pk=request.user.id)
+    if user.is_superuser == 0:
+        return redirect(reverse('login'))
     if request.method == 'GET':
-        field_list = {
-            'Phone': 'Phone Number',
-            'Exp_day': 'Exp Day',
-            'Exp_month': 'Exp Month',
-            'Exp_year': 'Exp Year',
-            'Puk_code': 'Puk Code',
-            'First_name': 'First Name',
-            'Last_name': 'Last Name',
-            'Gender': 'Gender',
-            'Address': 'Address',
-            'City': 'City',
-            'State': 'State',
-            'Zipcode': 'Zipcode',
-            'Extra1': 'Extra1',
-            'Extra2': 'Extra2',
-            'Extra3': 'Extra3',
-            'Extra4': 'Extra4',
-            'Extra5': 'Extra5',
-            'Areaf1': 'Areaf1',
-            'Areaf2': 'Areaf2',
-            'Areaf3': 'Areaf3',
-            'Areaf4': 'Areaf4',
-            'Areaf5': 'Areaf5',
-            'Areaf6': 'Areaf6'
-        }
         supplier_list = Supplier.objects.all()
         context = {
-            'field_list': field_list,
             'supplier_list': supplier_list
         }
         html_template = loader.get_template('new_batch.html')
@@ -546,28 +510,43 @@ def insert_batch(request):
                 batch_name = request.POST.get('batch_name')
                 percent = request.POST.get('percent')
                 percent = int(percent.split(' ')[0])
-                print(percent)
                 price = request.POST.get('price')
                 price = Decimal(price.split(' ')[1])
-                print(price)
                 supplier_id = int(request.POST.get('supplier_id'))
                 supplier = Supplier.objects.get(id=supplier_id)
                 new_batch = Batch(Name=batch_name, Supplier=supplier, Percent=percent)
                 new_batch.save()
-                print(new_batch.id)
                 data = []
                 for row in range(batch_num):
                     batch_list = request.POST.getlist(f'batch_list[{row}][]')
-                    row_dic = dict(zip(field_list, batch_list))
+                    row_dic = {}
+                    for i in range(len(field_list)):
+                        print(repr(row_dic))
+                        if field_list[i] != 'ignore':
+                            if i < len(batch_list):
+                                row_dic[field_list[i]] = batch_list[i]
+                    # row_dic = dict(zip(field_list, batch_list))
                     row_dic['Area_code'] = row_dic['Phone'][:6]
+
+                    area_code_query = AreaCode.objects.filter(area_code=row_dic['Area_code'])
+                    if area_code_query.exists():
+                        area_code_query = area_code_query.first()
+                        row_dic['Areaf1'] = area_code_query.areaf1
+                        row_dic['Areaf2'] = area_code_query.areaf2
+                        row_dic['Areaf3'] = area_code_query.areaf3
+                        row_dic['Areaf4'] = area_code_query.areaf4
+                        row_dic['Areaf5'] = area_code_query.areaf5
+                        row_dic['Areaf6'] = area_code_query.areaf6
                     row_dic['Batch'] = new_batch.id
                     row_dic['Price'] = price
-                    if row_dic['Gender'] == 'Male':
-                        row_dic['Gender'] = 'M'
-                    elif row_dic['Gender'] == 'Female':
-                        row_dic['Gender'] = 'F'
-                    elif row_dic['Gender'] == 'Unknown':
-                        row_dic['Gender'] = 'U'
+
+                    if 'Gender' in row_dic.keys():
+                        if row_dic['Gender'] == 'Male':
+                            row_dic['Gender'] = 'M'
+                        elif row_dic['Gender'] == 'Female':
+                            row_dic['Gender'] = 'F'
+                        else:
+                            row_dic['Gender'] = 'U'
                     data.append(row_dic)
 
                 many = isinstance(data, list)
@@ -597,6 +576,9 @@ def insert_batch(request):
 @login_required(login_url="/login/")
 @require_http_methods(["GET", "POST"])
 def manage_supplier(request):
+    user = User.objects.get(pk=request.user.id)
+    if user.is_superuser == 0:
+        return redirect(reverse('login'))
     if request.method == 'GET':
         supplier_list = Supplier.objects.all()
         context = {

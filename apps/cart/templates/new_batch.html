@@ -9,18 +9,19 @@
 <style>
   .form-control {
     border-radius: 0.1875rem;
-  }
-  .form-control:disabled {
-    color: rgb(77, 75, 75);
+    color: #6c7293;
   }
   .form-control option {
     color: white;
-  }
-  .form-control option:disabled {
-    color: darkgray;
+    margin-top: 1.5rem;
+    font-size: medium;
   }
   .form-control:focus {
     color: white;
+  }
+  select.form-control {
+    color: #6c7293;
+    font-size: medium;
   }
   .Phone-header div {
     font-size: 0.8rem;
@@ -49,7 +50,7 @@
                   <div class="col-md-12">
                     <label class="col-sm-12" for="insert_batch">Insert New Batch:</label>
                     <div class="col-sm-12">
-                      <textarea class="col-sm-12 form-control" rows="8" id="insert_batch" name="insert_batch" multiple></textarea>
+                      <textarea class="col-sm-12 form-control" rows="8" id="insert_batch" name="insert_batch" multiple placeholder="Insert new batches here..."></textarea>
                     </div>
                   </div>
                 </div>
@@ -76,17 +77,6 @@
             <div class="col-md-12 overflow-auto">
               <table class="table table-bordered table-striped">
                 <thead class="text-center">
-                  <tr>
-                    {% for field in field_list %}
-                    <td>
-                      <select class="form-control form-control-md field-select" style="width: 100px">
-                        {% for key, name in field_list.items %}
-                        <option value="{{ key }}">{{ name }}</option>
-                        {% endfor %}
-                      </select>
-                    </td>
-                    {% endfor %}
-                  </tr>
                 </thead>
                 <tbody class="text-left">
                 </tbody>
@@ -106,7 +96,7 @@
                 <div class="col-sm-5">
                   <select class="form-control form-control-md" id="supplier">
                     {% for supplier in supplier_list %}
-                    <option value="{{ supplier.id }}">{{ supplier.Username }}</option>
+                    <option value={{ supplier.id }}>{{ supplier.Username }}</option>
                     {% endfor %}
                   </select>
                 </div>
@@ -136,41 +126,68 @@
   </div>
 </div>
 <script>
-  var selects = $('.field-select')
+  var batch_list = []
+  var field_num = 0
+  var field_list_basic = {
+      'Phone': 'Phone Number',
+      'Exp_day': 'Exp Day',
+      'Exp_month': 'Exp Month',
+      'Exp_year': 'Exp Year',
+      'Puk_code': 'Puk Code',
+      'First_name': 'First Name',
+      'Last_name': 'Last Name',
+      'Gender': 'Gender',
+      'Address': 'Address',
+      'City': 'City',
+      'State': 'State',
+      'Zipcode': 'Zipcode',
+      'Extra1': 'Extra1',
+      'Extra2': 'Extra2',
+      'Extra3': 'Extra3',
+      'Extra4': 'Extra4',
+      'Extra5': 'Extra5',
+      'Areaf1': 'Areaf1',
+      'Areaf2': 'Areaf2',
+      'Areaf3': 'Areaf3',
+      'Areaf4': 'Areaf4',
+      'Areaf5': 'Areaf5',
+      'Areaf6': 'Areaf6'
+  }
   var valid = true
   jQuery(document).ready(function () {
-    $('.select2').select2()
-    $('#batch_preview').hide()
-    var len = selects.length
-    for(i = 0; i < len; i++)
-    {
-      selects.eq(i).children('option').eq(i).prop('selected', true)
-    }
-    $('#preview_btn').click(function() {
-      preview()
-    })
+    // $('#batch_preview').hide()
   })
 
   function format_text(text){
-    var len = selects.length
     var returnValue = []
     valid = true
+    field_num = 0
     text.split('\n').forEach((row, index) => {
       if(valid == false)
         return
+      if(row == '')
+      {
+        returnValue.pop()
+        return
+      }
       eachRow = []
       row.split(';').forEach(field => {
         eachRow.push(field)
       })
-      if(eachRow.length != len)
+      if(eachRow[eachRow.length - 1] == '')
+        eachRow.pop()
+      if(eachRow.length > field_list_basic.length)
       {
-        showWarningToast('Row ' + (index + 1) + ': Number of parameter must be ' + len, "Warning")
+        showWarningToast('Row ' + (index + 1) + ': Number of parameter must be ' + field_list_basic.length, "Warning")
         valid = false
         return
       }
-
+      field_num = Math.max(field_num, eachRow.length)
       returnValue.push(eachRow)
     })
+    if(returnValue[returnValue.length - 1] == '')
+      returnValue.pop()
+
     return returnValue
   }
 
@@ -181,20 +198,55 @@
       showInfoToast('Insert the new batch data', "Warning")
       return
     }
-    var batch_list = null
-    $('#batch_preview .table tbody').empty()
     batch_list = format_text(text)
     if(!valid)
       return
+    set_thead()
+    set_tbody()
     $('#batch_preview').show()
+  }
+
+  function set_thead(){
+    $('#batch_preview .table thead').empty()
+    var appendHTML = ''
+    appendHTML += '<tr>'
+    for(i = 0; i < field_num; i++)
+    {
+      appendHTML += '<td>'
+      appendHTML += '<select class="form-control form-control-md field-select" style="width: inherit">'
+      appendHTML += '<option value="ignore">Ignore</option>'
+      appendHTML += '<optgroup label="_________">'
+      appendHTML += '</optgroup>'
+      for (let [key, name] of Object.entries(field_list_basic)) {
+        appendHTML += `<option value="${key}">${name}</option>`
+      }
+      appendHTML += '</select>'
+      appendHTML += '</td>'
+    }
+    appendHTML += '</tr>'
+    $('#batch_preview .table thead').append(appendHTML)
+
+    var selects = $('.field-select')
+    for(i = 0; i < field_num; i++)
+    {
+      selects.eq(i).children('option').eq(i + 1).prop('selected', true)
+    }
+    $('#preview_btn').click(function() {
+      preview()
+    })
+  }
+
+  function set_tbody(){
+    $('#batch_preview .table tbody').empty()
     var appendHTML = ''
     batch_list.forEach(row => {
       appendHTML += '<tr>'
-      row.forEach(field => {
+      for(i = 0; i < field_num; i++) {
         appendHTML += '<td>'
-        appendHTML += field
+        appendHTML += row[i] ? row[i] : ''
         appendHTML += '</td>'
-      })
+      }
+      appendHTML += '</tr>'
     })
     // console.log(appendHTML)
     $('#batch_preview .table tbody').append(appendHTML)
@@ -225,15 +277,14 @@
         showInfoToast('Please insert price', 'warning')
         return
     }
-    var batch_list = format_text($('#insert_batch').val())
     if(!valid)
       return
     var field_list = []
-    var len = selects.length
-    for(i = 0; i < len; i++)
+    var selects = $('.field-select')
+    for(i = 0; i < field_num; i++)
     {
       field_list.push(selects.eq(i).val())
-      if(hasDuplicates(field_list))
+      if(hasDuplicates(field_list.filter(element => element !== 'ignore')))
       {
         showWarningToast('You select ' + selects.eq(i).children("option").filter(":selected").text() + ' repeatedly.', "Warning")
         return
