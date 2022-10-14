@@ -1,7 +1,6 @@
 import os
 from decimal import Decimal
 from datetime import datetime, date
-from unicodedata import decimal
 
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -540,13 +539,20 @@ def insert_batch(request):
                     row_dic['Batch'] = new_batch.id
                     row_dic['Price'] = price
 
-                    if 'Gender' in row_dic.keys():
+                    row_dic_keys = row_dic.keys()
+                    if 'Gender' in row_dic_keys:
                         if row_dic['Gender'] == 'Male':
                             row_dic['Gender'] = 'M'
                         elif row_dic['Gender'] == 'Female':
                             row_dic['Gender'] = 'F'
                         else:
                             row_dic['Gender'] = 'U'
+                    if 'Exp_day' in row_dic_keys:
+                        row_dic['Exp_day'] = int(row_dic['Exp_day'])
+                    if 'Exp_month' in row_dic_keys:
+                        row_dic['Exp_month'] = int(row_dic['Exp_month'])
+                    if 'Exp_year' in row_dic_keys:
+                        row_dic['Exp_year'] = int(row_dic['Exp_year'])
                     data.append(row_dic)
 
                 many = isinstance(data, list)
