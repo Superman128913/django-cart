@@ -16,5 +16,5 @@ urlpatterns = [
     path('order_history', order_history, name='order_history'),
     path('store_info', store_info_view, name='store_info'),
     path('new_batch', insert_batch, name='new_batch'),
-    path('manage_supplier', manage_supplier, name='manage_supplier'),
+    path('manage_batches', batch_management, name='manage_batches'),
 ]

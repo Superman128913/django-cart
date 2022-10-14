@@ -1,6 +1,6 @@
 import os
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, date
 from unicodedata import decimal
 
 from django.shortcuts import render
@@ -575,14 +575,25 @@ def insert_batch(request):
         
 @login_required(login_url="/login/")
 @require_http_methods(["GET", "POST"])
-def manage_supplier(request):
+def batch_management(request):
     user = User.objects.get(pk=request.user.id)
     if user.is_superuser == 0:
         return redirect(reverse('login'))
     if request.method == 'GET':
         supplier_list = Supplier.objects.all()
+        product_query = Shop_data.objects.order_by('Insert_date')
+        if product_query.exists():
+            start_date = product_query.first().Insert_date.strftime('%m/%d/%Y')
+            end_date = product_query.last().Insert_date.strftime('%m/%d/%Y')
+        else:
+            start_date = '01/01/2022'
+            end_date = date.today().strftime('%m/%d/%Y')
         context = {
-            'supplier_list': supplier_list
+            'supplier_list': supplier_list,
+            'start_date': start_date,
+            'end_date': end_date
         }
-        html_template = loader.get_template('manage_supplier.html')
+        html_template = loader.get_template('manage_batches.html')
         return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
+    else:
+        pass
