@@ -11,11 +11,11 @@ class CheckerAdmin(admin.ModelAdmin):
 
 
 class BatchAdmin(admin.ModelAdmin):
-    list_display = ['Name', 'Publish_date', 'Supplier', 'Supplier_payment_status', 'Percent']
+    list_display = ['Name', 'Publish_date', 'Supplier', 'Percent']
 
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['Phone', 'Exp_day', 'Exp_month', 'Exp_year', 'Puk_code', 'First_name', 'Last_name', 'Gender', 'Address', 'City', 'State', 'Zipcode', 'Extra1', 'Extra2', 'Extra3', 'Extra4', 'Extra5', 'Price', 'Areaf1', 'Areaf2', 'Areaf3', 'Areaf4', 'Areaf5', 'Areaf6', 'Area_code', 'Sold_unsold', 'Insert_date', 'Sold_date']
+    list_display = ['Phone', 'Exp_day', 'Exp_month', 'Exp_year', 'Puk_code', 'First_name', 'Last_name', 'Gender', 'Address', 'City', 'State', 'Zipcode', 'Extra1', 'Extra2', 'Extra3', 'Extra4', 'Extra5', 'Price', 'Areaf1', 'Areaf2', 'Areaf3', 'Areaf4', 'Areaf5', 'Areaf6', 'Area_code', 'Sold_unsold', 'Insert_date', 'Sold_date', 'Supplier_payment_status']
     
 
 class CartAdmin(admin.ModelAdmin):

@@ -127,7 +127,7 @@ function show_result(page = 0) {
           });
         } else
           $("#search_result .table tbody").append(
-            '<tr><td colspan="17" class="text-center">No Data</td></tr>'
+            '<tr><td colspan="12" class="text-center">No Data</td></tr>'
           );
       } else if (state == "FAIL") {
         $("#search_result").show();
@@ -170,7 +170,7 @@ function remove_product(product_id) {
         $("#balance").text("Balance: " + result["data"]["balance"] + " $");
         if (result["data"]["count_product"] == 0)
           $("#search_result .table tbody").append(
-            '<tr><td colspan="17" class="text-center">No Data</td></tr>'
+            '<tr><td colspan="12" class="text-center">No Data</td></tr>'
           );
         showSuccessToast("Removed item from cart", "Success");
       } else if (state == "FAIL") showDangerToast(result["error"], "Failed");
@@ -213,7 +213,7 @@ function check_and_finalize(product_id) {
         $(".count_product").text(result["data"]["count_product"]);
         if (result["data"]["count_product"] == 0)
           $("#search_result .table tbody").append(
-            '<tr><td colspan="17" class="text-center">No Data</td></tr>'
+            '<tr><td colspan="12" class="text-center">No Data</td></tr>'
           );
       } else if (state == "Fail") {
         td_element.parents("tr").remove();
@@ -222,7 +222,7 @@ function check_and_finalize(product_id) {
         $("#balance").text("Balance: " + result["data"]["balance"] + " $");
         if (result["data"]["count_product"] == 0)
           $("#search_result .table tbody").append(
-            '<tr><td colspan="17" class="text-center">No Data</td></tr>'
+            '<tr><td colspan="12" class="text-center">No Data</td></tr>'
           );
       } else showDangerToast(result["error"], "Error");
     },

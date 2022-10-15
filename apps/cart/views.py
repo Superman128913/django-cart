@@ -9,7 +9,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
-from django.db.models import F, Q, Count
+from django.db.models import F, Q, Count, Sum
 from apps.home.models import balance
 
 from apps.home.views import get_default_page_context
@@ -270,7 +270,7 @@ def search_result(request):
                     data = ProductSerializer(product_list, many=True).data
                     cart_obj = Cart.objects.new_or_get(request)
                     page = int(request.POST.get('page'))
-                    ############### ? Pagination##################
+                    ############### ? Pagination ##################
                     data_length = len(data)
                     start = page * 10
                     end = min((page + 1) * 10, data_length + 1)
@@ -449,7 +449,7 @@ def order_history(request):
                 query = Order_history.objects.filter(Checker_status='Done').order_by('-id').all()
                 data = HistorySerializer(query, many=True).data
                 page = int(request.POST.get('page'))
-                ############### ? Pagination##################
+                ############### ? Pagination ##################
                 data_length = len(data)
                 start = page * 10
                 end = min((page + 1) * 10, data_length + 1)
@@ -487,7 +487,7 @@ def store_info_view(request):
     html_template = loader.get_template('store_info.html')
     return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
 
-        
+
 @login_required(login_url="/login/")
 @require_http_methods(["GET", "POST"])
 def insert_batch(request):
@@ -602,4 +602,144 @@ def batch_management(request):
         html_template = loader.get_template('manage_batches.html')
         return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
     else:
-        pass
+        if request.is_ajax():
+            try:
+                supplier_id = int(request.POST.get('supplier_id'))
+                from_date = request.POST.get('from_date')
+                to_date = request.POST.get('to_date')
+                from_date = datetime.datetime.strptime(from_date, '%m/%d/%Y').date()
+                to_date = datetime.datetime.strptime(to_date, '%m/%d/%Y').date()
+                print(from_date, to_date)
+                PaidUnpaid = request.POST.get('PaidUnpaid')
+
+                supplier_obj = Supplier.objects.get(id=supplier_id)
+                batch_query = Batch.objects.filter(Supplier=supplier_obj)
+
+                total_batches = 0
+                total_sold = 0
+                total_supplier_profit = 0
+                total_refund = 0
+                total_supplier = 1
+                total_sold_price = 0
+                total_shop_profit = 0
+                total_unsold = 0
+
+                tableData = []
+                for batch in batch_query.all():
+                    products = Shop_data.objects.filter(Batch=batch).filter(Supplier_payment_status=PaidUnpaid).filter(Sold_date__date__range=(from_date, to_date))
+                    sold_products = products.filter(Sold_unsold='SOLD')
+                    refund_products = products.filter(Sold_unsold='REFUND')
+                    unsold_products = products.filter(Q(Sold_unsold='ON_CART') | Q(Sold_unsold='UNSOLD'))
+                    row = {
+                        'batch_id': batch.id,
+                        'batch_name': batch.Name,
+                        'supplier_name': supplier_obj.Username,
+                        'supplier_batch_share': batch.Percent,
+                        'total_sold': sold_products.count(),
+                        'total_sold_price': sold_products.aggregate(total_price=Sum('Price'))['total_price'] or 0,
+                        'total_refund': refund_products.count(),
+                        'total_unsold': unsold_products.count()
+                    }
+                    row['total_supplier_profit'] = row['total_sold_price'] * row['supplier_batch_share'] / Decimal(100)
+                    row['total_shop_profit'] = row['total_sold_price'] - row['total_supplier_profit']
+                    tableData.append(row)
+                    total_batches += 1
+                    total_sold += row['total_sold']
+                    total_sold_price += row['total_sold_price']
+                    total_supplier_profit += row['total_supplier_profit']
+                    total_shop_profit += row['total_shop_profit']
+                    total_refund += row['total_refund']
+                    total_unsold += row['total_unsold']
+                data = {
+                    'tableData': tableData,
+                    'total_batches': total_batches,
+                    'total_supplier': total_supplier,
+                    'total_sold': total_sold,
+                    'total_sold_price': total_sold_price,
+                    'total_supplier_profit': total_supplier_profit,
+                    'total_shop_profit': total_shop_profit,
+                    'total_refund': total_refund,
+                    'total_unsold': total_unsold
+                }
+                returnData = {
+                    'state': "OK",
+                    'data': data
+                }
+            except Exception as e:
+                returnData = {
+                    'state': "FAIL",
+                    'error': repr(e)
+                }
+        return JsonResponse(returnData)
+
+@login_required(login_url="/login/")
+@require_http_methods(["POST"])
+def get_batch_product_list(request):
+    if request.is_ajax():
+        try:
+            from_date = request.POST.get('from_date')
+            to_date = request.POST.get('to_date')
+            from_date = datetime.datetime.strptime(from_date, '%m/%d/%Y').date()
+            to_date = datetime.datetime.strptime(to_date, '%m/%d/%Y').date()
+            print(from_date, to_date)
+            PaidUnpaid = request.POST.get('PaidUnpaid')
+            get_type = request.POST.get('type')
+            batch_id = request.POST.get('batch_id')
+
+            batch_obj = Batch.objects.get(id=batch_id)
+            products = Shop_data.objects.filter(Batch=batch_obj).filter(Supplier_payment_status=PaidUnpaid).filter(Sold_date__date__range=(from_date, to_date))
+            if get_type == 'total-sold':
+                sold_products = products.filter(Sold_unsold='SOLD')
+                query = sold_products
+            elif get_type == 'total-refund':
+                refund_products = products.filter(Sold_unsold='REFUND')
+                query = refund_products
+            elif get_type == 'total-unsold':
+                unsold_products = products.filter(Q(Sold_unsold='ON_CART') | Q(Sold_unsold='UNSOLD'))
+                query = unsold_products
+            data = RecordsSerializer(query, many=True).data
+            page = int(request.POST.get('page'))
+            ############### ? Pagination ##################
+            data_length = len(data)
+            start = page * 10
+            end = min((page + 1) * 10, data_length + 1)
+            data = data[start:end]
+            ##############################################
+            returnData = {
+                'state': "OK",
+                'data': data,
+                'length': data_length
+            }
+        except Exception as e:
+            returnData = {
+                'state': "FAIL",
+                'error': repr(e)
+            }
+    return JsonResponse(returnData)
+
+@login_required(login_url="/login/")
+@require_http_methods(["POST"])
+def set_product_as_paid(request):
+    if request.is_ajax():
+        try:
+            from_date = request.POST.get('from_date')
+            to_date = request.POST.get('to_date')
+            from_date = datetime.datetime.strptime(from_date, '%m/%d/%Y').date()
+            to_date = datetime.datetime.strptime(to_date, '%m/%d/%Y').date()
+            print(from_date, to_date)
+            PaidUnpaid = request.POST.get('PaidUnpaid')
+            batch_list = request.POST.getlist('batch_list[]')
+            print(batch_list)
+
+            products = Shop_data.objects.filter(Batch__in=batch_list).filter(Sold_unsold='SOLD').filter(Supplier_payment_status=PaidUnpaid).filter(Sold_date__date__range=(from_date, to_date))
+            print(len(products))
+            products.update(Supplier_payment_status='PAID')
+            returnData = {
+                'state': "OK"
+            }
+        except Exception as e:
+            returnData = {
+                'state': "FAIL",
+                'error': repr(e)
+            }
+    return JsonResponse(returnData)

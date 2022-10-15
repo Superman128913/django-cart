@@ -122,3 +122,21 @@ class ShopDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shop_data
         fields = '__all__'
+
+
+class RecordsSerializer(serializers.ModelSerializer):
+    Gender = serializers.SerializerMethodField()
+    Batch_id = serializers.IntegerField(source='Batch.id')
+    Batch_Name = serializers.CharField(source='Batch.Name')
+    Batch_Publish_date = serializers.DateTimeField(source='Batch.Publish_date')
+    class Meta:
+        model = Shop_data
+        fields = ['Phone', 'Exp_day', 'Exp_month', 'Exp_year', 'Puk_code', 'First_name', 'Last_name', 'Gender', 'Address', 'City', 'State', 'Zipcode', 'Extra1', 'Extra2', 'Extra3', 'Extra4', 'Extra5', 'Price', 'Areaf1', 'Areaf2', 'Areaf3', 'Areaf4', 'Areaf5', 'Areaf6', 'Area_code', 'Sold_unsold', 'Sold_date', 'Supplier_payment_status', 'Batch_id', 'Batch_Name', 'Batch_Publish_date']
+
+    def get_Gender(self,obj):
+        if obj.Gender == 'M':
+            return 'Male'
+        elif obj.Gender == 'F':
+            return 'Female'
+        elif obj.Gender == 'U':
+            return 'Unknown'

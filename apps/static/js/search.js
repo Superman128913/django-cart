@@ -1560,7 +1560,7 @@ function show_result(page = 0) {
         $("#records_num").text(result["length"] + " records found");
         console.log(product_list);
         page_num = page;
-        var len = product_list.length;
+        var len = 0;
         if (len) {
           product_list.forEach(function (each) {
             each["Extra1"] =
@@ -1665,7 +1665,7 @@ function show_result(page = 0) {
           pagination_init(result["length"]);
         } else
           $("#search_result .table tbody").append(
-            '<tr><td colspan="17" class="text-center">No Data</td></tr>'
+            '<tr><td colspan="11" class="text-center">No Data</td></tr>'
           );
       } else if (state == "FAIL") showDangerToast(result["error"], "Failed");
       else showDangerToast("Cause an unknown error.", "Failed");

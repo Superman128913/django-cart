@@ -36,13 +36,6 @@ class Batch(models.Model):
     Publish_date =  models.DateTimeField(auto_now_add=True, null=False)
     
     Supplier =      models.ForeignKey(Supplier, on_delete=models.CASCADE)
-    Supplier_payment_status = models.CharField(choices=[
-                            ('Queue', 'Queue'),
-                            ('Processing', 'Processing'),
-                            ('Error', 'Error'),
-                            ('Done', 'Done'),
-                            ('Fail', 'Fail')
-                            ], max_length=12, default='Queue')
     Percent =  models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)], default=70)
 
     def __str__(self):
@@ -86,6 +79,10 @@ class Shop_data(models.Model):
         ], default='UNSOLD', max_length=7, blank=True, null=False)
     Insert_date =   models.DateTimeField(auto_now_add=True)
     Sold_date =     models.DateTimeField(blank=True, null=True)
+    Supplier_payment_status = models.CharField(choices=[
+                            ('PAID', 'PAID'),
+                            ('UNPAID', 'UNPAID')
+                            ], max_length=8, default='UNPAID')
     User =          models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):

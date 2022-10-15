@@ -2,7 +2,14 @@
 {% block title %} Store Info {% endblock %}
 
 <!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+<style>
+  .table th {
+    padding-left: 0.1rem !important;
+    padding-right: 0.1rem !important;
+  }
+</style>
+{% endblock stylesheets %}
 {% block content %}
 <div class="content-wrapper">
   <div class="page-header">

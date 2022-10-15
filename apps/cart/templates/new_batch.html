@@ -29,6 +29,10 @@
   .Phone-header #records_num {
     font-size: 1rem;
   }
+  .table th {
+    padding-left: 0.1rem !important;
+    padding-right: 0.1rem !important;
+  }
 </style>
 {% endblock stylesheets %}
 {% block modals %}
@@ -57,8 +61,8 @@
               </div>
             </div>
             <div class="row">    
-              <div class="col-md-12 mt-5" style="float: right">
-                <button type="button" class="btn btn-success float-right" onclick="preview()">Preview and Set Fields</button>
+              <div class="col-md-12 mt-4">
+                <button type="button" class="btn btn-success float-right mr-3" onclick="preview()">Preview and Set Fields</button>
               </div>
             </div>
           </div>
@@ -149,7 +153,7 @@
   }
   var valid = true
   jQuery(document).ready(function () {
-    // $('#batch_preview').hide()
+    $('#batch_preview').hide()
   })
 
   function format_text(text){
