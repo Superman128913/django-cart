@@ -1,7 +1,7 @@
 from email.policy import default
 from secrets import choice
 from rest_framework import serializers
-from .models import Order_history, Shop_data
+from .models import Order_history, Shop_data, SupplierRequest
 from encrypted_model_fields.fields import EncryptedIntegerField
 
 
@@ -140,3 +140,10 @@ class RecordsSerializer(serializers.ModelSerializer):
             return 'Female'
         elif obj.Gender == 'U':
             return 'Unknown'
+
+
+class RequestSerializer(serializers.ModelSerializer):
+    Supplier_Username = serializers.CharField(source='Supplier.Username')
+    class Meta:
+        model = SupplierRequest
+        fields = ['id', 'Supplier_Username', 'Date', 'USDT_address', 'TXID', 'Status']

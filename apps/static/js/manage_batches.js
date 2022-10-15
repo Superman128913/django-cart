@@ -182,7 +182,7 @@ function show_records(page = 0) {
     type: "POST",
     dataType: "json",
     headers: {
-      "X-CSRFToken": "{{ csrf_token }}",
+      "X-CSRFToken": $('meta[name="csrf-token"]').attr('content'),
     },
     data: postData,
     success: function (result) {
@@ -298,7 +298,6 @@ function show_records(page = 0) {
       else showDangerToast("Cause an unknown error.", "Failed");
     },
     error: function (xhr, status, error) {
-      $(".circle-loader").hide();
       showDangerToast(xhr.status + " " + xhr.statusText, "Failed");
     },
   });

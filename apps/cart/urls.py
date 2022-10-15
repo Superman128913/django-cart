@@ -18,5 +18,7 @@ urlpatterns = [
     path('new_batch', insert_batch, name='new_batch'),
     path('manage_batches', batch_management, name='manage_batches'),
     path('show_records', get_batch_product_list),
-    path('set_paid', set_product_as_paid)
+    path('set_paid', set_product_as_paid),
+    path('payment_request', payment_request, name='payment_request'),
+    path('finalize', set_request_as_paid),
 ]

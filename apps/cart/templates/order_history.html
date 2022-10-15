@@ -12,6 +12,9 @@
     padding-left: 0.1rem !important;
     padding-right: 0.1rem !important;
   }
+  .Phone {
+    border: none;
+  }
 </style>
 {% endblock stylesheets %} {% block modals %} {% endblock modals %}
 {% block content %}
@@ -130,7 +133,7 @@
       type: "POST",
       dataType: "json",
       headers: {
-        "X-CSRFToken": "{{ csrf_token }}",
+        "X-CSRFToken": $('meta[name="csrf-token"]').attr('content'),
       },
       data: postData,
       success: function (result) {

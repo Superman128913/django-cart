@@ -26,6 +26,10 @@ class HistoryAdmin(admin.ModelAdmin):
     list_display = ['User', 'Product', 'Checker', 'Checker_status', 'Checker_response_text', 'Checker_response_full', 'Checker_date']
 
 
+class RequestAdmin(admin.ModelAdmin):
+    list_display = ['Supplier', 'Date', 'USDT_address', 'TXID', 'Status']
+
+
 admin.site.register(Supplier, SupplierAdmin)
 admin.site.register(Checker, CheckerAdmin)
 admin.site.register(Batch, BatchAdmin)
@@ -33,3 +37,4 @@ admin.site.register(Shop_data, ProductAdmin)
 admin.site.register(Cart, CartAdmin)
 admin.site.register(Order_history, HistoryAdmin)
 admin.site.register(StoreInfoManage)
+admin.site.register(SupplierRequest, RequestAdmin)

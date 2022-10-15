@@ -743,3 +743,60 @@ def set_product_as_paid(request):
                 'error': repr(e)
             }
     return JsonResponse(returnData)
+        
+@login_required(login_url="/login/")
+@require_http_methods(["GET", "POST"])
+def payment_request(request):
+    user = User.objects.get(pk=request.user.id)
+    if user.is_superuser == 0:
+        return redirect(reverse('login'))
+    if request.method == 'GET':
+        context = {
+        }
+        html_template = loader.get_template('payment_request.html')
+        return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
+    else:
+        if request.is_ajax():
+            try:
+                PaidUnpaid = request.POST.get('PaidUnpaid')
+                query = SupplierRequest.objects.filter(Status=PaidUnpaid).order_by('-Date').all()
+                data = RequestSerializer(query, many=True).data
+                page = int(request.POST.get('page'))
+                ############### ? Pagination ##################
+                data_length = len(data)
+                start = page * 10
+                end = min((page + 1) * 10, data_length + 1)
+                data = data[start:end]
+                ##############################################
+                returnData = {
+                    'state': "OK",
+                    'data': data,
+                    'length': data_length
+                }
+            except Exception as e:
+                returnData = {
+                    'state': "FAIL",
+                    'error': repr(e)
+                }
+        return JsonResponse(returnData)
+        
+@login_required(login_url="/login/")
+@require_http_methods(["GET", "POST"])
+def set_request_as_paid(request):
+        if request.is_ajax():
+            try:
+                request_id = request.POST.get('request_id')
+                TXID = request.POST.get('TXID')
+                request_obj = SupplierRequest.objects.get(id=request_id)
+                request_obj.TXID = TXID
+                request_obj.Status = 'PAID'
+                request_obj.save()
+                returnData = {
+                    'state': "OK"
+                }
+            except Exception as e:
+                returnData = {
+                    'state': "FAIL",
+                    'error': repr(e)
+                }
+        return JsonResponse(returnData)

@@ -1,5 +1,6 @@
 from decimal import Decimal
 import datetime
+from email.policy import default
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -155,3 +156,17 @@ class StoreInfoManage(models.Model):
 
     def __str__(self):
         return "Store Info Manage"
+
+
+class SupplierRequest(models.Model):
+    Supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    Date = models.DateTimeField(auto_now_add=True, null=False)
+    USDT_address = models.CharField(default='', max_length=255, blank=True, null=False)
+    TXID = models.CharField(default='', max_length=255, blank=True, null=False)
+    Status = models.CharField(choices=[
+                            ('PAID', 'PAID'),
+                            ('UNPAID', 'UNPAID')
+                            ], max_length=8, default='UNPAID')
+
+    def __str__(self):
+        return self.Supplier.Username + ' ' + self.Date.strftime('%m/%d/%Y')
