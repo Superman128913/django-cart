@@ -129,6 +129,18 @@
     </div>
   </div>
 </div>
+
+{% endblock content %} {% block plugin_javascripts %}
+
+<script src="{% static 'assets/vendors/select2/select2.min.js' %}"></script>
+<script src="{% static 'assets/vendors/inputmask/jquery.inputmask.bundle.js' %}"></script>
+
+{% endblock plugin_javascripts %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<script src="{% static 'assets/js/inputmask.js' %}"></script>
 <script>
   var batch_list = []
   var field_num = 0
@@ -326,17 +338,5 @@
     return (new Set(array)).size !== array.length;
   }
 </script>
-
-{% endblock content %} {% block plugin_javascripts %}
-
-<script src="{% static 'assets/vendors/select2/select2.min.js' %}"></script>
-<script src="{% static 'assets/vendors/inputmask/jquery.inputmask.bundle.js' %}"></script>
-
-{% endblock plugin_javascripts %}
-
-<!-- Specific Page JS goes HERE  -->
-{% block javascripts %}
-
-<script src="{% static 'assets/js/inputmask.js' %}"></script>
 
 {% endblock javascripts %}

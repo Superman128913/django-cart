@@ -106,6 +106,14 @@
     </div>
   </div>
 </div>
+
+{% endblock content %} {% block plugin_javascripts %}
+
+{% endblock plugin_javascripts %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
 <script>
   var page_num = 0;
   var page_len = 0;
@@ -234,12 +242,5 @@
   }
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 </script>
-
-{% endblock content %} {% block plugin_javascripts %}
-
-{% endblock plugin_javascripts %}
-
-<!-- Specific Page JS goes HERE  -->
-{% block javascripts %}
 
 {% endblock javascripts %}
