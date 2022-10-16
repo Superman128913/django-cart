@@ -1,0 +1,130 @@
+{% extends "layouts/base.html" %}
+{% block title %} Store Info {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+  .table th {
+    padding-left: 0.1rem !important;
+    padding-right: 0.1rem !important;
+  }
+  .align-item-center {
+    margin: auto;
+  }
+  .form-control, .form-control:focus {
+    color: white;
+  }
+  select.form-control {
+    color: white;
+    font-size: medium;
+  }
+  button {
+    height: calc(2.25rem + 2px);
+  }
+</style>
+{% endblock stylesheets %}
+{% block content %}
+<div class="content-wrapper">
+  <div class="page-header">
+    <h5 class="page-title">Manage Supplier</h5>
+  </div>
+  <!-- [ Store Info ] start -->
+  <div class="row align-center">
+    <div class="col-md-6 grid-margin stretch-Phone align-item-center">
+      <div class="Phone">
+        <div class="Phone-body">
+          <h4 class="Phone-title mb-4">Set selected User as Supplier:</h4>
+          <div class="form-group">
+            <select class="form-control form-control-md col-md-6 float-left" id="user_select">
+              {% for user in user_list %}
+              <option value={{ user.id }}>{{ user.username }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-success float-right" onclick="set_supplier()">Set user as Supplier</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row align-center mt-3">
+    <div class="col-md-6 grid-margin stretch-Phone align-item-center">
+      <div class="Phone">
+        <div class="Phone-body">
+          <h4 class="Phone-title mb-4">Create a new username and set it as a supplier:</h4>
+          <form class="forms-sample" method="post"> {% csrf_token %}              
+            {% if form.errors %}
+              <div class="alert alert-danger">
+                <ul>
+                  {% for field in form %}
+                    {% if field.errors %}
+                      {% for error in field.errors %}
+                        <li>{{ error|escape }}</li>
+                      {% endfor %}
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+                {% if form.non_field_errors %}
+                  {{ form.non_field_errors }}
+                {% endif %}
+              </div>
+            {% endif %}
+            {% for each in form %}
+            {% if each is not form.csrf %}
+            <div class="form-group">
+              {{ each.label_tag }}
+              {{ each }}
+            </div>
+            {% endif %}
+            {% endfor %}
+            <button type="submit" class="btn btn-success mt-3 float-right">Add Supplier</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--[ Store Info ] end-->
+</div>
+{% endblock content %}
+{% block javascripts %}
+
+{% if success %}
+  <script>
+    jQuery(document).ready(function () {
+      showSuccessToast("{{ success }}", "Success");
+    })
+  </script>
+{% endif %}
+
+<script>
+  function set_supplier(){
+    postData = {
+      user_id: $('#user_select').val()
+    }
+    if(postData['user_id'] == '')
+      return
+    $.ajax({
+      url: "/set_supplier",
+      type: "POST",
+      dataType: "json",
+      headers: {
+        "X-CSRFToken": $('meta[name="csrf-token"]').attr('content'),
+      },
+      data: postData,
+      success: function (result) {
+        var state = result["state"];
+        if (state == "OK") {
+          showSuccessToast("Seted selected User as Supplier", "Success");
+          $('#user_select').children('option').filter(":selected").remove()
+        } else if (state == "FAIL")
+          showDangerToast(result["error"], "Failed");
+        else
+          showDangerToast("Cause an unknown error.", "Failed");
+      },
+      error: function (xhr, status, error) {
+        showDangerToast(xhr.status + " " + xhr.statusText, "Failed");
+      },
+    });
+  }
+</script>
+
+{% endblock javascripts %}

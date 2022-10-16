@@ -1,6 +1,7 @@
 import os
 from decimal import Decimal
 from datetime import datetime, date
+from urllib.request import Request
 
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -8,12 +9,14 @@ from django.template import loader
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate
 from django.views.decorators.http import require_http_methods
 from django.db.models import F, Q, Count, Sum
-from apps.home.models import balance
 
+from apps.home.models import balance
 from apps.home.views import get_default_page_context
 from apps.home.models import AreaCode
+from .forms import CreateSupplierForm
 from .models import *
 from .serializers import *
 
@@ -465,7 +468,7 @@ def order_history(request):
                     'state': "FAIL",
                     'error': repr(e)
                 }
-        return JsonResponse(returnData)
+            return JsonResponse(returnData)
 
 
 def checker_api(product_id, checker_id, user_id):
@@ -576,7 +579,7 @@ def insert_batch(request):
                     'state': "FAIL",
                     'error': repr(e)
                 }
-        return JsonResponse(returnData)
+            return JsonResponse(returnData)
 
         
 @login_required(login_url="/login/")
@@ -670,7 +673,7 @@ def batch_management(request):
                     'state': "FAIL",
                     'error': repr(e)
                 }
-        return JsonResponse(returnData)
+            return JsonResponse(returnData)
 
 @login_required(login_url="/login/")
 @require_http_methods(["POST"])
@@ -715,7 +718,7 @@ def get_batch_product_list(request):
                 'state': "FAIL",
                 'error': repr(e)
             }
-    return JsonResponse(returnData)
+        return JsonResponse(returnData)
 
 @login_required(login_url="/login/")
 @require_http_methods(["POST"])
@@ -742,7 +745,7 @@ def set_product_as_paid(request):
                 'state': "FAIL",
                 'error': repr(e)
             }
-    return JsonResponse(returnData)
+        return JsonResponse(returnData)
         
 @login_required(login_url="/login/")
 @require_http_methods(["GET", "POST"])
@@ -778,25 +781,226 @@ def payment_request(request):
                     'state': "FAIL",
                     'error': repr(e)
                 }
-        return JsonResponse(returnData)
+            return JsonResponse(returnData)
         
 @login_required(login_url="/login/")
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["POST"])
 def set_request_as_paid(request):
+    user = User.objects.get(pk=request.user.id)
+    if user.is_superuser == 0:
+        return redirect(reverse('login'))
+    if request.is_ajax():
+        try:
+            request_id = request.POST.get('request_id')
+            TXID = request.POST.get('TXID')
+            request_obj = SupplierRequest.objects.get(id=request_id)
+            request_obj.TXID = TXID
+            request_obj.Status = 'PAID'
+            request_obj.save()
+            returnData = {
+                'state': "OK"
+            }
+        except Exception as e:
+            returnData = {
+                'state': "FAIL",
+                'error': repr(e)
+            }
+        return JsonResponse(returnData)
+
+@login_required(login_url="/login/")
+@require_http_methods(["GET", "POST"])
+def create_supplier(request):
+    user = User.objects.get(pk=request.user.id)
+    if user.is_superuser == 0:
+        return redirect(reverse('login'))
+    supplier_list = Supplier.objects.values_list('Username', flat=True)
+    user_list = User.objects.exclude(username__in=supplier_list).all()
+    if request.method == 'GET':
+        form = CreateSupplierForm()
+        context = {
+            'form': form,
+            'user_list': user_list
+        }
+    else:
+        form = CreateSupplierForm(request.POST)
+        context = {
+            'form': form,
+            'user_list': user_list
+        }
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            new_supplier = Supplier(Username=username)
+            new_supplier.save()
+            context['form'] = CreateSupplierForm(),
+            context['success'] = 'Create a new user and set it as a supplier'
+    html_template = loader.get_template('manage_supplier.html')
+    return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
+        
+@login_required(login_url="/login/")
+@require_http_methods(["POST"])
+def set_user_as_supplier(request):
+    user = User.objects.get(pk=request.user.id)
+    if user.is_superuser == 0:
+        return redirect(reverse('login'))
+    if request.is_ajax():
+        try:
+            user_id = int(request.POST.get('user_id'))
+            user_obj = User.objects.get(pk=user_id)
+            new_supplier = Supplier(Username=user_obj.username)
+            new_supplier.save()
+            returnData = {
+                'state': "OK"
+            }
+        except Exception as e:
+            returnData = {
+                'state': "FAIL",
+                'error': repr(e)
+            }
+        return JsonResponse(returnData)
+
+    
+@login_required(login_url="/login/")
+@require_http_methods(["GET", "POST"])
+def show_batch(request):
+    supplier_obj = Supplier.objects.filter(Username=request.user.username)
+    if supplier_obj.exists() == False:
+        return redirect(reverse('login'))
+    supplier_obj = supplier_obj.first()
+    if request.method == 'GET':
+        product_query = Shop_data.objects.order_by('Insert_date')
+        if product_query.exists():
+            start_date = product_query.first().Insert_date.strftime('%m/%d/%Y')
+            end_date = product_query.last().Insert_date.strftime('%m/%d/%Y')
+        else:
+            start_date = '01/01/2022'
+            end_date = date.today().strftime('%m/%d/%Y')
+        context = {
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        html_template = loader.get_template('manage_your_batches.html')
+        return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
+    else:
         if request.is_ajax():
             try:
-                request_id = request.POST.get('request_id')
-                TXID = request.POST.get('TXID')
-                request_obj = SupplierRequest.objects.get(id=request_id)
-                request_obj.TXID = TXID
-                request_obj.Status = 'PAID'
-                request_obj.save()
+                from_date = request.POST.get('from_date')
+                to_date = request.POST.get('to_date')
+                from_date = datetime.datetime.strptime(from_date, '%m/%d/%Y').date()
+                to_date = datetime.datetime.strptime(to_date, '%m/%d/%Y').date()
+                print(from_date, to_date)
+                PaidUnpaid = request.POST.get('PaidUnpaid')
+
+                batch_query = Batch.objects.filter(Supplier=supplier_obj)
+
+                total_batches = 0
+                total_sold = 0
+                total_supplier_profit = 0
+                total_refund = 0
+                total_sold_price = 0
+                total_unsold = 0
+
+                tableData = []
+                for batch in batch_query.all():
+                    products = Shop_data.objects.filter(Batch=batch).filter(Supplier_payment_status=PaidUnpaid).filter(Sold_date__date__range=(from_date, to_date))
+                    sold_products = products.filter(Sold_unsold='SOLD')
+                    refund_products = products.filter(Sold_unsold='REFUND')
+                    unsold_products = products.filter(Q(Sold_unsold='ON_CART') | Q(Sold_unsold='UNSOLD'))
+                    row = {
+                        'batch_id': batch.id,
+                        'batch_name': batch.Name,
+                        'supplier_batch_share': batch.Percent,
+                        'total_sold': sold_products.count(),
+                        'total_sold_price': sold_products.aggregate(total_price=Sum('Price'))['total_price'] or 0,
+                        'total_refund': refund_products.count(),
+                        'total_unsold': unsold_products.count()
+                    }
+                    row['total_supplier_profit'] = row['total_sold_price'] * row['supplier_batch_share'] / Decimal(100)
+                    row['total_shop_profit'] = row['total_sold_price'] - row['total_supplier_profit']
+                    tableData.append(row)
+                    total_batches += 1
+                    total_sold += row['total_sold']
+                    total_sold_price += row['total_sold_price']
+                    total_supplier_profit += row['total_supplier_profit']
+                    total_refund += row['total_refund']
+                    total_unsold += row['total_unsold']
+                data = {
+                    'tableData': tableData,
+                    'total_batches': total_batches,
+                    'total_sold': total_sold,
+                    'total_sold_price': total_sold_price,
+                    'total_supplier_profit': total_supplier_profit,
+                    'total_refund': total_refund,
+                    'total_unsold': total_unsold
+                }
                 returnData = {
-                    'state': "OK"
+                    'state': "OK",
+                    'data': data
                 }
             except Exception as e:
                 returnData = {
                     'state': "FAIL",
                     'error': repr(e)
                 }
+            return JsonResponse(returnData)
+
+@login_required(login_url="/login/")
+@require_http_methods(["GET", "POST"])
+def supplier_request(request):
+    supplier_obj = Supplier.objects.filter(Username=request.user.username)
+    if supplier_obj.exists() == False:
+        return redirect(reverse('login'))
+    supplier_obj = supplier_obj.first()
+    if request.method == 'GET':
+        context = {
+        }
+        html_template = loader.get_template('request_payment.html')
+        return HttpResponse(html_template.render({**get_default_page_context(request), **context}, request))
+    else:
+        if request.is_ajax():
+            try:
+                query = SupplierRequest.objects.filter(Supplier=supplier_obj).order_by('-Date').all()
+                data = RequestSerializer(query, many=True).data
+                page = int(request.POST.get('page'))
+                ############### ? Pagination ##################
+                data_length = len(data)
+                start = page * 10
+                end = min((page + 1) * 10, data_length + 1)
+                data = data[start:end]
+                ##############################################
+                returnData = {
+                    'state': "OK",
+                    'data': data,
+                    'length': data_length
+                }
+            except Exception as e:
+                returnData = {
+                    'state': "FAIL",
+                    'error': repr(e)
+                }
+            return JsonResponse(returnData)
+
+@login_required(login_url="/login/")
+@require_http_methods(["GET", "POST"])
+def create_request(request):
+    supplier_obj = Supplier.objects.filter(Username=request.user.username)
+    if supplier_obj.exists() == False:
+        return redirect(reverse('login'))
+    supplier_obj = supplier_obj.first()
+    if request.is_ajax():
+        try:
+            USDT_address = request.POST.get('USDT_address')
+            new_request = SupplierRequest(
+                Supplier=supplier_obj,
+                USDT_address=USDT_address
+                )
+            new_request.save()
+            returnData = {
+                'state': "OK"
+            }
+        except Exception as e:
+            returnData = {
+                'state': "FAIL",
+                'error': repr(e)
+            }
         return JsonResponse(returnData)

@@ -21,4 +21,9 @@ urlpatterns = [
     path('set_paid', set_product_as_paid),
     path('payment_request', payment_request, name='payment_request'),
     path('finalize', set_request_as_paid),
+    path('manage_supplier', create_supplier, name='manage_supplier'),
+    path('set_supplier', set_user_as_supplier),
+    path('manage_your_batch', show_batch, name='manage_supplier_batch'),
+    path('request_payment', supplier_request, name='request_payment'),
+    path('submit_request', create_request),
 ]

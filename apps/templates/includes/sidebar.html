@@ -8,8 +8,8 @@
     <li class="nav-item nav-category">
       <span class="nav-link">Navigation</span>
     </li>
-    <!--ADMIN-->
-    {% if request.user.is_superuser %}
+    <!--ADMIN AREA-->
+    {% if is_admin %}
     <li class="nav-item menu-items">
       <a class="nav-link" data-toggle="collapse" href="#admin_area">
         <span class="menu-icon">
@@ -42,6 +42,14 @@
                 <i class="mdi mdi-bank"></i>
               </span>
               Payment Request</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'manage_supplier' %}">
+              <span class="menu-icon">
+                <i class="mdi mdi-server-plus"></i>
+              </span>
+              Manage Supplier</a
             >
           </li>
         </ul>
@@ -188,7 +196,7 @@
     <!--History End-->
     <!--Online Support Start-->
     <li class="nav-item menu-items">
-      {% if user.is_superuser %}
+      {% if is_admin %}
       <a class="nav-link" href="/helpdesk/">
       {% else %}  
       <a class="nav-link" href="{% url 'onlineSupport' %}">
@@ -200,5 +208,38 @@
       </a>
     </li>
     <!--Online Support end-->
+    <!--Partners Area-->
+    {% if is_supplier %}
+    <li class="nav-item menu-items">
+      <a class="nav-link" data-toggle="collapse" href="#partners_area">
+        <span class="menu-icon">
+          <i class="mdi mdi-bank"></i>
+        </span>
+        <span class="menu-title">Partners Area</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="partners_area">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'manage_supplier_batch' %}">
+              <span class="menu-icon">
+                <i class="mdi mdi-archive"></i>
+              </span>
+              Manage your Batches</a
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'request_payment' %}">
+              <span class="menu-icon">
+                <i class="mdi mdi-cash-usd"></i>
+              </span>
+              Request Payment</a
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+    {% endif %}
+    <!--Partners Area End-->
   </ul>
 </nav>

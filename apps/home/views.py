@@ -37,7 +37,7 @@ from helpdesk.models import Ticket, FollowUp
 
 from .forms import AreaCodeForm
 from .pages.ticket import CreateTicketForm
-from apps.cart.models import Cart
+from apps.cart.models import Cart, Supplier
 
 
 def get_default_page_context(request):
@@ -104,6 +104,9 @@ def get_default_page_context(request):
     gm2 = Gate2Manage.objects.all()
     if len(gm2) > 0:
         context["Gate1_About_Image"] = gm2[0].icon_about_gate
+    context['is_admin'] = request.user.is_superuser
+    supplier_list = Supplier.objects.values_list('Username', flat=True)
+    context['is_supplier'] = request.user.username in supplier_list
 
     return context
 

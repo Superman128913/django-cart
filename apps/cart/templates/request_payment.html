@@ -1,0 +1,285 @@
+{% extends "layouts/base.html" %} {% block title %} Search {% endblock %}
+{% load static %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<style>
+  .form-control {
+    border-radius: 0.1875rem;
+  }
+  .form-control:focus {
+    color: white;
+  }
+  .form-control, .close {
+    color: white;
+  }
+  .Phone-header div {
+    font-size: 0.8rem;
+  }
+  .Phone-header #records_num {
+    font-size: 1rem;
+  }
+  .datepicker {
+    padding: 0px
+  }
+  .form-label, .col-form-label {
+    color: #6c7293;
+  }
+  .table th {
+    padding-left: 0.1rem !important;
+    padding-right: 0.1rem !important;
+  }
+  .table td {
+    white-space: normal !important; 
+    word-wrap: break-word;
+  }
+  .Phone {
+    border: none;
+  }
+</style>
+{% endblock stylesheets %}
+{% block modals %}
+{% endblock modals %} {% block content %}
+
+<div class="content-wrapper">
+  <!--Header-->
+  <div class="page-header">
+    <h1 class="page-title">Payment Request</h1>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 grid-margin">
+      <div class="Phone">
+        <div class="Phone-body">
+          <div class="template-demo">
+            <div class="row mt-1">
+              <div class="col-md-9">
+                <div class="form-group row">
+                  <label for="USDT_address"  class="col-sm-3 col-form-label">Your USDT payment address: </label>
+                  <div class="col-sm-9">
+                    <input type="text" class="form-control" id="USDT_address" placeholder="USDT address">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <button type="button" class="btn btn-success" style="height: calc(2.25rem + 2px);" onclick="submit_request()">Submit your payment request</button>
+              </div>
+            </div>
+            <div class="row mt-1 col-md-12 stretch-Phone">
+              <div class="circle-loader"></div>
+            </div>
+            <div class="row mt-1" id="search_result">
+              <div class="col-md-12 overflow-auto">
+                <table class="table table-bordered table-striped">
+                  <thead class="text-center">
+                    <tr>
+                      <th>Request Date</th>
+                      <th>Request USDT Address</th>
+                      <th>Request Status</th>
+                      <th>Request TXID (Transaction Hash)</th>
+                    </tr>
+                  </thead>
+                  <tbody class="text-left"></tbody>
+                </table>
+              </div>
+              <!--------------------------- Pagination-HTML --------------------------------->
+              <div
+                class="col-md-12 col-sm-6 grid-margin stretch-Phone"
+                id="pagination"
+              >
+                <div class="Phone">
+                  <div class="Phone-body">                    
+                    <h5 class="col-md-6 float-left">Total Records: <b id="records_num"></b></h5>
+                    <nav class="col-md-6 float-right">
+                      <ul
+                        class="pagination justify-content-end flat"
+                        id="page_button"
+                      ></ul>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+              <!-------------------------------------------------------------------------->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %} {% block plugin_javascripts %}
+
+{% endblock plugin_javascripts %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<script>
+  var page_num = 0;
+  var page_len = 0;
+
+  jQuery(document).ready(function () {
+    show_result()
+  })
+
+  function show_result(page = 0) {
+    $("#search_result").hide()
+    $(".circle-loader").show()
+    $("#search_result .table tbody").empty()
+    postData = {
+      page: page
+    }
+    $.ajax({
+      url: "",
+      type: "POST",
+      dataType: "json",
+      headers: {
+        "X-CSRFToken": $('meta[name="csrf-token"]').attr('content'),
+      },
+      data: postData,
+      success: function (result) {
+        var state = result["state"];
+        if (state == "OK") {
+          $("#search_result").show()
+          $(".circle-loader").hide()
+          var request_list = result["data"];
+          $("#records_num").text(result["length"] + " records found");
+          console.log(request_list);
+          page_num = page;
+          var len = request_list.length;
+          if (len) {
+            request_list.forEach(function (each) {
+              var appendHTML = '';
+              appendHTML += '<tr>';
+                var request_date = new Date(each['Date']);
+                appendHTML += '<td class="text-center">' + (request_date.getDate()).toString().padStart(2, '0') + '/' + (request_date.getMonth() + 1).toString().padStart(2, '0') + '/' + request_date.getFullYear() + '</td>'
+                appendHTML += '<td>' + each['USDT_address'] + '</td>'
+              appendHTML += '<td class="text-center">' + each['Status'] + '</td>'
+              appendHTML += '<td>' + each['TXID'] + '</td>'
+              appendHTML += '</tr>';
+              $("#search_result .table tbody").append(appendHTML);
+            });
+            pagination_init(result["length"])
+          } else
+            $("#search_result .table tbody").append(
+              '<tr><td colspan="4" class="text-center">No Data</td></tr>'
+            );
+        } else if (state == "FAIL")
+        {
+          $("#search_result").show()
+          $(".circle-loader").hide()
+          showDangerToast(result["error"], "Failed");
+        }
+        else
+        {
+          $("#search_result").show()
+          $(".circle-loader").hide()
+          showDangerToast("Cause an unknown error.", "Failed");
+        }
+      },
+      error: function (xhr, status, error) {
+        $("#search_result").show()
+        $(".circle-loader").hide()
+        showDangerToast(xhr.status + " " + xhr.statusText, "Failed");
+      },
+    });
+  }
+
+  function submit_request() {
+    postData = {
+      USDT_address: $('#USDT_address').val()
+    }
+    if(postData['USDT_address'] == '')
+      return
+    $.ajax({
+      url: "submit_request",
+      type: "POST",
+      dataType: "json",
+      headers: {
+        "X-CSRFToken": $('meta[name="csrf-token"]').attr('content'),
+      },
+      data: postData,
+      success: function (result) {
+        var state = result["state"];
+        if (state == "OK") {
+          window.location.href = ''
+        } else if (state == "FAIL")
+          showDangerToast(result["error"], "Failed");
+        else
+          showDangerToast("Cause an unknown error.", "Failed");
+      },
+      error: function (xhr, status, error) {
+        showDangerToast(xhr.status + " " + xhr.statusText, "Failed");
+      },
+    });
+  }
+  ////////////////////////////////////////////// Pagination-Javascript //////////////////////////////////////////////////
+  function pagination_init(len) {
+    $("#pagination").show();
+    $("#page_button").empty();
+    $("#page_button").append(
+      '<li class="page-item"><a class="page-link" id="page-first" href="javascript:void(0);"><<</a></li>'
+    );
+    $("#page_button").append(
+      '<li class="page-item"><a class="page-link" id="page-prev" href="javascript:void(0);"><</a></li>'
+    );
+    page_len = Math.floor((len - 1) / 10) + 1;
+    var start = 0;
+    if (page_num - start >= 2) start = page_num - 2;
+    if (start + 5 >= page_len) start = Math.max(page_len - 5, 0);
+
+    var end = Math.min(start + 5, page_len);
+    for (i = start; i < end; i++) {
+      if (i == page_num)
+        $("#page_button").append(
+          '<li class="page-item active"><a class="page-link page-num" href="javascript:void(0);" page=' +
+            i +
+            ">" +
+            (i + 1) +
+            "</a></li>"
+        );
+      else
+        $("#page_button").append(
+          '<li class="page-item"><a class="page-link page-num" href="javascript:void(0);" page=' +
+            i +
+            ">" +
+            (i + 1) +
+            "</a></li>"
+        );
+    }
+    $("#page_button").append(
+      '<li class="page-item"><a class="page-link" id="page-next" href="javascript:void(0);">></a></li>'
+    );
+    $("#page_button").append(
+      '<li class="page-item"><a class="page-link" id="page-end" href="javascript:void(0);">>></a></li>'
+    );
+    $(".page-num").click(function () {
+      if (page_num == $(this).attr("page")) return;
+      page_num = $(this).attr("page");
+      show_result(page_num);
+    });
+    $("#page-first").click(function () {
+      if (page_num == 0) return;
+      page_num = 0;
+      show_result(page_num);
+    });
+    $("#page-end").click(function () {
+      if (page_num == page_len - 1) return;
+      page_num = page_len - 1;
+      show_result(page_num);
+    });
+    $("#page-prev").click(function () {
+      if (page_num == 0) return;
+      page_num -= 1;
+      show_result(page_num);
+    });
+    $("#page-next").click(function () {
+      if (page_num == page_len - 1) return;
+      page_num += 1;
+      show_result(page_num);
+    });
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+</script>
+
+{% endblock javascripts %}

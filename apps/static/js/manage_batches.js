@@ -73,7 +73,7 @@ function show_result() {
           });
         } else
           $("#search_result .table tbody").append(
-            '<tr><td colspan="9" class="text-center">No Data</td></tr>'
+            '<tr><td colspan="11" class="text-center">No Data</td></tr>'
           );
         $("#total_batches").text(data["total_batches"]);
         $("#total_supplier").text(data["total_supplier"]);

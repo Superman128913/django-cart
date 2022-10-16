@@ -7,16 +7,10 @@
   .form-control {
     border-radius: 0.1875rem;
   }
-  .form-control option {
-    color: white;
-  }
   .form-control:focus {
     color: white;
   }
   .form-control, .close {
-    color: white;
-  }
-  select.form-control {
     color: white;
   }
   .Phone-header div {
@@ -58,8 +52,7 @@
         <div class="Phone-body">
           <div class="template-demo">
             <div class="row mt-1">
-              <div class="col-sm-6"></div>
-              <div class="col-md-4">
+              <div class="col-md-6">
                 <div class="form-group row">
                   <div class="col-sm-5">
                     <div class="form-check mt-sm-2 float-right">
@@ -79,7 +72,7 @@
                 <button type="button" class="btn btn-success" style="height: calc(2.25rem + 2px);" onclick="show_result()">Show Results</button>
               </div>
             </div>
-            <div class="row mt-1 col-md-12 stretch-card">
+            <div class="row mt-1 col-md-12 stretch-Phone">
               <div class="circle-loader"></div>
             </div>
             <div class="row mt-1" id="search_result">
@@ -91,7 +84,7 @@
               </div>
               <!--------------------------- Pagination-HTML --------------------------------->
               <div
-                class="col-md-12 col-sm-6 grid-margin stretch-card"
+                class="col-md-12 col-sm-6 grid-margin stretch-Phone"
                 id="pagination"
               >
                 <div class="Phone">
@@ -223,7 +216,7 @@
       }
       $(this).parents('td').html('<div class="circle-loader"></div>')
       $.ajax({
-        url: "finalize",
+        url: "/finalize",
         type: "POST",
         dataType: "json",
         headers: {

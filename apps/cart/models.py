@@ -1,6 +1,7 @@
 from decimal import Decimal
 import datetime
 from email.policy import default
+from enum import unique
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -18,7 +19,7 @@ year_list = [(each, each) for each in range(int(datetime.date.today().strftime('
 # Create your models here.   
 
 class Supplier(models.Model):
-    Username = models.CharField(max_length=255, null=False)
+    Username = models.CharField(max_length=255, null=False, unique=True)
 
     def __str__(self):
         return self.Username
