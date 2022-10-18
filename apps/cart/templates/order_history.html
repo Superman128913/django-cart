@@ -149,17 +149,30 @@
             product_list.forEach(function (each) {
               var appendHTML = "";
               appendHTML += "<tr>";
-              appendHTML += '<td class="text-center">' + each['Phone'] + '</td>'
-              appendHTML += '<td>' + each['Exp_day'] + '/' + each['Exp_month'] + '/' + each['Exp_year'] + '<br>' + each['Puk_code'] + '<br>' + each['Item_cost'] + '$</td>'
-              appendHTML += '<td>' + each['Areaf1'] + '<br>' + each['Areaf2'] + '<br>' + each['Areaf3'] + '<br>' + each['Areaf4'] + '</td>'
-              appendHTML += '<td class="text-center"><img src="static/assets/vendors/flag-icon-css/flags/4x3/' + each['Areaf6'] + '.svg" alt="' + each['Areaf6'] + '.svg"><br>' + each['Areaf5'] + '</td>'
-              appendHTML += '<td>' + each['Address'] + '<br>' + each['City'] + '<br>' + each['State'] + '<br>' + each['Zipcode'] + '</td>'
-              appendHTML += '<td>' + each['First_name'] + '<br>' + each['Last_name'] + '<br>(' + each['Gender'] + ')</td>'
-              appendHTML += '<td>' + each['Extra1'] + '<br>' + each['Extra2'] + '<br>' + each['Extra3'] + '<br>' + each['Extra4'] + '<br>' + each['Extra5'] + '</td>'
+              appendHTML += '<td class="text-center">' + (each['Phone'] || '') + '</td>'
+              appendHTML += '<td>' + (each['Exp_day'] || '') + '/' + (each['Exp_month'] || '') + '/' + each(['Exp_year'] || '') + '<br>' + (each['Puk_code'] || '') + '<br>' + (each['Item_cost'] || '') + '$</td>'
+              appendHTML += '<td>' + (each['Areaf1'] || '') + '<br>' + (each['Areaf2'] || '') + '<br>' + each(['Areaf3'] || '') + '<br>' + (each['Areaf4'] || '') + '</td>'
+              if(each["Areaf6"])
+                appendHTML +=
+                  '<td class="text-center"><img src="static/assets/vendors/flag-icon-css/flags/4x3/' +
+                  each["Areaf6"] +
+                  '.svg" alt="' +
+                  each["Areaf6"] +
+                  '.svg"><br>' +
+                  (each["Areaf5"] || '') +
+                  "</td>";
+              else
+                appendHTML +=
+                  '<td class="text-center">' +
+                  (each["Areaf5"] || '') +
+                  "</td>";
+              appendHTML += '<td>' + (each['Address'] || '') + '<br>' + (each['City'] || '') + '<br>' + (each['State'] || '') + '<br>' + (each['Zipcode'] || '') + '</td>'
+              appendHTML += '<td>' + (each['First_name'] || '') + '<br>' + (each['Last_name'] || '') + '<br>(' + (each['Gender'] || '') + ')</td>'
+              appendHTML += '<td>' + (each['Extra1'] || '') + '<br>' + (each['Extra2'] || '') + '<br>' + (each['Extra3'] || '') + '<br>' + (each['Extra4'] || '') + '<br>' + (each['Extra5'] || '') + '</td>'
               var Batch_Publish_date = new Date(each['Batch_Publish_date']);
-              appendHTML += '<td>' + each['Batch_id'] + '<br>' + each['Batch_Name'] + '<br>' + (Batch_Publish_date.getDate()).toString().padStart(2, '0') + '/' + (Batch_Publish_date.getMonth() + 1).toString().padStart(2, '0') + '/' + Batch_Publish_date.getFullYear() + '</td>'
+              appendHTML += '<td>' + (each['Batch_id'] || '') + '<br>' + (each['Batch_Name'] || '') + '<br>' + (Batch_Publish_date.getDate()).toString().padStart(2, '0') + '/' + (Batch_Publish_date.getMonth() + 1).toString().padStart(2, '0') + '/' + Batch_Publish_date.getFullYear() + '</td>'
               var Check_date = new Date(each['Sold_date'])
-              appendHTML += '<td>' + each["Checker_name"] + '<br>' + each['Checker_cost'] + '$<br>' + each['Checker_status'] + '<br>' + (Check_date.getDate()).toString().padStart(2, '0') + '/' + (Check_date.getMonth() + 1).toString().padStart(2, '0') + '/' + Check_date.getFullYear() + "</td>";
+              appendHTML += '<td>' + (each["Checker_name"] || '') + '<br>' + (each['Checker_cost'] || '') + '$<br>' + each['Checker_status'] + '<br>' + (Check_date.getDate()).toString().padStart(2, '0') + '/' + (Check_date.getMonth() + 1).toString().padStart(2, '0') + '/' + Check_date.getFullYear() + "</td>";
               appendHTML += "</tr>";
               $("#search_result .table tbody").append(appendHTML);
             });

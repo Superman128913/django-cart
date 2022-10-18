@@ -1565,26 +1565,11 @@ function show_result(page = 0) {
         var len = result["length"];
         if (len) {
           product_list.forEach(function (each) {
-            each["Extra1"] =
-              each["Extra1"] == "" || each["Extra1"] == null
-                ? ""
-                : "Extra1 included";
-            each["Extra2"] =
-              each["Extra2"] == "" || each["Extra2"] == null
-                ? ""
-                : "Extra2 included";
-            each["Extra3"] =
-              each["Extra3"] == "" || each["Extra3"] == null
-                ? ""
-                : "Extra3 included";
-            each["Extra4"] =
-              each["Extra4"] == "" || each["Extra4"] == null
-                ? ""
-                : "Extra4 included";
-            each["Extra5"] =
-              each["Extra5"] == "" || each["Extra5"] == null
-                ? ""
-                : "Extra5 included";
+            each["Extra1"] = each["Extra1"] == null ? "" : "Extra1 included";
+            each["Extra2"] = each["Extra2"] == null ? "" : "Extra2 included";
+            each["Extra3"] = each["Extra3"] == null ? "" : "Extra3 included";
+            each["Extra4"] = each["Extra4"] == null ? "" : "Extra4 included";
+            each["Extra5"] = each["Extra5"] == null ? "" : "Extra5 included";
             each["Extra"] = "";
             each["Extra"] += each["Extra1"];
             each["Extra"] +=
@@ -1599,50 +1584,56 @@ function show_result(page = 0) {
             var appendHTML = "";
             appendHTML += "<tr>";
             appendHTML +=
-              '<td class="text-center">' + each["Area_code"] + "</td>";
+              '<td class="text-center">' + (each["Area_code"] || '') + "</td>";
             appendHTML +=
               '<td class="text-center">' +
-              each["Exp_day"] +
+              (each["Exp_day"] || '') +
               "/" +
-              each["Exp_month"] +
+              (each["Exp_month"] || '') +
               "/" +
-              each["Exp_year"] +
+              (each["Exp_year"] || '') +
               "</td>";
             appendHTML +=
               "<td>" +
-              each["Areaf1"] +
+              (each["Areaf1"] || '') +
               "<br>" +
-              each["Areaf2"] +
+              (each["Areaf2"] || '') +
               "<br>" +
-              each["Areaf3"] +
+              (each["Areaf3"] || '') +
               "<br>" +
-              each["Areaf4"] +
+              (each["Areaf4"] || '') +
               "</td>";
-            appendHTML +=
-              '<td class="text-center"><img src="static/assets/vendors/flag-icon-css/flags/4x3/' +
-              each["Areaf6"] +
-              '.svg" alt="' +
-              each["Areaf6"] +
-              '.svg"><br>' +
-              each["Areaf5"] +
-              "</td>";
+            if(each["Areaf6"])
+              appendHTML +=
+                '<td class="text-center"><img src="static/assets/vendors/flag-icon-css/flags/4x3/' +
+                each["Areaf6"] +
+                '.svg" alt="' +
+                each["Areaf6"] +
+                '.svg"><br>' +
+                (each["Areaf5"] || '') +
+                "</td>";
+            else
+              appendHTML +=
+                '<td class="text-center">' +
+                (each["Areaf5"] || '') +
+                "</td>";
             appendHTML +=
               "<td>" +
-              each["City"] +
+              (each["City"] || '') +
               "<br>" +
-              each["State"] +
+              (each["State"] || '') +
               "<br>" +
-              each["Zipcode"] +
+              (each["Zipcode"] || '') +
               "</td>";
-            appendHTML += "<td>" + each["First_name"] + "</td>";
-            appendHTML += '<td class="text-center">' + each["Gender"] + "</td>";
-            appendHTML += '<td class="text-center">' + each["Extra"] + "</td>";
+            appendHTML += "<td>" + (each["First_name"] || '') + "</td>";
+            appendHTML += '<td class="text-center">' + (each["Gender"] || '') + "</td>";
+            appendHTML += '<td class="text-center">' + (each["Extra"] || '') + "</td>";
             var Batch_Publish_date = new Date(each["Batch_Publish_date"]);
             appendHTML +=
               "<td>" +
-              each["Batch_id"] +
+              (each["Batch_id"] || '') +
               "<br>" +
-              each["Batch_Name"] +
+              (each["Batch_Name"] || '') +
               "<br>" +
               Batch_Publish_date.getDate().toString().padStart(2, "0") +
               "/" +
@@ -1650,7 +1641,7 @@ function show_result(page = 0) {
               "/" +
               Batch_Publish_date.getFullYear() +
               "</td>";
-            appendHTML += '<td class="text-right">' + each["Price"] + "$</td>";
+            appendHTML += '<td class="text-right">' + (each["Price"] || '') + "$</td>";
             if (each["Sold_unsold"] == "ON_CART")
               appendHTML +=
                 '<td class="text-center"><button type="button" class="btn btn-warning" onclick="remove_product(' +

@@ -39,17 +39,17 @@ function show_result() {
             appendHTML +=
               '<td class="text-center">' + each["batch_id"] + "</td>";
             appendHTML +=
-              '<td class="text-left">' + each["batch_name"] + "</td>";
-            appendHTML += "<td>" + each["supplier_batch_share"] + " % </td>";
+              '<td class="text-left">' + (each["batch_name"] || '') + "</td>";
+            appendHTML += "<td>" + (each["supplier_batch_share"] || '') + " % </td>";
             if (each["total_sold"])
               appendHTML +=
                 "<td>" +
                 each["total_sold"] +
                 '<br><a href="javascript: void(0);" class="show-record total-sold">Show Records</a></td>';
-            else appendHTML += "<td>" + each["total_sold"] + "</td>";
-            appendHTML += "<td>" + each["total_sold_price"] + " $ </td>";
-            appendHTML += "<td>" + each["total_supplier_profit"] + " $ </td>";
-            appendHTML += "<td>" + each["total_shop_profit"] + " $ </td>";
+            else appendHTML += "<td>" + (each["total_sold"] || 0) + "</td>";
+            appendHTML += "<td>" + (each["total_sold_price"] || 0) + " $ </td>";
+            appendHTML += "<td>" + (each["total_supplier_profit"] || 0) + " $ </td>";
+            appendHTML += "<td>" + (each["total_shop_profit"] || 0) + " $ </td>";
             if (each["total_refund"])
               appendHTML +=
                 "<td>" +
@@ -146,70 +146,76 @@ function show_records(page = 0) {
             appendHTML += '<td class="text-center">' + each["Phone"] + "</td>";
             appendHTML +=
               "<td>" +
-              each["Exp_day"] +
+              (each["Exp_day"] || '') +
               "/" +
-              each["Exp_month"] +
+              (each["Exp_month"] || '') +
               "/" +
-              each["Exp_year"] +
+              (each["Exp_year"] || '') +
               "<br>" +
-              each["Puk_code"] +
+              (each["Puk_code"] || '') +
               "<br>" +
-              each["Price"] +
+              (each["Price"] || '') +
               "$</td>";
             appendHTML +=
               "<td>" +
-              each["Areaf1"] +
+              (each["Areaf1"] || '') +
               "<br>" +
-              each["Areaf2"] +
+              (each["Areaf2"] || '') +
               "<br>" +
-              each["Areaf3"] +
+              (each["Areaf3"] || '') +
               "<br>" +
-              each["Areaf4"] +
+              (each["Areaf4"] || '') +
               "</td>";
+            if(each["Areaf6"])
+              appendHTML +=
+                '<td class="text-center"><img src="static/assets/vendors/flag-icon-css/flags/4x3/' +
+                each["Areaf6"] +
+                '.svg" alt="' +
+                each["Areaf6"] +
+                '.svg"><br>' +
+                (each["Areaf5"] || '') +
+                "</td>";
+            else
+              appendHTML +=
+                '<td class="text-center">' +
+                (each["Areaf5"] || '') +
+                "</td>";
             appendHTML +=
-              '<td class="text-center"><img src="static/assets/vendors/flag-icon-css/flags/4x3/' +
-              each["Areaf6"] +
-              '.svg" alt="' +
-              each["Areaf6"] +
-              '.svg"><br>' +
-              each["Areaf5"] +
+              "<td>" +
+              (each["Address"] || '') +
+              "<br>" +
+              (each["City"] || '') +
+              "<br>" +
+              (each["State"] || '') +
+              "<br>" +
+              (each["Zipcode"] || '') +
               "</td>";
             appendHTML +=
               "<td>" +
-              each["Address"] +
+              (each["First_name"] || '') +
               "<br>" +
-              each["City"] +
-              "<br>" +
-              each["State"] +
-              "<br>" +
-              each["Zipcode"] +
-              "</td>";
-            appendHTML +=
-              "<td>" +
-              each["First_name"] +
-              "<br>" +
-              each["Last_name"] +
+              (each["Last_name"] || '') +
               "<br>(" +
-              each["Gender"] +
+              (each["Gender"] || '') +
               ")</td>";
             appendHTML +=
               "<td>" +
-              each["Extra1"] +
+              (each["Extra1"] || '') +
               "<br>" +
-              each["Extra2"] +
+              (each["Extra2"] || '') +
               "<br>" +
-              each["Extra3"] +
+              (each["Extra3"] || '') +
               "<br>" +
-              each["Extra4"] +
+              (each["Extra4"] || '') +
               "<br>" +
-              each["Extra5"] +
+              (each["Extra5"] || '') +
               "</td>";
             var Batch_Publish_date = new Date(each["Batch_Publish_date"]);
             appendHTML +=
               "<td>" +
-              each["Batch_id"] +
+              (each["Batch_id"] || '') +
               "<br>" +
-              each["Batch_Name"] +
+              (each["Batch_Name"] || '') +
               "<br>" +
               Batch_Publish_date.getDate().toString().padStart(2, "0") +
               "/" +
@@ -221,7 +227,7 @@ function show_records(page = 0) {
               var Sold_date = new Date(each["Sold_date"]);
               appendHTML +=
                 "<td>" +
-                each["Sold_unsold"] +
+                (each["Sold_unsold"] || '') +
                 "<br>" +
                 Sold_date.getDate().toString().padStart(2, "0") +
                 "/" +
@@ -229,9 +235,9 @@ function show_records(page = 0) {
                 "/" +
                 Sold_date.getFullYear() +
                 "<br>" +
-                each["Supplier_payment_status"] +
+                (each["Supplier_payment_status"] || '') +
                 "</td>";
-            } else appendHTML += "<td>" + each["Sold_unsold"] + "<br>" + each["Supplier_payment_status"] + "</td>";
+            } else appendHTML += "<td>" + (each["Sold_unsold"] || '') + "<br>" + (each["Supplier_payment_status"] || '') + "</td>";
             appendHTML += "</tr>";
             $("#show_records_modal .table tbody").append(appendHTML);
           });

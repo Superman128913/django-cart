@@ -153,9 +153,9 @@
               appendHTML += '<tr>';
                 var request_date = new Date(each['Date']);
                 appendHTML += '<td class="text-center">' + (request_date.getDate()).toString().padStart(2, '0') + '/' + (request_date.getMonth() + 1).toString().padStart(2, '0') + '/' + request_date.getFullYear() + '</td>'
-                appendHTML += '<td>' + each['USDT_address'] + '</td>'
-              appendHTML += '<td class="text-center">' + each['Status'] + '</td>'
-              appendHTML += '<td>' + each['TXID'] + '</td>'
+                appendHTML += '<td>' + (each['USDT_address'] || '') + '</td>'
+              appendHTML += '<td class="text-center">' + (each['Status'] || '') + '</td>'
+              appendHTML += '<td>' + (each['TXID'] || '') + '</td>'
               appendHTML += '</tr>';
               $("#search_result .table tbody").append(appendHTML);
             });

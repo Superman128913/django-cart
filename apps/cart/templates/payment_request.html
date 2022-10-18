@@ -156,10 +156,10 @@
               var appendHTML = '';
               appendHTML += '<tr request_id="' + each['id'] + '">';
               appendHTML += '<td class="text-right" style="width: ' + width_list[0] + '%">' + each['id'] + '</td>'
-              appendHTML += '<td style="width: ' + width_list[1] + '%">' + each['Supplier_Username'] + '</td>'
+              appendHTML += '<td style="width: ' + width_list[1] + '%">' + (each['Supplier_Username'] || '') + '</td>'
               var request_date = new Date(each['Date']);
               appendHTML += '<td class="text-center" style="width: ' + width_list[2] + '%">' + (request_date.getDate()).toString().padStart(2, '0') + '/' + (request_date.getMonth() + 1).toString().padStart(2, '0') + '/' + request_date.getFullYear() + '</td>'
-              appendHTML += '<td style="width: ' + width_list[3] + '%">' + each['USDT_address'] + '</td>'
+              appendHTML += '<td style="width: ' + width_list[3] + '%">' + (each['USDT_address'] || '') + '</td>'
               if(postData['PaidUnpaid'] == 'UNPAID')
               {
                 appendHTML += '<td class="text-cener" style="width: ' + width_list[4] + '%">'
@@ -171,7 +171,7 @@
                 appendHTML += '</td>'
               }
               else
-                appendHTML += '<td style="width: ' + width_list[4] + '%">' + each['TXID'] + '</td>'
+                appendHTML += '<td style="width: ' + width_list[4] + '%">' + (each['TXID'] || '') + '</td>'
               appendHTML += '</tr>';
               $("#search_result .table tbody").append(appendHTML);
             });
