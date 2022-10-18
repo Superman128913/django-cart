@@ -1491,11 +1491,13 @@ function check_gender() {
   var checked_len = input_list.length;
   var num_text = "";
   for (i = 1; i < checked_len; i++) {
-    if (i == 1) num_text += input_list.eq(i).attr("gender");
-    else if (i < 4) num_text += " / " + input_list.eq(i).attr("gender");
-    gender_list_const.push(input_list.eq(i).attr("gender"));
+    if (input_list.eq(i).prop("checked"))
+    {
+      if (num_text == "") num_text += input_list.eq(i).attr("gender");
+      else num_text += " / " + input_list.eq(i).attr("gender");
+      gender_list_const.push(input_list.eq(i).attr("gender"));
+    }
   }
-  if (i > 4) num_text += " /(+" + (checked_len - 4) + " selected)";
   if (num_text == "") num_text = "(0 selected)";
   $("#selected_gender_num").text(num_text);
 }
@@ -1560,7 +1562,7 @@ function show_result(page = 0) {
         $("#records_num").text(result["length"] + " records found");
         console.log(product_list);
         page_num = page;
-        var len = 0;
+        var len = result["length"];
         if (len) {
           product_list.forEach(function (each) {
             each["Extra1"] =

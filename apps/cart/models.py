@@ -2,19 +2,25 @@ from decimal import Decimal
 import datetime
 from email.policy import default
 from enum import unique
+from string import digits
+from wsgiref.validate import validator
 
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models.signals import pre_save, post_save, m2m_changed
 
-from encrypted_model_fields.fields import EncryptedBigIntegerField
+from encrypted_model_fields.fields import EncryptedCharField
 from ckeditor.fields import RichTextField
-# from apps.home import models
+from django.core.exceptions import ValidationError
 
-day_list = [(each, each) for each in range(1, 32)]
-month_list = [(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'), (6, 'Jun'), (7, 'July'), (8, 'August'), (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')]
-year_list = [(each, each) for each in range(int(datetime.date.today().strftime('%Y')), 2300 + 1)]
+def only_int(value): 
+    if value.isdigit()==False:
+        raise ValidationError('ID contains characters')
+
+day_list = [("{:02d}".format(each), "{:02d}".format(each)) for each in range(1, 32)]
+month_list = [('01', 'January'), ('02', 'February'), ('03', 'March'), ('04', 'April'), ('05', 'May'), ('06', 'Jun'), ('07', 'July'), ('08', 'August'), ('09', 'September'), ('10', 'October'), ('11', 'November'), ('12', 'December')]
+year_list = [(str(each), str(each)) for each in range(int(datetime.date.today().strftime('%Y')), 2300 + 1)]
 
 # Create your models here.   
 
@@ -45,33 +51,33 @@ class Batch(models.Model):
 
 
 class Shop_data(models.Model):
-    Phone =         EncryptedBigIntegerField(blank=False, null=False)
-    Exp_day =       models.IntegerField(choices=day_list, blank=True, null=True)
-    Exp_month =     models.IntegerField(choices=month_list, blank=True, null=True)
-    Exp_year =      models.IntegerField(choices=year_list, blank=True, null=True)
-    Puk_code =      models.DecimalField(decimal_places=0, max_digits=8, blank=True, null=True)
+    Phone =         EncryptedCharField(blank=False, null=False, max_length=15, validators=[only_int])
+    Exp_day =       models.CharField(choices=day_list, blank=True, null=True, max_length=2, validators=[only_int])
+    Exp_month =     models.CharField(choices=month_list, blank=True, null=True, max_length=2, validators=[only_int])
+    Exp_year =      models.CharField(choices=year_list, blank=True, null=True, max_length=4, validators=[only_int])
+    Puk_code =      models.CharField(max_length=8, blank=True, null=True, validators=[only_int])
     First_name =    models.CharField(max_length=100, blank=True, null=True)
     Last_name =     models.CharField(max_length=100, blank=True, null=True)
-    Gender =        models.CharField(default='U', choices=[('M', 'Man'), ('F', 'Female'), ('U', 'Unknown')], max_length=2, blank=True, null=False)
+    Gender =        models.CharField(default='Unknown', choices=[('Male', 'Male'), ('Female', 'Female'), ('Unknown', 'Unknown')], max_length=7, blank=True, null=False)
     Address =       models.CharField(max_length=255, blank=True, null=True)
-    City =          models.CharField(max_length=100, blank=True, null=True)
-    State =         models.CharField(max_length=100, blank=True, null=True)
-    Zipcode =       models.CharField(max_length=10, blank=True, null=True)
-    Extra1 =        models.CharField(max_length=255, blank=True, null=False, default='')
-    Extra2 =        models.CharField(max_length=255, blank=True, null=False, default='')
-    Extra3 =        models.CharField(max_length=255, blank=True, null=False, default='')
-    Extra4 =        models.CharField(max_length=255, blank=True, null=False, default='')
-    Extra5 =        models.CharField(max_length=255, blank=True, null=False, default='')
+    City =          models.CharField(max_length=100, blank=True, null=False, default='Other')
+    State =         models.CharField(max_length=100, blank=True, null=False, default='Other')
+    Zipcode =       models.CharField(max_length=50, blank=True, null=True)
+    Extra1 =        models.CharField(max_length=255, blank=True, null=True)
+    Extra2 =        models.CharField(max_length=255, blank=True, null=True)
+    Extra3 =        models.CharField(max_length=255, blank=True, null=True)
+    Extra4 =        models.CharField(max_length=255, blank=True, null=True)
+    Extra5 =        models.CharField(max_length=255, blank=True, null=True)
     Price =         models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=False, default=0)
     Batch =         models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='batch_product_list', null=False)
 
-    Areaf1 =        models.CharField(max_length=255, blank=True, null=True)
-    Areaf2 =        models.CharField(max_length=255, blank=True, null=True)
-    Areaf3 =        models.CharField(max_length=255, blank=True, null=True)
-    Areaf4 =        models.CharField(max_length=255, blank=True, null=True)
-    Areaf5 =        models.CharField(max_length=255, blank=True, null=True)
-    Areaf6 =        models.CharField(max_length=255, blank=True, null=True)
-    Area_code =     models.DecimalField(decimal_places=0, max_digits=6, null=False)
+    Areaf1 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
+    Areaf2 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
+    Areaf3 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
+    Areaf4 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
+    Areaf5 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
+    Areaf6 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
+    Area_code =     models.CharField(max_length=6, null=False, validators=[only_int])
 
     Sold_unsold =   models.CharField(choices=[
         ('UNSOLD', 'UNSOLD'),
