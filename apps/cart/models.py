@@ -51,7 +51,7 @@ class Batch(models.Model):
 
 
 class Shop_data(models.Model):
-    Phone =         EncryptedCharField(blank=False, null=False, max_length=15, validators=[only_int])
+    Phone =         EncryptedCharField(blank=False, null=False, max_length=25, validators=[only_int])
     Exp_day =       models.CharField(choices=day_list, blank=True, null=True, max_length=2, validators=[only_int])
     Exp_month =     models.CharField(choices=month_list, blank=True, null=True, max_length=2, validators=[only_int])
     Exp_year =      models.CharField(choices=year_list, blank=True, null=True, max_length=4, validators=[only_int])
@@ -146,7 +146,7 @@ pre_save.connect(pre_save_cart_receiver, sender=Cart)
 
 class Order_history(models.Model):
     User =          models.ForeignKey(User, on_delete=models.CASCADE)
-    Product = models.ForeignKey(Shop_data, on_delete=models.CASCADE)
+    Product = models.OneToOneField(Shop_data, on_delete=models.CASCADE)
 
     Checker = models.ForeignKey(Checker, on_delete=models.CASCADE)
     Checker_status = models.CharField(choices=[
