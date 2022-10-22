@@ -50,8 +50,7 @@ function show_result(page = 0) {
               '<td class="text-center">' + (each["Area_code"] || '') + "</td>";
             appendHTML +=
               '<td class="text-center">' +
-              (each["Exp_day"] || '') +
-              "/" +
+              (each["Exp_day"] ? (each["Exp_day"] + "/") : '') +
               (each["Exp_month"] || '') +
               "/" +
               (each["Exp_year"] || '') +
@@ -215,7 +214,12 @@ function check_and_finalize(product_id) {
           $("#search_result .table tbody").append(
             '<tr><td colspan="12" class="text-center">No Data</td></tr>'
           );
-      } else showDangerToast(result["error"], "Error");
+      }else if (state == "Over_balance")
+        showWarningToast(
+          "You are getting out of balance. Please recharge your balance.",
+          "Warning"
+        )
+      else showDangerToast(result["error"], "Error");
     },
     error: function (xhr, status, error) {
       td_element.html(btn_html);

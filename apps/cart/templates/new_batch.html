@@ -321,7 +321,12 @@
       success: function (result) {
         var state = result["state"];
         if (state == "OK") {
-          showSuccessToast('Added new batches', "Success");
+          if(result['data_length'] > 0)
+            showSuccessToast('Added new batches', "Success");
+          duplicate_list = result['duplicates']
+          duplicate_list.forEach(function (each) {
+            showWarningToast(each["Phone"] + ' has already registered', "Failed");
+          })
           console.log(result['data'])
         } else if (state == "FAIL")
           showDangerToast(result["error"], "Failed");

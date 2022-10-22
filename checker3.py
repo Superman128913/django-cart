@@ -46,7 +46,7 @@ def decrypt_str(t):
     # be sure to decode the bytes to a string
     return CRYPTER.decrypt(t.encode('utf-8')).decode('utf-8')
 
-api = 'https://hardcore-varahamihira.78-141-193-11.plesk.page/API.php'
+api = 'http://65.20.73.79/API2.php'
 
 
 def checker_api(phonenumber, day, month, year, zipcode, gatelink):
@@ -67,10 +67,8 @@ def check(product_id, checker_id, user_id):
         mydb = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",
-            database='MyDatabase',
-            # password="]f3PW3[*@,F2d3oCx",
-            # database='MyDatabase-andrew',
+            password="]f3PW3[*@,F2d3oCx",
+            database='MyDatabase-andrew',
             auth_plugin='mysql_native_password'
         )
     except:
@@ -126,7 +124,7 @@ def check(product_id, checker_id, user_id):
             check_status = "Error"
             break
     #? #################################################
-
+    
     if check_status == 'Done':        
         tmp = "INSERT INTO cart_order_history (User_id, Product_id, Checker_id, Checker_status, Checker_response_text, Checker_response_full, Checker_date) VALUES (%d, %d, %d, '%s', '%s', '%s', '%s')" % (user_id, product_id, checker_id, 'Done', checker_response_text, checker_response_full, str(datetime.now()))
         mycursor.execute(tmp)
@@ -150,6 +148,9 @@ def check(product_id, checker_id, user_id):
         m_userBalance = float(m_result[0][0])
         m_userBalance = round(m_userBalance + price - checker_price, 2)
         tmp = "UPDATE home_balance SET balance=%f WHERE user_id=%d" % (m_userBalance, user_id)
+        mycursor.execute(tmp)
+    else:
+        tmp = "UPDATE cart_shop_data SET Sold_unsold='%s' WHERE id=%d" % ('ON_CART', product_id)
         mycursor.execute(tmp)
 
     mydb.commit()

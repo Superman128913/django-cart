@@ -3,7 +3,6 @@ from secrets import choice
 from wsgiref.validate import validator
 from rest_framework import serializers
 from .models import Order_history, Shop_data, SupplierRequest
-from encrypted_model_fields.fields import EncryptedIntegerField
 from django.core.exceptions import ValidationError
 
 def only_int(value): 

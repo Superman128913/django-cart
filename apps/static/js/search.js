@@ -250,10 +250,10 @@ function init_areaf1_selection(areaf1_list = null) {
       appendHTML += '<div class="form-check-group">';
       appendHTML += '<label class="form-check-label">';
       appendHTML +=
-        '<input type="checkbox" checked class="form-check-input" areaf1="' +
-        each["Areaf1"] +
+        '<input type="checkbox" checked class="form-check-input" name="' + each["Areaf1"] + '" areaf1="' +
+        (each["Areaf1"] == '' ? 'Other' : each["Areaf1"]) +
         '"> ' +
-        each["Areaf1"] +
+        (each["Areaf1"] == '' ? 'Other' : each["Areaf1"]) +
         " (" +
         each["product_num"] +
         ")";
@@ -306,7 +306,7 @@ function init_areaf1_selection(areaf1_list = null) {
           show_num = i + 1;
         }
       }
-      areaf1_list_const.push(input_list.eq(i).attr("areaf1"));
+      areaf1_list_const.push(input_list.eq(i).attr("name"));
     }
     if (checked_len == 0) $("#selected_areaf1_num").text("(0 selected)");
     else if (show_num == 0)
@@ -348,7 +348,7 @@ function check_areaf1() {
         }
       }
       checked_len++;
-      areaf1_list_const.push(input_list.eq(i).attr("areaf1"));
+      areaf1_list_const.push(input_list.eq(i).attr("name"));
     }
   }
   if (checked_len == 0) $("#selected_areaf1_num").text("(0 selected)");
@@ -432,10 +432,10 @@ function init_areaf2_selection(areaf2_list = null) {
       appendHTML += '<div class="form-check-group">';
       appendHTML += '<label class="form-check-label">';
       appendHTML +=
-        '<input type="checkbox" checked class="form-check-input" areaf2="' +
-        each["Areaf2"] +
+        '<input type="checkbox" checked class="form-check-input" name="' + each["Areaf2"] + '" areaf2="' +
+        (each["Areaf2"] == '' ? 'Other' : each["Areaf2"]) +
         '"> ' +
-        each["Areaf2"] +
+        (each["Areaf2"] == '' ? 'Other' : each["Areaf2"]) +
         " (" +
         each["product_num"] +
         ")";
@@ -488,7 +488,7 @@ function init_areaf2_selection(areaf2_list = null) {
           show_num = i + 1;
         }
       }
-      areaf2_list_const.push(input_list.eq(i).attr("areaf2"));
+      areaf2_list_const.push(input_list.eq(i).attr("name"));
     }
     if (checked_len == 0) $("#selected_areaf2_num").text("(0 selected)");
     else if (show_num == 0)
@@ -530,7 +530,7 @@ function check_areaf2() {
         }
       }
       checked_len++;
-      areaf2_list_const.push(input_list.eq(i).attr("areaf2"));
+      areaf2_list_const.push(input_list.eq(i).attr("name"));
     }
   }
   if (checked_len == 0) $("#selected_areaf2_num").text("(0 selected)");
@@ -614,10 +614,10 @@ function init_areaf3_selection(areaf3_list = null) {
       appendHTML += '<div class="form-check-group">';
       appendHTML += '<label class="form-check-label">';
       appendHTML +=
-        '<input type="checkbox" checked class="form-check-input" areaf3="' +
-        each["Areaf3"] +
+        '<input type="checkbox" checked class="form-check-input" name="' + each["Areaf3"] + '" areaf3="' +
+        (each["Areaf3"] == '' ? 'Other' : each["Areaf3"]) +
         '"> ' +
-        each["Areaf3"] +
+        (each["Areaf3"] == '' ? 'Other' : each["Areaf3"]) +
         " (" +
         each["product_num"] +
         ")";
@@ -670,7 +670,7 @@ function init_areaf3_selection(areaf3_list = null) {
           show_num = i + 1;
         }
       }
-      areaf3_list_const.push(input_list.eq(i).attr("areaf3"));
+      areaf3_list_const.push(input_list.eq(i).attr("name"));
     }
     if (checked_len == 0) $("#selected_areaf3_num").text("(0 selected)");
     else if (show_num == 0)
@@ -712,7 +712,7 @@ function check_areaf3() {
         }
       }
       checked_len++;
-      areaf3_list_const.push(input_list.eq(i).attr("areaf3"));
+      areaf3_list_const.push(input_list.eq(i).attr("name"));
     }
   }
   if (checked_len == 0) $("#selected_areaf3_num").text("(0 selected)");
@@ -796,10 +796,10 @@ function init_areaf4_selection(areaf4_list = null) {
       appendHTML += '<div class="form-check-group">';
       appendHTML += '<label class="form-check-label">';
       appendHTML +=
-        '<input type="checkbox" checked class="form-check-input" areaf4="' +
-        each["Areaf4"] +
+        '<input type="checkbox" checked class="form-check-input" name="' + each["Areaf4"] + '" areaf4="' +
+        (each["Areaf4"] == '' ? 'Other' : each["Areaf4"]) +
         '"> ' +
-        each["Areaf4"] +
+        (each["Areaf4"] == '' ? 'Other' : each["Areaf4"]) +
         " (" +
         each["product_num"] +
         ")";
@@ -852,7 +852,7 @@ function init_areaf4_selection(areaf4_list = null) {
           show_num = i + 1;
         }
       }
-      areaf4_list_const.push(input_list.eq(i).attr("areaf4"));
+      areaf4_list_const.push(input_list.eq(i).attr("name"));
     }
     if (checked_len == 0) $("#selected_areaf4_num").text("(0 selected)");
     else if (show_num == 0)
@@ -894,7 +894,7 @@ function check_areaf4() {
         }
       }
       checked_len++;
-      areaf4_list_const.push(input_list.eq(i).attr("areaf4"));
+      areaf4_list_const.push(input_list.eq(i).attr("name"));
     }
   }
   if (checked_len == 0) $("#selected_areaf4_num").text("(0 selected)");
@@ -978,10 +978,10 @@ function init_areaf5_selection(areaf5_list = null) {
       appendHTML += '<div class="form-check-group">';
       appendHTML += '<label class="form-check-label">';
       appendHTML +=
-        '<input type="checkbox" checked class="form-check-input" areaf5="' +
-        each["Areaf5"] +
+        '<input type="checkbox" checked class="form-check-input" name="' + each["Areaf5"] + '" areaf5="' +
+        (each["Areaf5"] == '' ? 'Other' : each["Areaf5"]) +
         '"> ' +
-        each["Areaf5"] +
+        (each["Areaf5"] == '' ? 'Other' : each["Areaf5"]) +
         " (" +
         each["product_num"] +
         ")";
@@ -1034,7 +1034,7 @@ function init_areaf5_selection(areaf5_list = null) {
           show_num = i + 1;
         }
       }
-      areaf5_list_const.push(input_list.eq(i).attr("areaf5"));
+      areaf5_list_const.push(input_list.eq(i).attr("name"));
     }
     if (checked_len == 0) $("#selected_areaf5_num").text("(0 selected)");
     else if (show_num == 0)
@@ -1076,7 +1076,7 @@ function check_areaf5() {
         }
       }
       checked_len++;
-      areaf5_list_const.push(input_list.eq(i).attr("areaf5"));
+      areaf5_list_const.push(input_list.eq(i).attr("name"));
     }
   }
   if (checked_len == 0) $("#selected_areaf5_num").text("(0 selected)");
@@ -1160,10 +1160,10 @@ function init_state_selection(state_list = null) {
       appendHTML += '<div class="form-check-group">';
       appendHTML += '<label class="form-check-label">';
       appendHTML +=
-        '<input type="checkbox" checked class="form-check-input" state="' +
-        each["State"] +
+        '<input type="checkbox" checked class="form-check-input" name="' + each["State"] + '" state="' +
+        (each["State"] == '' ? 'Unknown' : each["State"]) +
         '"> ' +
-        each["State"] +
+        (each["State"] == '' ? 'Unknown' : each["State"]) +
         " (" +
         each["product_num"] +
         ")";
@@ -1216,7 +1216,7 @@ function init_state_selection(state_list = null) {
           show_num = i + 1;
         }
       }
-      state_list_const.push(input_list.eq(i).attr("state"));
+      state_list_const.push(input_list.eq(i).attr("name"));
     }
     if (checked_len == 0) $("#selected_state_num").text("(0 selected)");
     else if (show_num == 0)
@@ -1258,7 +1258,7 @@ function check_state() {
         }
       }
       checked_len++;
-      state_list_const.push(input_list.eq(i).attr("state"));
+      state_list_const.push(input_list.eq(i).attr("name"));
     }
   }
   if (checked_len == 0) $("#selected_state_num").text("(0 selected)");
@@ -1342,10 +1342,10 @@ function init_city_selection(city_list = null) {
       appendHTML += '<div class="form-check-group">';
       appendHTML += '<label class="form-check-label">';
       appendHTML +=
-        '<input type="checkbox" checked class="form-check-input" city="' +
-        each["City"] +
+        '<input type="checkbox" checked class="form-check-input" name="' + each["City"] + '" city="' +
+        (each["City"] == '' ? 'Unknown' : each["City"]) +
         '"> ' +
-        each["City"] +
+        (each["City"] == '' ? 'Unknown' : each["City"]) +
         " (" +
         each["product_num"] +
         ")";
@@ -1398,7 +1398,7 @@ function init_city_selection(city_list = null) {
           show_num = i + 1;
         }
       }
-      city_list_const.push(input_list.eq(i).attr("city"));
+      city_list_const.push(input_list.eq(i).attr("name"));
     }
     if (checked_len == 0) $("#selected_city_num").text("(0 selected)");
     else if (show_num == 0)
@@ -1439,7 +1439,7 @@ function check_city() {
         }
       }
       checked_len++;
-      city_list_const.push(input_list.eq(i).attr("city"));
+      city_list_const.push(input_list.eq(i).attr("name"));
     }
   }
   if (checked_len == 0) $("#selected_city_num").text("(0 selected)");
@@ -1587,8 +1587,7 @@ function show_result(page = 0) {
               '<td class="text-center">' + (each["Area_code"] || '') + "</td>";
             appendHTML +=
               '<td class="text-center">' +
-              (each["Exp_day"] || '') +
-              "/" +
+              (each["Exp_day"] ? (each["Exp_day"] + "/") : '') +
               (each["Exp_month"] || '') +
               "/" +
               (each["Exp_year"] || '') +
@@ -1804,8 +1803,8 @@ function add_product(product_id) {
             );
           $(".count_product").text(result["data"]["count_product"]);
           $("#balance").text("Balance: " + result["data"]["balance"] + " $");
+          showSuccessToast("Add item to cart", "Success");
         }
-        showSuccessToast("Add item to cart", "Success");
       } else if (state == "FAIL") showDangerToast(result["error"], "Failed");
       else showDangerToast("Cause an unknown error.", "Failed");
     },

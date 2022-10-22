@@ -1,7 +1,9 @@
+from functools import reduce
 import os
 from decimal import Decimal
 from datetime import datetime, date
 from urllib.request import Request
+from operator import or_
 
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -37,7 +39,7 @@ def search(request):
         if request.is_ajax():
             try:
                 object = request.POST.get('object')
-                query = Shop_data.objects.filter((Q(User=request.user) & Q(Sold_unsold='ON_CART')) | Q(Sold_unsold='UNSOLD'))
+                query = Shop_data.objects.filter(Sold_unsold='UNSOLD')
                 if object == 'batch':
                     batch_list = request.POST.getlist('batch_list[]')
                     batch_list = list(map(int, batch_list))
@@ -227,34 +229,11 @@ def search_result(request):
                     else:
                         zipcode_list = request.POST.getlist('zipcode_list[]')
                         if len(zipcode_list):
-                            # search by batch and gender
-                            where = ' WHERE Batch_id IN {} AND Gender IN {}'.format(repr(tuple(batch_list)), repr(tuple(gender_list)))
-                            # search by price
-                            if price_min == 0 and price_max == 0:
-                                pass
-                            else:
-                                where += ' AND Price>={} AND Price<={}'.format(price_min, price_max)
-                            # search by extra
-                            if extra1=='true':
-                                where += ' AND Extra1 IS NOT NULL'
-                            if extra2=='true':
-                                where += ' AND Extra2 IS NOT NULL'
-                            if extra3=='true':
-                                where += ' AND Extra3 IS NOT NULL'
-                            if extra4=='true':
-                                where += ' AND Extra4 IS NOT NULL'
-                            if extra5=='true':
-                                where += ' AND Extra5 IS NOT NULL'
-                                
-                            for idx, zipcode in enumerate(zipcode_list):
-                                if idx == 0:
-                                    where += " AND (Zipcode LIKE '%%{}%%'".format(zipcode)
-                                else:
-                                    where += " OR Zipcode LIKE '%%{}%%'".format(zipcode)
-                            where += ') AND Sold_unsold="UNSOLD"'
-                            sql = 'SELECT * FROM cart_shop_data{} ORDER BY id DESC'.format(where)
-                            product_list = Shop_data.objects.raw(sql)
-                            # query = query.filter(Zipcode__in=zipcode_list)
+                            filter = []
+                            for zipcode in zipcode_list:
+                                filter.append(Q(Zipcode__contains=zipcode))
+                            query = query.filter(reduce(or_, filter))
+                            product_list = query.order_by('-id').all()
                         else:
                             areaf1_list = request.POST.getlist('areaf1_list[]')
                             areaf2_list = request.POST.getlist('areaf2_list[]')
@@ -404,28 +383,45 @@ def check_product(request):
             product_obj = Shop_data.objects.get(id=product_id)
 
             if cart_obj.products.filter(pk=product_obj.pk).exists():
-
-                check_status = checker_api(product_id, checker_id, request.user.id)
-                check_status = check_status[:-1]
-                print(check_status)
-                if check_status == 'Done':
-                    returnData = {
-                        'state': check_status,
-                    }
-                    cart_obj.products.remove(product_obj)
-                elif check_status == 'Fail':
-                    returnData = {
-                        'state': check_status,
-                        'error': "This is Invalid Phone. This item price has been refuned to your balance."
-                    }
-                    cart_obj.products.remove(product_obj)
-                else:
-                    returnData = {
-                        'state': check_status,
-                        'error': "Problem while checking your Phone. Please try again or select a differant checker."
-                    }
-
+                
                 balance_obj = balance.objects.get(user=request.user)
+                checker_obj = Checker.objects.get(id=checker_id)
+                if balance_obj.balance < float(checker_obj.Cost):                
+                    returnData = {
+                        'state': 'Over_balance',
+                    }
+                    return JsonResponse(returnData)
+                if product_obj.Sold_unsold == 'CHECKING':                    
+                    returnData = {
+                        'state': 'Error',
+                        'error': "It is checking now."
+                    }
+                else:
+                    product_obj.Sold_unsold = 'CHECKING'
+                    product_obj.save()
+                    check_status = checker_api(product_id, checker_id, request.user.id)
+                    check_status = check_status[:-1]
+                    print(check_status)
+                    if product_obj.Sold_unsold == 'CHECKING':
+                        product_obj.Sold_unsold = 'ON_CART'
+                        product_obj.save()
+                    if check_status == 'Done':
+                        returnData = {
+                            'state': check_status,
+                        }
+                        cart_obj.products.remove(product_obj)
+                    elif check_status == 'Fail':
+                        returnData = {
+                            'state': check_status,
+                            'error': "This is Invalid Phone. This item price has been refuned to your balance."
+                        }
+                        cart_obj.products.remove(product_obj)
+                    else:
+                        returnData = {
+                            'state': check_status,
+                            'error': "Problem while checking your Phone. Please try again or select a differant checker."
+                        }
+
                 data = {
                     'balance': balance_obj.balance,
                     'count_product': cart_obj.products.count()
@@ -528,11 +524,11 @@ def insert_batch(request):
                 new_batch = Batch(Name=batch_name, Supplier=supplier, Percent=percent)
                 new_batch.save()
                 data = []
+                duplicates = []
                 for row in range(batch_num):
                     batch_list = request.POST.getlist(f'batch_list[{row}][]')
                     row_dic = {}
                     for i in range(len(field_list)):
-                        print(repr(row_dic))
                         if field_list[i] != 'ignore':
                             if i < len(batch_list):
                                 row_dic[field_list[i]] = batch_list[i]
@@ -550,16 +546,26 @@ def insert_batch(request):
                         row_dic['Areaf6'] = area_code_query.areaf6
                     row_dic['Batch'] = new_batch.id
                     row_dic['Price'] = price
-                    data.append(row_dic)
+
+                    # check duplicates
+                    phone_list = (Shop_data.objects.values_list('Phone', flat=True))
+                    if row_dic['Phone'] in phone_list:
+                        duplicates.append(row_dic)
+                    else:
+                        data.append(row_dic)
 
                 many = isinstance(data, list)
                 serializer = ShopDataSerializer(data=data, many=many)
                 
                 if serializer.is_valid(raise_exception=True):
-                    serializer.save()                
+                    serializer.save()   
+                    data_length = len(data)
+                    if data_length == 0 and new_batch:
+                        new_batch.delete()             
                     returnData = {
                         'state': "OK",
-                        'data': data
+                        'data_length': len(data),
+                        'duplicates': duplicates
                     }
                 else:
                     returnData = {
@@ -985,7 +991,7 @@ def create_request(request):
         try:
             USDT_address = request.POST.get('USDT_address')
             if SupplierRequest.objects.filter(
-                Supplier=supplier_obj,
+                Supplier=supplier_obj.id,
                 USDT_address=USDT_address,
                 Status='UNPAID'
                 ).exists():

@@ -51,7 +51,7 @@ class Batch(models.Model):
 
 
 class Shop_data(models.Model):
-    Phone =         EncryptedCharField(blank=False, null=False, max_length=25, validators=[only_int])
+    Phone =         EncryptedCharField(blank=False, null=False, max_length=25, validators=[only_int], unique=True)
     Exp_day =       models.CharField(choices=day_list, blank=True, null=True, max_length=2, validators=[only_int])
     Exp_month =     models.CharField(choices=month_list, blank=True, null=True, max_length=2, validators=[only_int])
     Exp_year =      models.CharField(choices=year_list, blank=True, null=True, max_length=4, validators=[only_int])
@@ -60,8 +60,8 @@ class Shop_data(models.Model):
     Last_name =     models.CharField(max_length=100, blank=True, null=True)
     Gender =        models.CharField(default='Unknown', choices=[('Male', 'Male'), ('Female', 'Female'), ('Unknown', 'Unknown')], max_length=7, blank=True, null=False)
     Address =       models.CharField(max_length=255, blank=True, null=True)
-    City =          models.CharField(max_length=100, blank=True, null=False, default='Other')
-    State =         models.CharField(max_length=100, blank=True, null=False, default='Other')
+    City =          models.CharField(max_length=100, blank=True, null=False, default='')
+    State =         models.CharField(max_length=100, blank=True, null=False, default='')
     Zipcode =       models.CharField(max_length=50, blank=True, null=True)
     Extra1 =        models.CharField(max_length=255, blank=True, null=True)
     Extra2 =        models.CharField(max_length=255, blank=True, null=True)
@@ -71,20 +71,21 @@ class Shop_data(models.Model):
     Price =         models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=False, default=0)
     Batch =         models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='batch_product_list', null=False)
 
-    Areaf1 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
-    Areaf2 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
-    Areaf3 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
-    Areaf4 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
-    Areaf5 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
-    Areaf6 =        models.CharField(max_length=255, blank=True, null=False, default='Other')
+    Areaf1 =        models.CharField(max_length=255, blank=True, null=False, default='')
+    Areaf2 =        models.CharField(max_length=255, blank=True, null=False, default='')
+    Areaf3 =        models.CharField(max_length=255, blank=True, null=False, default='')
+    Areaf4 =        models.CharField(max_length=255, blank=True, null=False, default='')
+    Areaf5 =        models.CharField(max_length=255, blank=True, null=False, default='')
+    Areaf6 =        models.CharField(max_length=255, blank=True, null=False, default='')
     Area_code =     models.CharField(max_length=6, null=False, validators=[only_int])
 
     Sold_unsold =   models.CharField(choices=[
         ('UNSOLD', 'UNSOLD'),
         ('SOLD', 'SOLD'),
         ('REFUND', 'REFUND'),
-        ('ON_CART', 'ON_CART')
-        ], default='UNSOLD', max_length=7, blank=True, null=False)
+        ('ON_CART', 'ON_CART'),
+        ('CHECKING', 'CHECKING')
+        ], default='UNSOLD', max_length=8, blank=True, null=False)
     Insert_date =   models.DateTimeField(auto_now_add=True)
     Sold_date =     models.DateTimeField(blank=True, null=True)
     Supplier_payment_status = models.CharField(choices=[

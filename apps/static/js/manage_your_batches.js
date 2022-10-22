@@ -146,8 +146,7 @@ function show_records(page = 0) {
             appendHTML += '<td class="text-center">' + each["Phone"] + "</td>";
             appendHTML +=
               "<td>" +
-              (each["Exp_day"] || '') +
-              "/" +
+              (each["Exp_day"] ? (each["Exp_day"] + "/") : '') +
               (each["Exp_month"] || '') +
               "/" +
               (each["Exp_year"] || '') +
@@ -223,7 +222,7 @@ function show_records(page = 0) {
               "/" +
               Batch_Publish_date.getFullYear() +
               "</td>";
-            if (each["Sold_unsold"] == "SOLD") {
+              if (each["Sold_unsold"] == "SOLD" || each["Sold_unsold"] == "REFUND") {
               var Sold_date = new Date(each["Sold_date"]);
               appendHTML +=
                 "<td>" +
