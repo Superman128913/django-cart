@@ -313,6 +313,12 @@ def cart_home(request):
                 elif type == 'remove':
                     product_id = int(request.POST.get('product_id', None))
                     product_obj = Shop_data.objects.get(id=product_id)
+                    if product_obj.Sold_unsold == 'CHECKING':                    
+                        returnData = {
+                            'state': 'Error',
+                            'error': "This item is checking now."
+                        }
+                        return JsonResponse(returnData)
                     if cart_obj.products.filter(pk=product_obj.pk).exists():
                         product_obj.Sold_unsold = 'UNSOLD'
                         product_obj.User = None
@@ -335,6 +341,12 @@ def cart_home(request):
                 elif type == 'add':
                     product_id = int(request.POST.get('product_id', None))
                     product_obj = Shop_data.objects.get(id=product_id)
+                    if product_obj.Sold_unsold == 'CHECKING':                    
+                        returnData = {
+                            'state': 'Error',
+                            'error': "This item is checking now."
+                        }
+                        return JsonResponse(returnData)
                     if cart_obj.products.filter(pk=product_obj.pk).exists():
                         returnData = {
                             'state': "FAIL",
@@ -394,33 +406,33 @@ def check_product(request):
                 if product_obj.Sold_unsold == 'CHECKING':                    
                     returnData = {
                         'state': 'Error',
-                        'error': "It is checking now."
+                        'error': "This item is checking now."
                     }
-                else:
-                    product_obj.Sold_unsold = 'CHECKING'
+                    return JsonResponse(returnData)
+                product_obj.Sold_unsold = 'CHECKING'
+                product_obj.save()
+                check_status = checker_api(product_id, checker_id, request.user.id)
+                check_status = check_status[:-1]
+                print(check_status)
+                if product_obj.Sold_unsold == 'CHECKING':
+                    product_obj.Sold_unsold = 'ON_CART'
                     product_obj.save()
-                    check_status = checker_api(product_id, checker_id, request.user.id)
-                    check_status = check_status[:-1]
-                    print(check_status)
-                    if product_obj.Sold_unsold == 'CHECKING':
-                        product_obj.Sold_unsold = 'ON_CART'
-                        product_obj.save()
-                    if check_status == 'Done':
-                        returnData = {
-                            'state': check_status,
-                        }
-                        cart_obj.products.remove(product_obj)
-                    elif check_status == 'Fail':
-                        returnData = {
-                            'state': check_status,
-                            'error': "This is Invalid Phone. This item price has been refuned to your balance."
-                        }
-                        cart_obj.products.remove(product_obj)
-                    else:
-                        returnData = {
-                            'state': check_status,
-                            'error': "Problem while checking your Phone. Please try again or select a differant checker."
-                        }
+                if check_status == 'Done':
+                    returnData = {
+                        'state': check_status,
+                    }
+                    cart_obj.products.remove(product_obj)
+                elif check_status == 'Fail':
+                    returnData = {
+                        'state': check_status,
+                        'error': "This is Invalid Phone. This item price has been refuned to your balance."
+                    }
+                    cart_obj.products.remove(product_obj)
+                else:
+                    returnData = {
+                        'state': check_status,
+                        'error': "Problem while checking your Phone. Please try again or select a differant checker."
+                    }
 
                 data = {
                     'balance': balance_obj.balance,
@@ -629,9 +641,9 @@ def batch_management(request):
 
                 tableData = []
                 for batch in batch_query.all():
-                    products = Shop_data.objects.filter(Batch=batch).filter(Supplier_payment_status=PaidUnpaid).filter(Sold_date__date__range=(from_date, to_date))
-                    sold_products = products.filter(Sold_unsold='SOLD')
-                    refund_products = products.filter(Sold_unsold='REFUND')
+                    products = Shop_data.objects.filter(Batch=batch).filter(Supplier_payment_status=PaidUnpaid)
+                    sold_products = products.filter(Sold_date__date__range=(from_date, to_date)).filter(Sold_unsold='SOLD')
+                    refund_products = products.filter(Sold_date__date__range=(from_date, to_date)).filter(Sold_unsold='REFUND')
                     unsold_products = products.filter(Q(Sold_unsold='ON_CART') | Q(Sold_unsold='UNSOLD'))
                     row = {
                         'batch_id': batch.id,
@@ -690,12 +702,12 @@ def get_batch_product_list(request):
             batch_id = request.POST.get('batch_id')
 
             batch_obj = Batch.objects.get(id=batch_id)
-            products = Shop_data.objects.filter(Batch=batch_obj).filter(Supplier_payment_status=PaidUnpaid).filter(Sold_date__date__range=(from_date, to_date))
+            products = Shop_data.objects.filter(Batch=batch_obj).filter(Supplier_payment_status=PaidUnpaid)
             if get_type == 'total-sold':
-                sold_products = products.filter(Sold_unsold='SOLD')
+                sold_products = products.filter(Sold_date__date__range=(from_date, to_date)).filter(Sold_unsold='SOLD')
                 query = sold_products
             elif get_type == 'total-refund':
-                refund_products = products.filter(Sold_unsold='REFUND')
+                refund_products = products.filter(Sold_date__date__range=(from_date, to_date)).filter(Sold_unsold='REFUND')
                 query = refund_products
             elif get_type == 'total-unsold':
                 unsold_products = products.filter(Q(Sold_unsold='ON_CART') | Q(Sold_unsold='UNSOLD'))
@@ -902,9 +914,9 @@ def show_batch(request):
 
                 tableData = []
                 for batch in batch_query.all():
-                    products = Shop_data.objects.filter(Batch=batch).filter(Supplier_payment_status=PaidUnpaid).filter(Sold_date__date__range=(from_date, to_date))
-                    sold_products = products.filter(Sold_unsold='SOLD')
-                    refund_products = products.filter(Sold_unsold='REFUND')
+                    products = Shop_data.objects.filter(Batch=batch).filter(Supplier_payment_status=PaidUnpaid)
+                    sold_products = products.filter(Sold_date__date__range=(from_date, to_date)).filter(Sold_unsold='SOLD')
+                    refund_products = products.filter(Sold_date__date__range=(from_date, to_date)).filter(Sold_unsold='REFUND')
                     unsold_products = products.filter(Q(Sold_unsold='ON_CART') | Q(Sold_unsold='UNSOLD'))
                     row = {
                         'batch_id': batch.id,
