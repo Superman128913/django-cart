@@ -85,7 +85,7 @@
                   <div class="dropdown col-md-4">
                     <label class="col-sm-12">Select Batches to search area code list:</label>
                     <div class="col-sm-12">
-                      <button class="btn btn-primary dropdown-toggle col-sm-12 text-left" type="button" id="batch" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_batch_num"></t></button>
+                      <button class="btn {% if batch_list|length > 0 %}btn-success{% else %}btn-danger{% endif %} dropdown-toggle col-sm-12 text-left" type="button" id="batch" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_batch_num"></t></button>
                       <div class="dropdown-menu" aria-labelledby="batch" onclick="event.stopPropagation()" id="batch_selection">
                         {% if batch_list %}
                           <div class="dropdown-header search-box">
@@ -101,6 +101,7 @@
                           </div>
                           <div class="dropdown-divider batch-check"></div>
                           {% for each in batch_list %}
+                          {% if each.product_num > 0 %}
                           <div class="dropdown-item batch-list">
                             <div class="form-check-group">
                               <label class="form-check-label">
@@ -108,6 +109,7 @@
                               </label>
                             </div>
                           </div>
+                          {% endif %}
                           {% endfor %}
                         {% endif %}
                       </div>
@@ -116,7 +118,7 @@
                   <div class="dropdown col-md-4">
                     <label class="col-sm-12">Areaf1 (Phone type):</label>
                     <div class="col-sm-12">
-                      <button class="btn btn-secondary dropdown-toggle col-sm-12 text-left" type="button" id="areaf1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_areaf1_num"></t></button>
+                      <button class="btn btn-success dropdown-toggle col-sm-12 text-left" type="button" id="areaf1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_areaf1_num"></t></button>
                       <div class="dropdown-menu" aria-labelledby="areaf1" onclick="event.stopPropagation()" id="areaf1_selection">
                       </div>
                     </div>
@@ -124,7 +126,7 @@
                   <div class="dropdown col-md-4">
                     <label class="col-sm-12">Areaf2 (Operator):</label>
                     <div class="col-sm-12">
-                      <button class="btn btn-danger dropdown-toggle col-sm-12 text-left" type="button" id="areaf2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_areaf2_num"></t></button>
+                      <button class="btn btn-success dropdown-toggle col-sm-12 text-left" type="button" id="areaf2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_areaf2_num"></t></button>
                       <div class="dropdown-menu" aria-labelledby="areaf2" onclick="event.stopPropagation()" id="areaf2_selection">
                       </div>
                     </div>
@@ -136,7 +138,7 @@
                   <div class="dropdown col-md-4">
                     <label class="col-sm-12">Areaf3 (Perpaid / Monthly Billing):</label>
                     <div class="col-sm-12">
-                      <button class="btn btn-warning dropdown-toggle col-sm-12 text-left" type="button" id="areaf3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_areaf3_num"></t></button>
+                      <button class="btn btn-success dropdown-toggle col-sm-12 text-left" type="button" id="areaf3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_areaf3_num"></t></button>
                       <div class="dropdown-menu" aria-labelledby="areaf3" onclick="event.stopPropagation()" id="areaf3_selection">
                       </div>
                     </div>
@@ -152,7 +154,7 @@
                   <div class="dropdown col-md-4">
                     <label class="col-sm-12">Areaf5:</label>
                     <div class="col-sm-12">
-                      <button class="btn btn-info dropdown-toggle col-sm-12 text-left" type="button" id="areaf5" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_areaf5_num"></t></button>
+                      <button class="btn btn-success dropdown-toggle col-sm-12 text-left" type="button" id="areaf5" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_areaf5_num"></t></button>
                       <div class="dropdown-menu" aria-labelledby="areaf5" onclick="event.stopPropagation()" id="areaf5_selection">
                       </div>
                     </div>
@@ -165,7 +167,7 @@
                   <div class="dropdown col-md-6">
                     <label class="col-sm-12">User State:</label>
                     <div class="col-sm-12">
-                      <button class="btn btn-dark dropdown-toggle col-sm-12 text-left" type="button" id="state" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_state_num"></t></button>
+                      <button class="btn btn-success dropdown-toggle col-sm-12 text-left" type="button" id="state" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_state_num"></t></button>
                       <div class="dropdown-menu" aria-labelledby="state" onclick="event.stopPropagation()" id="state_selection">
                       </div>
                     </div>
@@ -173,7 +175,7 @@
                   <div class="dropdown col-md-6">
                     <label class="col-sm-12">User City:</label>
                     <div class="col-sm-12">
-                      <button class="btn btn-primary dropdown-toggle col-sm-12 text-left" type="button" id="city" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_city_num"></t></button>
+                      <button class="btn btn-success dropdown-toggle col-sm-12 text-left" type="button" id="city" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_city_num"></t></button>
                       <div class="dropdown-menu" aria-labelledby="city" onclick="event.stopPropagation()" id="city_selection">
                       </div>
                     </div>
@@ -183,7 +185,7 @@
                   <div class="dropdown col-md-6">
                     <label class="col-sm-12">User Gender:</label>
                     <div class="col-sm-12">
-                      <button class="btn btn-info dropdown-toggle col-sm-12 text-left" type="button" id="gender" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_gender_num"></t></button>
+                      <button class="btn btn-success dropdown-toggle col-sm-12 text-left" type="button" id="gender" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><t id="selected_gender_num"></t></button>
                       <div class="dropdown-menu" aria-labelledby="gender" onclick="event.stopPropagation()" id="gender_selection">
                         <h6 class="dropdown-item">
                           <div class="form-check-group">
@@ -271,7 +273,7 @@
                       <div class="col-sm-12">
                         <label class="form-check-label">
                           Extra1 <i class="input-helper"></i>
-                          <input type="checkbox" checked class="form-check-input" id="extra1">
+                          <input type="checkbox" class="form-check-input" id="extra1">
                         </label>
                       </div>
                     </div>
@@ -281,7 +283,7 @@
                       <div class="col-sm-12">
                         <label class="form-check-label">
                           Extra2 <i class="input-helper"></i>
-                          <input type="checkbox" checked class="form-check-input" id="extra2">
+                          <input type="checkbox" class="form-check-input" id="extra2">
                         </label>
                       </div>
                     </div>
@@ -291,7 +293,7 @@
                       <div class="col-sm-12">
                         <label class="form-check-label">
                           Extra3 <i class="input-helper"></i>
-                          <input type="checkbox" checked class="form-check-input" id="extra3">
+                          <input type="checkbox" class="form-check-input" id="extra3">
                         </label>
                       </div>
                     </div>
@@ -301,7 +303,7 @@
                       <div class="col-sm-12">
                         <label class="form-check-label">
                           Extra4 <i class="input-helper"></i>
-                          <input type="checkbox" checked class="form-check-input" id="extra4">
+                          <input type="checkbox" class="form-check-input" id="extra4">
                         </label>
                       </div>
                     </div>
@@ -311,7 +313,7 @@
                       <div class="col-sm-12">
                         <label class="form-check-label">
                           Extra5 <i class="input-helper"></i>
-                          <input type="checkbox" checked class="form-check-input" id="extra5">
+                          <input type="checkbox" class="form-check-input" id="extra5">
                         </label>
                       </div>
                     </div>

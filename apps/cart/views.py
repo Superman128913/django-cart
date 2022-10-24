@@ -28,7 +28,7 @@ from .serializers import *
 def search(request):
     if request.method == 'GET':
         product_list = Shop_data.objects.all()
-        batch_list = Batch.objects.raw('SELECT cart_batch.id, cart_batch.Name, (SELECT count(*) FROM cart_shop_data WHERE Batch_id=cart_batch.id) AS product_num FROM cart_batch ORDER BY id DESC')
+        batch_list = Batch.objects.raw('SELECT cart_batch.id, cart_batch.Name, (SELECT count(*) FROM cart_shop_data WHERE Batch_id=cart_batch.id AND Sold_unsold="UNSOLD") AS product_num FROM cart_batch ORDER BY id DESC')
         context = {
             'product_list': product_list,
             'batch_list': batch_list
@@ -454,7 +454,7 @@ def order_history(request):
     else:
         if request.is_ajax():
             try:
-                query = Order_history.objects.filter(Checker_status='Done').order_by('-id').all()
+                query = Order_history.objects.filter(User=request.user).filter(Checker_status='Done').order_by('-id').all()
                 data = HistorySerializer(query, many=True).data
                 page = int(request.POST.get('page'))
                 ############### ? Pagination ##################
@@ -992,7 +992,6 @@ def create_request(request):
             USDT_address = request.POST.get('USDT_address')
             if SupplierRequest.objects.filter(
                 Supplier=supplier_obj.id,
-                USDT_address=USDT_address,
                 Status='UNPAID'
                 ).exists():
                 returnData = {

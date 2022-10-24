@@ -220,15 +220,15 @@ function update_batch() {
 ///////////////////////////////////////////////////////////////////////
 
 ///////////////////////Areaf1 Selection///////////////////////////////
-function init_areaf1_selection(areaf1_list = null) {
+function init_areaf1_selection(areaf1_list = []) {
   areaf1_list_const = [];
   $("#areaf1_selection").empty();
   $("#selected_areaf1_num").text(0);
 
-  if (areaf1_list == null) return;
-
   var len = areaf1_list.length;
   if (len) {
+    $("#areaf1").removeClass('btn-danger');
+    $("#areaf1").addClass('btn-success');
     var appendHTML = "";
     appendHTML += '<div class="dropdown-header search-box">';
     appendHTML +=
@@ -319,6 +319,10 @@ function init_areaf1_selection(areaf1_list = null) {
       );
     update_areaf1();
   }
+  else {
+    $("#areaf1").removeClass('btn-success');
+    $("#areaf1").addClass('btn-danger');
+  }
 }
 
 function check_areaf1() {
@@ -402,15 +406,15 @@ function update_areaf1() {
 //////////////////////////////////////////////////////////////////////
 
 ///////////////////////Areaf2 Selection///////////////////////////////
-function init_areaf2_selection(areaf2_list = null) {
+function init_areaf2_selection(areaf2_list = []) {
   areaf2_list_const = [];
   $("#areaf2_selection").empty();
   $("#selected_areaf2_num").text(0);
 
-  if (areaf2_list == null) return;
-
   var len = areaf2_list.length;
   if (len) {
+    $("#areaf2").removeClass('btn-danger');
+    $("#areaf2").addClass('btn-success');
     var appendHTML = "";
     appendHTML += '<div class="dropdown-header search-box">';
     appendHTML +=
@@ -501,6 +505,10 @@ function init_areaf2_selection(areaf2_list = null) {
       );
     update_areaf2();
   }
+  else {
+    $("#areaf2").removeClass('btn-success');
+    $("#areaf2").addClass('btn-danger');
+  }
 }
 
 function check_areaf2() {
@@ -584,15 +592,15 @@ function update_areaf2() {
 //////////////////////////////////////////////////////////////////////
 
 ///////////////////////Areaf3 Selection///////////////////////////////
-function init_areaf3_selection(areaf3_list = null) {
+function init_areaf3_selection(areaf3_list = []) {
   areaf3_list_const = [];
   $("#areaf3_selection").empty();
   $("#selected_areaf3_num").text(0);
 
-  if (areaf3_list == null) return;
-
   var len = areaf3_list.length;
   if (len) {
+    $("#areaf3").removeClass('btn-danger');
+    $("#areaf3").addClass('btn-success');
     var appendHTML = "";
     appendHTML += '<div class="dropdown-header search-box">';
     appendHTML +=
@@ -683,6 +691,10 @@ function init_areaf3_selection(areaf3_list = null) {
       );
     update_areaf3();
   }
+  else {
+    $("#areaf3").removeClass('btn-success');
+    $("#areaf3").addClass('btn-danger');
+  }
 }
 
 function check_areaf3() {
@@ -766,15 +778,15 @@ function update_areaf3() {
 //////////////////////////////////////////////////////////////////////
 
 ///////////////////////Areaf4 Selection///////////////////////////////
-function init_areaf4_selection(areaf4_list = null) {
+function init_areaf4_selection(areaf4_list = []) {
   areaf4_list_const = [];
   $("#areaf4_selection").empty();
   $("#selected_areaf4_num").text(0);
 
-  if (areaf4_list == null) return;
-
   var len = areaf4_list.length;
   if (len) {
+    $("#areaf4").removeClass('btn-danger');
+    $("#areaf4").addClass('btn-success');
     var appendHTML = "";
     appendHTML += '<div class="dropdown-header search-box">';
     appendHTML +=
@@ -865,6 +877,10 @@ function init_areaf4_selection(areaf4_list = null) {
       );
     update_areaf4();
   }
+  else {
+    $("#areaf4").removeClass('btn-success');
+    $("#areaf4").addClass('btn-danger');
+  }
 }
 
 function check_areaf4() {
@@ -948,15 +964,15 @@ function update_areaf4() {
 //////////////////////////////////////////////////////////////////////
 
 ///////////////////////Areaf5 Selection///////////////////////////////
-function init_areaf5_selection(areaf5_list = null) {
+function init_areaf5_selection(areaf5_list = []) {
   areaf5_list_const = [];
   $("#areaf5_selection").empty();
   $("#selected_areaf5_num").text(0);
 
-  if (areaf5_list == null) return;
-
   var len = areaf5_list.length;
   if (len) {
+    $("#areaf5").removeClass('btn-danger');
+    $("#areaf5").addClass('btn-success');
     var appendHTML = "";
     appendHTML += '<div class="dropdown-header search-box">';
     appendHTML +=
@@ -1047,6 +1063,10 @@ function init_areaf5_selection(areaf5_list = null) {
       );
     update_areaf5();
   }
+  else {
+    $("#areaf5").removeClass('btn-success');
+    $("#areaf5").addClass('btn-danger');
+  }
 }
 
 function check_areaf5() {
@@ -1130,15 +1150,15 @@ function update_areaf5() {
 //////////////////////////////////////////////////////////////////////
 
 ///////////////////////User State Selection///////////////////////////////
-function init_state_selection(state_list = null) {
+function init_state_selection(state_list = []) {
   state_list_const = [];
   $("#state_selection").empty();
   $("#selected_state_num").text(0);
 
-  if (state_list == null) return;
-
   var len = state_list.length;
   if (len) {
+    $("#state").removeClass('btn-danger');
+    $("#state").addClass('btn-success');
     var appendHTML = "";
     appendHTML += '<div class="dropdown-header search-box">';
     appendHTML +=
@@ -1229,6 +1249,10 @@ function init_state_selection(state_list = null) {
       );
     update_state();
   }
+  else {
+    $("#state").removeClass('btn-success');
+    $("#state").addClass('btn-danger');
+  }
 }
 
 function check_state() {
@@ -1312,15 +1336,15 @@ function update_state() {
 //////////////////////////////////////////////////////////////////////
 
 ///////////////////////User City Selection///////////////////////////////
-function init_city_selection(city_list = null) {
+function init_city_selection(city_list = []) {
   city_list_const = [];
   $("#city_selection").empty();
   $("#selected_city_num").text(0);
 
-  if (city_list == null) return;
-
   var len = city_list.length;
   if (len) {
+    $("#city").removeClass('btn-danger');
+    $("#city").addClass('btn-success');
     var appendHTML = "";
     appendHTML += '<div class="dropdown-header search-box">';
     appendHTML +=
@@ -1409,6 +1433,10 @@ function init_city_selection(city_list = null) {
       $("#selected_city_num").text(
         buf + " /(+" + (checked_len - show_num) + " selected)"
       );
+  }
+  else {
+    $("#city").removeClass('btn-success');
+    $("#city").addClass('btn-danger');
   }
 }
 
