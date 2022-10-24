@@ -414,21 +414,28 @@ def check_product(request):
                 check_status = checker_api(product_id, checker_id, request.user.id)
                 check_status = check_status[:-1]
                 print(check_status)
-                if product_obj.Sold_unsold == 'CHECKING':
-                    product_obj.Sold_unsold = 'ON_CART'
-                    product_obj.save()
                 if check_status == 'Done':
+                    product_obj.Sold_unsold = 'SOLD'
+                    product_obj.User = request.user
+                    product_obj.Sold_date = datetime.datetime.now()
+                    product_obj.save()
                     returnData = {
                         'state': check_status,
                     }
                     cart_obj.products.remove(product_obj)
                 elif check_status == 'Fail':
+                    product_obj.Sold_unsold = 'REFUND'
+                    product_obj.User = request.user
+                    product_obj.Sold_date = datetime.datetime.now()
+                    product_obj.save()
                     returnData = {
                         'state': check_status,
                         'error': "This is Invalid Phone. This item price has been refuned to your balance."
                     }
                     cart_obj.products.remove(product_obj)
                 else:
+                    product_obj.Sold_unsold = 'ON_CART'
+                    product_obj.save()
                     returnData = {
                         'state': check_status,
                         'error': "Problem while checking your Phone. Please try again or select a differant checker."
@@ -446,6 +453,9 @@ def check_product(request):
                 }
                 return JsonResponse(returnData)
         except Exception as e:
+            if product_obj.Sold_unsold == 'CHECKING':
+                product_obj.Sold_unsold = 'ON_CART'
+                product_obj.save()
             returnData = {
                 'state': 'Error',
                 'error': "Problem while checking your Phone. Please try again or select a differant checker."
@@ -490,7 +500,7 @@ def order_history(request):
 
 def checker_api(product_id, checker_id, user_id):
     checker_name = Checker.objects.get(id=checker_id).Name + '.py'
-    commend = 'python3 %s %d %d %d' % (checker_name, product_id, checker_id, user_id)
+    commend = 'python %s %d %d %d' % (checker_name, product_id, checker_id, user_id)
     os.system(commend + ' > tmp')
     result = open('tmp', 'r').read()
     os.remove('tmp')

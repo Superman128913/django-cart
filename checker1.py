@@ -126,9 +126,7 @@ def check(product_id, checker_id, user_id):
     #? #################################################
     
     if check_status == 'Done':        
-        tmp = "INSERT INTO cart_order_history (User_id, Product_id, Checker_id, Checker_status, Checker_response_text, Checker_response_full, Checker_date) VALUES (%d, %d, %d, '%s', '%s', '%s', '%s')" % (user_id, product_id, checker_id, 'Done', checker_response_text, checker_response_full, str(datetime.now()))
-        mycursor.execute(tmp)
-        tmp = "UPDATE cart_shop_data SET Sold_unsold='%s', Sold_date='%s' WHERE id=%d" % ('SOLD', str(datetime.now()), product_id)
+        tmp = "INSERT INTO cart_order_history (User_id, Product_id, Checker_id, Checker_status, Checker_response_text, Checker_response_full, Checker_date) VALUES (%d, %d, %d, '%s', '%s', '%s', '%s')" % (user_id, product_id, checker_id, 'Done', checker_response_text, checker_response_full, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         mycursor.execute(tmp)
         tmp = "SELECT balance FROM home_balance WHERE user_id=%d" % (user_id)
         mycursor.execute(tmp)
@@ -138,9 +136,7 @@ def check(product_id, checker_id, user_id):
         tmp = "UPDATE home_balance SET balance=%f WHERE user_id=%d" % (m_userBalance, user_id)
         mycursor.execute(tmp)
     elif check_status == 'Fail':     
-        tmp = "INSERT INTO cart_order_history (User_id, Product_id, Checker_id, Checker_status, Checker_response_text, Checker_response_full, Checker_date) VALUES (%d, %d, %d, '%s', '%s', '%s', '%s')" % (user_id, product_id, checker_id, 'Fail', checker_response_text, checker_response_full, str(datetime.now()))
-        mycursor.execute(tmp)
-        tmp = "UPDATE cart_shop_data SET Sold_unsold='%s', Sold_date='%s' WHERE id=%d" % ('REFUND', str(datetime.now()), product_id)
+        tmp = "INSERT INTO cart_order_history (User_id, Product_id, Checker_id, Checker_status, Checker_response_text, Checker_response_full, Checker_date) VALUES (%d, %d, %d, '%s', '%s', '%s', '%s')" % (user_id, product_id, checker_id, 'Fail', checker_response_text, checker_response_full, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         mycursor.execute(tmp)
         tmp = "SELECT balance FROM home_balance WHERE user_id=%d" % (user_id)
         mycursor.execute(tmp)
@@ -148,9 +144,6 @@ def check(product_id, checker_id, user_id):
         m_userBalance = float(m_result[0][0])
         m_userBalance = round(m_userBalance + price - checker_price, 2)
         tmp = "UPDATE home_balance SET balance=%f WHERE user_id=%d" % (m_userBalance, user_id)
-        mycursor.execute(tmp)
-    else:
-        tmp = "UPDATE cart_shop_data SET Sold_unsold='%s' WHERE id=%d" % ('ON_CART', product_id)
         mycursor.execute(tmp)
 
     mydb.commit()
