@@ -205,19 +205,19 @@ def search_result(request):
                     #search by extra
                     extra1 = request.POST.get('extra1')
                     if extra1=='true':
-                        query = query.filter(Extra1__isnull=False)
+                        query = query.filter(Extra1__isnull=False).exclude(Extra1='')
                     extra2 = request.POST.get('extra2')
                     if extra2=='true':
-                        query = query.filter(Extra2__isnull=False)
+                        query = query.filter(Extra2__isnull=False).exclude(Extra2='')
                     extra3 = request.POST.get('extra3')
                     if extra3=='true':
-                        query = query.filter(Extra3__isnull=False)
+                        query = query.filter(Extra3__isnull=False).exclude(Extra3='')
                     extra4 = request.POST.get('extra4')
                     if extra4=='true':
-                        query = query.filter(Extra4__isnull=False)
+                        query = query.filter(Extra4__isnull=False).exclude(Extra4='')
                     extra5 = request.POST.get('extra5')
                     if extra5=='true':
-                        query = query.filter(Extra5__isnull=False)
+                        query = query.filter(Extra5__isnull=False).exclude(Extra5='')
                     query = query.filter(Sold_unsold='UNSOLD')
                     #search by area code
                     area_code_list = request.POST.getlist('area_code_list[]')
@@ -500,7 +500,7 @@ def order_history(request):
 
 def checker_api(product_id, checker_id, user_id):
     checker_name = Checker.objects.get(id=checker_id).Name + '.py'
-    commend = 'python %s %d %d %d' % (checker_name, product_id, checker_id, user_id)
+    commend = 'python3 %s %d %d %d' % (checker_name, product_id, checker_id, user_id)
     os.system(commend + ' > tmp')
     result = open('tmp', 'r').read()
     os.remove('tmp')

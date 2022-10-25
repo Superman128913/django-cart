@@ -1593,11 +1593,11 @@ function show_result(page = 0) {
         var len = result["length"];
         if (len) {
           product_list.forEach(function (each) {
-            each["Extra1"] = each["Extra1"] == null ? "" : "Extra1 included";
-            each["Extra2"] = each["Extra2"] == null ? "" : "Extra2 included";
-            each["Extra3"] = each["Extra3"] == null ? "" : "Extra3 included";
-            each["Extra4"] = each["Extra4"] == null ? "" : "Extra4 included";
-            each["Extra5"] = each["Extra5"] == null ? "" : "Extra5 included";
+            each["Extra1"] = each["Extra1"] == null || each["Extra1"] == '' ? "" : "Extra1 included";
+            each["Extra2"] = each["Extra2"] == null || each["Extra2"] == '' ? "" : "Extra2 included";
+            each["Extra3"] = each["Extra3"] == null || each["Extra3"] == '' ? "" : "Extra3 included";
+            each["Extra4"] = each["Extra4"] == null || each["Extra4"] == '' ? "" : "Extra4 included";
+            each["Extra5"] = each["Extra5"] == null || each["Extra5"] == '' ? "" : "Extra5 included";
             each["Extra"] = "";
             each["Extra"] += each["Extra1"];
             each["Extra"] +=
