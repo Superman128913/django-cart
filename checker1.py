@@ -98,55 +98,24 @@ def check(product_id, checker_id, user_id):
         
         if (m_result == "phone registered successfully" or m_result == "Registration success" or m_result == "Thank you for your Registration"):
             # print("_________________DONE__________________")
-            checker_response_text = m_result
-            checker_response_full = "Phone Registered Successfully"
-            check_status = "Done"
+            check_status = m_result
             break
 
         elif (m_result == "Phone Registration Fails ." or m_result == "Phone number is no more active." or m_result == "Please check your phone number."):
             # print("_________________FAIL__________________")
-            checker_response_text = m_result
-            checker_response_full = "Phone Registration Fails"
-            check_status = "Fail"
+            check_status = m_result
             break
 
         elif (m_result == "Please try again " or m_result == "Please try again later" or m_result == "Problem while processing your request. " or m_result == "Can’t process your request at the moment" or m_result == "Service is over load please try again later"):
             if each == 9:
                 # print("__________________ERROR_________________")
-                checker_response_text = m_result
-                checker_response_full = "Please try again Later"
-                check_status = "Error"
+                check_status = m_result
 
         else:
             # print("__________________UNKOWN ERROR_________________")
-            checker_response_text = m_result
-            checker_response_full = "Unknown error please contact support"
-            check_status = "Error"
+            check_status = m_result
             break
-    #? #################################################
-    
-    if check_status == 'Done':        
-        tmp = "INSERT INTO cart_order_history (User_id, Product_id, Checker_id, Checker_status, Checker_response_text, Checker_response_full, Checker_date) VALUES (%d, %d, %d, '%s', '%s', '%s', '%s')" % (user_id, product_id, checker_id, 'Done', checker_response_text, checker_response_full, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        mycursor.execute(tmp)
-        tmp = "SELECT balance FROM home_balance WHERE user_id=%d" % (user_id)
-        mycursor.execute(tmp)
-        m_result = mycursor.fetchall()
-        m_userBalance = float(m_result[0][0])
-        m_userBalance = round(m_userBalance - checker_price, 2)
-        tmp = "UPDATE home_balance SET balance=%f WHERE user_id=%d" % (m_userBalance, user_id)
-        mycursor.execute(tmp)
-    elif check_status == 'Fail':     
-        tmp = "INSERT INTO cart_order_history (User_id, Product_id, Checker_id, Checker_status, Checker_response_text, Checker_response_full, Checker_date) VALUES (%d, %d, %d, '%s', '%s', '%s', '%s')" % (user_id, product_id, checker_id, 'Fail', checker_response_text, checker_response_full, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        mycursor.execute(tmp)
-        tmp = "SELECT balance FROM home_balance WHERE user_id=%d" % (user_id)
-        mycursor.execute(tmp)
-        m_result = mycursor.fetchall()
-        m_userBalance = float(m_result[0][0])
-        m_userBalance = round(m_userBalance + price - checker_price, 2)
-        tmp = "UPDATE home_balance SET balance=%f WHERE user_id=%d" % (m_userBalance, user_id)
-        mycursor.execute(tmp)
-
-    mydb.commit()
+        
     mycursor.close()
     mydb.close()
     return check_status

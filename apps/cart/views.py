@@ -414,11 +414,44 @@ def check_product(request):
                 check_status = checker_api(product_id, checker_id, request.user.id)
                 check_status = check_status[:-1]
                 print(check_status)
+        
+                if (check_status == "phone registered successfully" or check_status == "Registration success" or check_status == "Thank you for your Registration"):
+                    # print("_________________DONE__________________")
+                    checker_response_text = check_status
+                    checker_response_full = "Phone Registered Successfully"
+                    check_status = "Done"
+                elif (check_status == "Phone Registration Fails ." or check_status == "Phone number is no more active." or check_status == "Please check your phone number."):
+                    # print("_________________FAIL__________________")
+                    checker_response_text = check_status
+                    checker_response_full = "Phone Registration Fails"
+                    check_status = "Fail"
+                elif (check_status == "Please try again " or check_status == "Please try again later" or check_status == "Problem while processing your request. " or check_status == "Can’t process your request at the moment" or check_status == "Service is over load please try again later"):
+                    # print("__________________ERROR_________________")
+                    checker_response_text = check_status
+                    checker_response_full = "Please try again Later"
+                    check_status = "Error"
+                else:
+                    # print("__________________UNKOWN ERROR_________________")
+                    checker_response_text = check_status
+                    checker_response_full = "Unknown error please contact support"
+                    check_status = "Error"
+
                 if check_status == 'Done':
                     product_obj.Sold_unsold = 'SOLD'
                     product_obj.User = request.user
                     product_obj.Sold_date = datetime.datetime.now()
                     product_obj.save()
+                    new_history = Order_history(
+                        User=request.user,
+                        Product=product_obj,
+                        Checker=checker_obj,
+                        Checker_status=check_status,
+                        Checker_response_text=checker_response_text,
+                        Checker_response_full=checker_response_full,
+                    )
+                    new_history.save()
+                    balance_obj.balance = round(balance_obj.balance - float(checker_obj.Cost), 2)
+                    balance_obj.save()
                     returnData = {
                         'state': check_status,
                     }
@@ -428,6 +461,17 @@ def check_product(request):
                     product_obj.User = request.user
                     product_obj.Sold_date = datetime.datetime.now()
                     product_obj.save()
+                    new_history = Order_history(
+                        User=request.user,
+                        Product=product_obj,
+                        Checker=checker_obj,
+                        Checker_status=check_status,
+                        Checker_response_text=checker_response_text,
+                        Checker_response_full=checker_response_full,
+                    )
+                    new_history.save()
+                    balance_obj.balance = round(balance_obj.balance - float(checker_obj.Cost) + float(product_obj.Price), 2)
+                    balance_obj.save()
                     returnData = {
                         'state': check_status,
                         'error': "This is Invalid Phone. This item price has been refuned to your balance."
@@ -501,9 +545,10 @@ def order_history(request):
 def checker_api(product_id, checker_id, user_id):
     checker_name = Checker.objects.get(id=checker_id).Name + '.py'
     commend = 'python3 %s %d %d %d' % (checker_name, product_id, checker_id, user_id)
-    os.system(commend + ' > tmp')
-    result = open('tmp', 'r').read()
-    os.remove('tmp')
+    file_name = 'tmp' + product_id
+    os.system(commend + ' > ' + file_name)
+    result = open(file_name, 'r').read()
+    os.remove(file_name)
     return result
 
         
