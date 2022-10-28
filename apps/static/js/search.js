@@ -99,15 +99,25 @@ function init_batch_selection() {
     }
     batch_list_const.push(input_list.eq(i).attr("batch_id"));
   }
-  if (checked_len == 0) $("#selected_batch_num").text("(0 selected)");
-  else if (show_num == 0)
+  if (checked_len == 0){
+    $("#batch").removeClass('btn-success');
+    $("#batch").addClass('btn-danger');
+    $("#selected_batch_num").text("(0 selected)");
+  }
+  else if (show_num == 0){
+    $("#batch").removeClass('btn-danger');
+    $("#batch").addClass('btn-success');
     $("#selected_batch_num").text(
       buf + "(+" + (checked_len - show_num) + " selected)"
     );
-  else if (show_num < checked_len)
+  }
+  else if (show_num < checked_len){
+    $("#batch").removeClass('btn-danger');
+    $("#batch").addClass('btn-success');
     $("#selected_batch_num").text(
       buf + " /(+" + (checked_len - show_num) + " selected)"
     );
+  }
   update_batch();
 }
 
@@ -143,15 +153,25 @@ function check_batch() {
       batch_list_const.push(input_list.eq(i).attr("batch_id"));
     }
   }
-  if (checked_len == 0) $("#selected_batch_num").text("(0 selected)");
-  else if (show_num == 0)
+  if (checked_len == 0){
+    $("#batch").removeClass('btn-success');
+    $("#batch").addClass('btn-danger');
+    $("#selected_batch_num").text("(0 selected)");
+  }
+  else if (show_num == 0){
+    $("#batch").removeClass('btn-danger');
+    $("#batch").addClass('btn-success');
     $("#selected_batch_num").text(
       buf + "(+" + (checked_len - show_num) + " selected)"
     );
-  else if (show_num < checked_len)
+  }
+  else if (show_num < checked_len){
+    $("#batch").removeClass('btn-danger');
+    $("#batch").addClass('btn-success');
     $("#selected_batch_num").text(
       buf + " /(+" + (checked_len - show_num) + " selected)"
     );
+  }
   if (checked_len == len) $("#any_batch").prop("checked", true);
   else $("#any_batch").prop("checked", false);
   update_batch();
@@ -308,15 +328,25 @@ function init_areaf1_selection(areaf1_list = []) {
       }
       areaf1_list_const.push(input_list.eq(i).attr("name"));
     }
-    if (checked_len == 0) $("#selected_areaf1_num").text("(0 selected)");
-    else if (show_num == 0)
+    if (checked_len == 0){
+      $("#areaf1").removeClass('btn-success');
+      $("#areaf1").addClass('btn-danger');
+      $("#selected_areaf1_num").text("(0 selected)");
+    }
+    else if (show_num == 0){
+      $("#areaf1").removeClass('btn-danger');
+      $("#areaf1").addClass('btn-success');
       $("#selected_areaf1_num").text(
         buf + "(+" + (checked_len - show_num) + " selected)"
       );
-    else if (show_num < checked_len)
+    }
+    else if (show_num < checked_len){
+      $("#areaf1").removeClass('btn-danger');
+      $("#areaf1").addClass('btn-success');
       $("#selected_areaf1_num").text(
         buf + " /(+" + (checked_len - show_num) + " selected)"
       );
+    }
     update_areaf1();
   }
   else {
@@ -355,15 +385,25 @@ function check_areaf1() {
       areaf1_list_const.push(input_list.eq(i).attr("name"));
     }
   }
-  if (checked_len == 0) $("#selected_areaf1_num").text("(0 selected)");
-  else if (show_num == 0)
+  if (checked_len == 0){
+    $("#areaf1").removeClass('btn-success');
+    $("#areaf1").addClass('btn-danger');
+    $("#selected_areaf1_num").text("(0 selected)");
+  }
+  else if (show_num == 0){
+    $("#areaf1").removeClass('btn-danger');
+    $("#areaf1").addClass('btn-success');
     $("#selected_areaf1_num").text(
       buf + "(+" + (checked_len - show_num) + " selected)"
     );
-  else if (show_num < checked_len)
+  }
+  else if (show_num < checked_len){
+    $("#areaf1").removeClass('btn-danger');
+    $("#areaf1").addClass('btn-success');
     $("#selected_areaf1_num").text(
       buf + " /(+" + (checked_len - show_num) + " selected)"
     );
+  }
   if (checked_len == len) $("#any_areaf1").prop("checked", true);
   else $("#any_areaf1").prop("checked", false);
   update_areaf1();
@@ -494,15 +534,25 @@ function init_areaf2_selection(areaf2_list = []) {
       }
       areaf2_list_const.push(input_list.eq(i).attr("name"));
     }
-    if (checked_len == 0) $("#selected_areaf2_num").text("(0 selected)");
-    else if (show_num == 0)
+    if (checked_len == 0){
+      $("#areaf2").removeClass('btn-success');
+      $("#areaf2").addClass('btn-danger');
+      $("#selected_areaf2_num").text("(0 selected)");
+    }
+    else if (show_num == 0){
+      $("#areaf2").removeClass('btn-danger');
+      $("#areaf2").addClass('btn-success');
       $("#selected_areaf2_num").text(
         buf + "(+" + (checked_len - show_num) + " selected)"
       );
-    else if (show_num < checked_len)
+    }
+    else if (show_num < checked_len){
+      $("#areaf2").removeClass('btn-danger');
+      $("#areaf2").addClass('btn-success');
       $("#selected_areaf2_num").text(
         buf + " /(+" + (checked_len - show_num) + " selected)"
       );
+    }
     update_areaf2();
   }
   else {
@@ -541,15 +591,25 @@ function check_areaf2() {
       areaf2_list_const.push(input_list.eq(i).attr("name"));
     }
   }
-  if (checked_len == 0) $("#selected_areaf2_num").text("(0 selected)");
-  else if (show_num == 0)
+  if (checked_len == 0){
+    $("#areaf2").removeClass('btn-success');
+    $("#areaf2").addClass('btn-danger');
+    $("#selected_areaf2_num").text("(0 selected)");
+  }
+  else if (show_num == 0){
+    $("#areaf2").removeClass('btn-danger');
+    $("#areaf2").addClass('btn-success');
     $("#selected_areaf2_num").text(
       buf + "(+" + (checked_len - show_num) + " selected)"
     );
-  else if (show_num < checked_len)
+  }
+  else if (show_num < checked_len){
+    $("#areaf2").removeClass('btn-danger');
+    $("#areaf2").addClass('btn-success');
     $("#selected_areaf2_num").text(
       buf + " /(+" + (checked_len - show_num) + " selected)"
     );
+  }
   if (checked_len == len) $("#any_areaf2").prop("checked", true);
   else $("#any_areaf2").prop("checked", false);
   update_areaf2();
@@ -680,15 +740,25 @@ function init_areaf3_selection(areaf3_list = []) {
       }
       areaf3_list_const.push(input_list.eq(i).attr("name"));
     }
-    if (checked_len == 0) $("#selected_areaf3_num").text("(0 selected)");
-    else if (show_num == 0)
+    if (checked_len == 0){
+      $("#areaf3").removeClass('btn-success');
+      $("#areaf3").addClass('btn-danger');
+      $("#selected_areaf3_num").text("(0 selected)");
+    }
+    else if (show_num == 0){
+      $("#areaf3").removeClass('btn-danger');
+      $("#areaf3").addClass('btn-success');
       $("#selected_areaf3_num").text(
         buf + "(+" + (checked_len - show_num) + " selected)"
       );
-    else if (show_num < checked_len)
+    }
+    else if (show_num < checked_len){
+      $("#areaf3").removeClass('btn-danger');
+      $("#areaf3").addClass('btn-success');
       $("#selected_areaf3_num").text(
         buf + " /(+" + (checked_len - show_num) + " selected)"
       );
+    }
     update_areaf3();
   }
   else {
@@ -727,15 +797,25 @@ function check_areaf3() {
       areaf3_list_const.push(input_list.eq(i).attr("name"));
     }
   }
-  if (checked_len == 0) $("#selected_areaf3_num").text("(0 selected)");
-  else if (show_num == 0)
+  if (checked_len == 0){
+    $("#areaf3").removeClass('btn-success');
+    $("#areaf3").addClass('btn-danger');
+    $("#selected_areaf3_num").text("(0 selected)");
+  }
+  else if (show_num == 0){
+    $("#areaf3").removeClass('btn-danger');
+    $("#areaf3").addClass('btn-success');
     $("#selected_areaf3_num").text(
       buf + "(+" + (checked_len - show_num) + " selected)"
     );
-  else if (show_num < checked_len)
+  }
+  else if (show_num < checked_len){
+    $("#areaf3").removeClass('btn-danger');
+    $("#areaf3").addClass('btn-success');
     $("#selected_areaf3_num").text(
       buf + " /(+" + (checked_len - show_num) + " selected)"
     );
+  }
   if (checked_len == len) $("#any_areaf3").prop("checked", true);
   else $("#any_areaf3").prop("checked", false);
   update_areaf3();
@@ -866,15 +946,25 @@ function init_areaf4_selection(areaf4_list = []) {
       }
       areaf4_list_const.push(input_list.eq(i).attr("name"));
     }
-    if (checked_len == 0) $("#selected_areaf4_num").text("(0 selected)");
-    else if (show_num == 0)
+    if (checked_len == 0){
+      $("#areaf4").removeClass('btn-success');
+      $("#areaf4").addClass('btn-danger');
+      $("#selected_areaf4_num").text("(0 selected)");
+    }
+    else if (show_num == 0){
+      $("#areaf4").removeClass('btn-danger');
+      $("#areaf4").addClass('btn-success');
       $("#selected_areaf4_num").text(
         buf + "(+" + (checked_len - show_num) + " selected)"
       );
-    else if (show_num < checked_len)
+    }
+    else if (show_num < checked_len){
+      $("#areaf4").removeClass('btn-danger');
+      $("#areaf4").addClass('btn-success');
       $("#selected_areaf4_num").text(
         buf + " /(+" + (checked_len - show_num) + " selected)"
       );
+    }
     update_areaf4();
   }
   else {
@@ -913,15 +1003,25 @@ function check_areaf4() {
       areaf4_list_const.push(input_list.eq(i).attr("name"));
     }
   }
-  if (checked_len == 0) $("#selected_areaf4_num").text("(0 selected)");
-  else if (show_num == 0)
+  if (checked_len == 0){
+    $("#areaf4").removeClass('btn-success');
+    $("#areaf4").addClass('btn-danger');
+    $("#selected_areaf4_num").text("(0 selected)");
+  }
+  else if (show_num == 0){
+    $("#areaf4").removeClass('btn-danger');
+    $("#areaf4").addClass('btn-success');
     $("#selected_areaf4_num").text(
       buf + "(+" + (checked_len - show_num) + " selected)"
     );
-  else if (show_num < checked_len)
+  }
+  else if (show_num < checked_len){
+    $("#areaf4").removeClass('btn-danger');
+    $("#areaf4").addClass('btn-success');
     $("#selected_areaf4_num").text(
       buf + " /(+" + (checked_len - show_num) + " selected)"
     );
+  }
   if (checked_len == len) $("#any_areaf4").prop("checked", true);
   else $("#any_areaf4").prop("checked", false);
   update_areaf4();
@@ -1052,15 +1152,25 @@ function init_areaf5_selection(areaf5_list = []) {
       }
       areaf5_list_const.push(input_list.eq(i).attr("name"));
     }
-    if (checked_len == 0) $("#selected_areaf5_num").text("(0 selected)");
-    else if (show_num == 0)
+    if (checked_len == 0){
+      $("#areaf5").removeClass('btn-success');
+      $("#areaf5").addClass('btn-danger');
+      $("#selected_areaf5_num").text("(0 selected)");
+    }
+    else if (show_num == 0){
+      $("#areaf5").removeClass('btn-danger');
+      $("#areaf5").addClass('btn-success');
       $("#selected_areaf5_num").text(
         buf + "(+" + (checked_len - show_num) + " selected)"
       );
-    else if (show_num < checked_len)
+    }
+    else if (show_num < checked_len){
+      $("#areaf5").removeClass('btn-danger');
+      $("#areaf5").addClass('btn-success');
       $("#selected_areaf5_num").text(
         buf + " /(+" + (checked_len - show_num) + " selected)"
       );
+    }
     update_areaf5();
   }
   else {
@@ -1099,15 +1209,25 @@ function check_areaf5() {
       areaf5_list_const.push(input_list.eq(i).attr("name"));
     }
   }
-  if (checked_len == 0) $("#selected_areaf5_num").text("(0 selected)");
-  else if (show_num == 0)
+  if (checked_len == 0){
+    $("#areaf5").removeClass('btn-success');
+    $("#areaf5").addClass('btn-danger');
+    $("#selected_areaf5_num").text("(0 selected)");
+  }
+  else if (show_num == 0){
+    $("#areaf5").removeClass('btn-danger');
+    $("#areaf5").addClass('btn-success');
     $("#selected_areaf5_num").text(
       buf + "(+" + (checked_len - show_num) + " selected)"
     );
-  else if (show_num < checked_len)
+  }
+  else if (show_num < checked_len){
+    $("#areaf5").removeClass('btn-danger');
+    $("#areaf5").addClass('btn-success');
     $("#selected_areaf5_num").text(
       buf + " /(+" + (checked_len - show_num) + " selected)"
     );
+  }
   if (checked_len == len) $("#any_areaf5").prop("checked", true);
   else $("#any_areaf5").prop("checked", false);
   update_areaf5();
@@ -1238,15 +1358,25 @@ function init_state_selection(state_list = []) {
       }
       state_list_const.push(input_list.eq(i).attr("name"));
     }
-    if (checked_len == 0) $("#selected_state_num").text("(0 selected)");
-    else if (show_num == 0)
+    if (checked_len == 0){
+      $("#state").removeClass('btn-success');
+      $("#state").addClass('btn-danger');
+      $("#selected_state_num").text("(0 selected)");
+    }
+    else if (show_num == 0){
+      $("#state").removeClass('btn-danger');
+      $("#state").addClass('btn-success');
       $("#selected_state_num").text(
         buf + "(+" + (checked_len - show_num) + " selected)"
       );
-    else if (show_num < checked_len)
+    }
+    else if (show_num < checked_len){
+      $("#state").removeClass('btn-danger');
+      $("#state").addClass('btn-success');
       $("#selected_state_num").text(
         buf + " /(+" + (checked_len - show_num) + " selected)"
       );
+    }
     update_state();
   }
   else {
@@ -1285,15 +1415,25 @@ function check_state() {
       state_list_const.push(input_list.eq(i).attr("name"));
     }
   }
-  if (checked_len == 0) $("#selected_state_num").text("(0 selected)");
-  else if (show_num == 0)
+  if (checked_len == 0){
+    $("#state").removeClass('btn-success');
+    $("#state").addClass('btn-danger');
+    $("#selected_state_num").text("(0 selected)");
+  }
+  else if (show_num == 0){
+    $("#state").removeClass('btn-danger');
+    $("#state").addClass('btn-success');
     $("#selected_state_num").text(
       buf + "(+" + (checked_len - show_num) + " selected)"
     );
-  else if (show_num < checked_len)
+  }
+  else if (show_num < checked_len){
+    $("#state").removeClass('btn-danger');
+    $("#state").addClass('btn-success');
     $("#selected_state_num").text(
       buf + " /(+" + (checked_len - show_num) + " selected)"
     );
+  }
   if (checked_len == len) $("#any_state").prop("checked", true);
   else $("#any_state").prop("checked", false);
   update_state();
@@ -1424,15 +1564,25 @@ function init_city_selection(city_list = []) {
       }
       city_list_const.push(input_list.eq(i).attr("name"));
     }
-    if (checked_len == 0) $("#selected_city_num").text("(0 selected)");
-    else if (show_num == 0)
+    if (checked_len == 0){
+      $("#city").removeClass('btn-success');
+      $("#city").addClass('btn-danger');
+      $("#selected_city_num").text("(0 selected)");
+    }
+    else if (show_num == 0){
+      $("#city").removeClass('btn-danger');
+      $("#city").addClass('btn-success');
       $("#selected_city_num").text(
         buf + "(+" + (checked_len - show_num) + " selected)"
       );
-    else if (show_num < checked_len)
+    }
+    else if (show_num < checked_len){
+      $("#city").removeClass('btn-danger');
+      $("#city").addClass('btn-success');
       $("#selected_city_num").text(
         buf + " /(+" + (checked_len - show_num) + " selected)"
       );
+    }
   }
   else {
     $("#city").removeClass('btn-success');
@@ -1470,15 +1620,25 @@ function check_city() {
       city_list_const.push(input_list.eq(i).attr("name"));
     }
   }
-  if (checked_len == 0) $("#selected_city_num").text("(0 selected)");
-  else if (show_num == 0)
+  if (checked_len == 0){
+    $("#city").removeClass('btn-success');
+    $("#city").addClass('btn-danger');
+    $("#selected_city_num").text("(0 selected)");
+  }
+  else if (show_num == 0){
+    $("#city").removeClass('btn-danger');
+    $("#city").addClass('btn-success');
     $("#selected_city_num").text(
       buf + "(+" + (checked_len - show_num) + " selected)"
     );
-  else if (show_num < checked_len)
+  }
+  else if (show_num < checked_len){
+    $("#city").removeClass('btn-danger');
+    $("#city").addClass('btn-success');
     $("#selected_city_num").text(
       buf + " /(+" + (checked_len - show_num) + " selected)"
     );
+  }
   if (checked_len == len) $("#any_city").prop("checked", true);
   else $("#any_city").prop("checked", false);
 }

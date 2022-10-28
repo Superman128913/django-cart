@@ -282,13 +282,13 @@ function show_records(page = 0) {
                 "<td>" +
                 (each["Sold_unsold"] || '') +
                 "<br>" +
-                Sold_date.getDate().toString().padStart(2, "0") +
-                "/" +
-                (Sold_date.getMonth() + 1).toString().padStart(2, "0") +
-                "/" +
-                Sold_date.getFullYear() +
-                "<br>" +
                 (each["Supplier_payment_status"] || '') +
+                "<br>" +
+                moment(Sold_date).utc().format('MM/DD/YYYY HH:mm') +
+                "<br>" +
+                (each["Checker_response_text"] || '') +
+                "<br>" +
+                (each["Checker_response_full"] || '') +
                 "</td>";
             } else appendHTML += "<td>" + (each["Sold_unsold"] || '') + "<br>" + (each["Supplier_payment_status"] || '') + "</td>";
             appendHTML += "</tr>";

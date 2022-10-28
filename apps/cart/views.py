@@ -14,6 +14,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate
 from django.views.decorators.http import require_http_methods
 from django.db.models import F, Q, Count, Sum
+from django.utils import timezone
+from django.db import transaction
 
 from apps.home.models import balance
 from apps.home.views import get_default_page_context
@@ -292,6 +294,7 @@ def search_result(request):
         
 @login_required(login_url="/login/")
 @require_http_methods(["GET", "POST"])
+@transaction.non_atomic_requests(using='other')
 def cart_home(request):
     if request.method == 'GET':
         cart_obj = Cart.objects.new_or_get(request)
@@ -386,6 +389,7 @@ def cart_home(request):
         
 @login_required(login_url="/login/")
 @require_http_methods(["POST"])
+@transaction.non_atomic_requests(using='other')
 def check_product(request):
     if request.is_ajax():
         try:
@@ -411,6 +415,7 @@ def check_product(request):
                     return JsonResponse(returnData)
                 product_obj.Sold_unsold = 'CHECKING'
                 product_obj.save()
+                print('Checking...')
                 check_status = checker_api(product_id, checker_id, request.user.id)
                 check_status = check_status[:-1]
                 print(check_status)
@@ -439,7 +444,7 @@ def check_product(request):
                 if check_status == 'Done':
                     product_obj.Sold_unsold = 'SOLD'
                     product_obj.User = request.user
-                    product_obj.Sold_date = datetime.datetime.now()
+                    product_obj.Sold_date = timezone.now()
                     product_obj.save()
                     new_history = Order_history(
                         User=request.user,
@@ -459,7 +464,7 @@ def check_product(request):
                 elif check_status == 'Fail':
                     product_obj.Sold_unsold = 'REFUND'
                     product_obj.User = request.user
-                    product_obj.Sold_date = datetime.datetime.now()
+                    product_obj.Sold_date = timezone.now()
                     product_obj.save()
                     new_history = Order_history(
                         User=request.user,
@@ -542,11 +547,12 @@ def order_history(request):
             return JsonResponse(returnData)
 
 
+@transaction.non_atomic_requests(using='other')
 def checker_api(product_id, checker_id, user_id):
     checker_name = Checker.objects.get(id=checker_id).Name + '.py'
-    commend = 'python3 %s %d %d %d' % (checker_name, product_id, checker_id, user_id)
-    file_name = 'tmp' + product_id
-    os.system(commend + ' > ' + file_name)
+    command = 'python3 %s %d %d %d' % (checker_name, product_id, checker_id, user_id)
+    file_name = 'tmp' + str(product_id)
+    os.system(command + ' > ' + file_name)
     result = open(file_name, 'r').read()
     os.remove(file_name)
     return result
@@ -757,17 +763,15 @@ def get_batch_product_list(request):
             batch_id = request.POST.get('batch_id')
 
             batch_obj = Batch.objects.get(id=batch_id)
-            products = Shop_data.objects.filter(Batch=batch_obj).filter(Supplier_payment_status=PaidUnpaid)
             if get_type == 'total-sold':
-                sold_products = products.filter(Sold_date__date__range=(from_date, to_date)).filter(Sold_unsold='SOLD')
-                query = sold_products
+                sold_products = Order_history.objects.filter(Product__Batch=batch_obj).filter(Product__Supplier_payment_status=PaidUnpaid).filter(Checker_date__range=(from_date, to_date)).filter(Product__Sold_unsold='SOLD').order_by('-Checker_date')
+                data = SoldRefundSerializer(sold_products, many=True).data
             elif get_type == 'total-refund':
-                refund_products = products.filter(Sold_date__date__range=(from_date, to_date)).filter(Sold_unsold='REFUND')
-                query = refund_products
+                refund_products = Order_history.objects.filter(Product__Batch=batch_obj).filter(Product__Supplier_payment_status=PaidUnpaid).filter(Checker_date__range=(from_date, to_date)).filter(Product__Sold_unsold='REFUND').order_by('-Checker_date')
+                data = SoldRefundSerializer(refund_products, many=True).data
             elif get_type == 'total-unsold':
-                unsold_products = products.filter(Q(Sold_unsold='ON_CART') | Q(Sold_unsold='UNSOLD'))
-                query = unsold_products
-            data = RecordsSerializer(query, many=True).data
+                unsold_products = Shop_data.objects.filter(Batch=batch_obj).filter(Supplier_payment_status=PaidUnpaid).filter(Q(Sold_unsold='ON_CART') | Q(Sold_unsold='UNSOLD')).order_by('-Sold_date')
+                data = RecordsSerializer(unsold_products, many=True).data
             page = int(request.POST.get('page'))
             ############### ? Pagination ##################
             data_length = len(data)

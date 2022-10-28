@@ -173,7 +173,7 @@
               var Batch_Publish_date = new Date(each['Batch_Publish_date']);
               appendHTML += '<td>' + (each['Batch_id'] || '') + '<br>' + (each['Batch_Name'] || '') + '<br>' + (Batch_Publish_date.getDate()).toString().padStart(2, '0') + '/' + (Batch_Publish_date.getMonth() + 1).toString().padStart(2, '0') + '/' + Batch_Publish_date.getFullYear() + '</td>'
               var Check_date = new Date(each['Sold_date'])
-              appendHTML += '<td>' + (each["Checker_name"] || '') + '<br>' + (each['Checker_cost'] || '') + '$<br>' + each['Checker_status'] + '<br>' + (Check_date.getDate()).toString().padStart(2, '0') + '/' + (Check_date.getMonth() + 1).toString().padStart(2, '0') + '/' + Check_date.getFullYear() + ' ' + moment(Check_date).format('HH:mm') + '<br>' + (each['Item_cost'] || '') + '$' + "</td>";
+              appendHTML += '<td>' + (each["Checker_name"] || '') + '<br>' + (each['Checker_cost'] || '') + '$<br>' + each['Checker_status'] + '<br>' + moment(Check_date).utc().format('MM/DD/YYYY HH:mm') + '<br>' + (each['Item_cost'] || '') + '$' + "</td>";
               appendHTML += "</tr>";
               $("#search_result .table tbody").append(appendHTML);
             });
