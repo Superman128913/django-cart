@@ -46,7 +46,7 @@ def decrypt_str(t):
     # be sure to decode the bytes to a string
     return CRYPTER.decrypt(t.encode('utf-8')).decode('utf-8')
 
-api = 'http://65.20.73.79/API2.php'
+api = 'http://65.20.73.79/API-invalid.php'
 
 
 def checker_api(phonenumber, day, month, year, zipcode, gatelink):
@@ -67,8 +67,10 @@ def check(product_id, checker_id, user_id):
         mydb = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="]f3PW3[*@,F2d3oCx",
-            database='MyDatabase-andrew',
+            password="",
+            database='MyDatabase',
+            # password="]f3PW3[*@,F2d3oCx",
+            # database='MyDatabase-andrew',
             auth_plugin='mysql_native_password'
         )
     except:

@@ -367,6 +367,7 @@ def cart_home(request):
                             product_obj.Sold_unsold = 'ON_CART'
                             product_obj.User = request.user
                             product_obj.save()
+                            balance_obj = balance.objects.get(user=request.user)
                             balance_obj.balance = round(balance_obj.balance - float(product_obj.Price), 2)
                             balance_obj.save()
                             data = {
@@ -455,6 +456,7 @@ def check_product(request):
                         Checker_response_full=checker_response_full,
                     )
                     new_history.save()
+                    balance_obj = balance.objects.get(user=request.user)
                     balance_obj.balance = round(balance_obj.balance - float(checker_obj.Cost), 2)
                     balance_obj.save()
                     returnData = {
@@ -475,6 +477,7 @@ def check_product(request):
                         Checker_response_full=checker_response_full,
                     )
                     new_history.save()
+                    balance_obj = balance.objects.get(user=request.user)
                     balance_obj.balance = round(balance_obj.balance - float(checker_obj.Cost) + float(product_obj.Price), 2)
                     balance_obj.save()
                     returnData = {
@@ -490,6 +493,7 @@ def check_product(request):
                         'error': "Problem while checking your Phone. Please try again or select a differant checker."
                     }
 
+                balance_obj = balance.objects.get(user=request.user)
                 data = {
                     'balance': balance_obj.balance,
                     'count_product': cart_obj.products.count()
@@ -763,11 +767,14 @@ def get_batch_product_list(request):
             batch_id = request.POST.get('batch_id')
 
             batch_obj = Batch.objects.get(id=batch_id)
+            products = Shop_data.objects.filter(Batch=batch_obj).filter(Supplier_payment_status=PaidUnpaid)
             if get_type == 'total-sold':
-                sold_products = Order_history.objects.filter(Product__Batch=batch_obj).filter(Product__Supplier_payment_status=PaidUnpaid).filter(Checker_date__range=(from_date, to_date)).filter(Product__Sold_unsold='SOLD').order_by('-Checker_date')
+                sold_product_list = products.filter(Sold_date__date__range=(from_date, to_date)).filter(Sold_unsold='SOLD').values_list('pk', flat=True)
+                sold_products = Order_history.objects.filter(Product__in=sold_product_list).order_by('-Checker_date')
                 data = SoldRefundSerializer(sold_products, many=True).data
             elif get_type == 'total-refund':
-                refund_products = Order_history.objects.filter(Product__Batch=batch_obj).filter(Product__Supplier_payment_status=PaidUnpaid).filter(Checker_date__range=(from_date, to_date)).filter(Product__Sold_unsold='REFUND').order_by('-Checker_date')
+                refund_product_list = products.filter(Sold_date__date__range=(from_date, to_date)).filter(Sold_unsold='REFUND')
+                refund_products = Order_history.objects.filter(Product__in=refund_product_list).filter(Product__Supplier_payment_status=PaidUnpaid).filter(Checker_date__range=(from_date, to_date)).filter(Product__Sold_unsold='REFUND').order_by('-Checker_date')
                 data = SoldRefundSerializer(refund_products, many=True).data
             elif get_type == 'total-unsold':
                 unsold_products = Shop_data.objects.filter(Batch=batch_obj).filter(Supplier_payment_status=PaidUnpaid).filter(Q(Sold_unsold='ON_CART') | Q(Sold_unsold='UNSOLD')).order_by('-Sold_date')
