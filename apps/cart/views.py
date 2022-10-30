@@ -294,7 +294,7 @@ def search_result(request):
         
 @login_required(login_url="/login/")
 @require_http_methods(["GET", "POST"])
-@transaction.non_atomic_requests(using='other')
+@transaction.atomic
 def cart_home(request):
     if request.method == 'GET':
         cart_obj = Cart.objects.new_or_get(request)
@@ -356,25 +356,30 @@ def cart_home(request):
                             'error': "This item has already added to cart."
                         }
                         return JsonResponse(returnData)
+                    if product_obj.Sold_unsold == 'ON_CART':
+                        returnData = {
+                            'state': "FAIL",
+                            'error': "This item has already sold."
+                        }
+                        return JsonResponse(returnData)
+                    balance_obj = balance.objects.get(user=request.user)
+                    if float(product_obj.Price) > balance_obj.balance:
+                        data = {
+                            'over_balance': True
+                        }
                     else:
+                        cart_obj.products.add(product_obj)
+                        product_obj.Sold_unsold = 'ON_CART'
+                        product_obj.User = request.user
+                        product_obj.save()
                         balance_obj = balance.objects.get(user=request.user)
-                        if float(product_obj.Price) > balance_obj.balance:
-                            data = {
-                                'over_balance': True
-                            }
-                        else:
-                            cart_obj.products.add(product_obj)
-                            product_obj.Sold_unsold = 'ON_CART'
-                            product_obj.User = request.user
-                            product_obj.save()
-                            balance_obj = balance.objects.get(user=request.user)
-                            balance_obj.balance = round(balance_obj.balance - float(product_obj.Price), 2)
-                            balance_obj.save()
-                            data = {
-                                'over_balance': False,
-                                'balance': balance_obj.balance,
-                                'count_product': cart_obj.products.count()
-                            }
+                        balance_obj.balance = round(balance_obj.balance - float(product_obj.Price), 2)
+                        balance_obj.save()
+                        data = {
+                            'over_balance': False,
+                            'balance': balance_obj.balance,
+                            'count_product': cart_obj.products.count()
+                        }
 
                 returnData = {
                     'state': 'OK',
@@ -390,7 +395,6 @@ def cart_home(request):
         
 @login_required(login_url="/login/")
 @require_http_methods(["POST"])
-@transaction.non_atomic_requests(using='other')
 def check_product(request):
     if request.is_ajax():
         try:
@@ -442,56 +446,57 @@ def check_product(request):
                     checker_response_full = "Unknown error please contact support"
                     check_status = "Error"
 
-                if check_status == 'Done':
-                    product_obj.Sold_unsold = 'SOLD'
-                    product_obj.User = request.user
-                    product_obj.Sold_date = timezone.now()
-                    product_obj.save()
-                    new_history = Order_history(
-                        User=request.user,
-                        Product=product_obj,
-                        Checker=checker_obj,
-                        Checker_status=check_status,
-                        Checker_response_text=checker_response_text,
-                        Checker_response_full=checker_response_full,
-                    )
-                    new_history.save()
-                    balance_obj = balance.objects.get(user=request.user)
-                    balance_obj.balance = round(balance_obj.balance - float(checker_obj.Cost), 2)
-                    balance_obj.save()
-                    returnData = {
-                        'state': check_status,
-                    }
-                    cart_obj.products.remove(product_obj)
-                elif check_status == 'Fail':
-                    product_obj.Sold_unsold = 'REFUND'
-                    product_obj.User = request.user
-                    product_obj.Sold_date = timezone.now()
-                    product_obj.save()
-                    new_history = Order_history(
-                        User=request.user,
-                        Product=product_obj,
-                        Checker=checker_obj,
-                        Checker_status=check_status,
-                        Checker_response_text=checker_response_text,
-                        Checker_response_full=checker_response_full,
-                    )
-                    new_history.save()
-                    balance_obj = balance.objects.get(user=request.user)
-                    balance_obj.balance = round(balance_obj.balance - float(checker_obj.Cost) + float(product_obj.Price), 2)
-                    balance_obj.save()
-                    returnData = {
-                        'state': check_status,
-                        'error': "This is Invalid Phone. This item price has been refuned to your balance."
-                    }
-                    cart_obj.products.remove(product_obj)
-                else:
-                    product_obj.Sold_unsold = 'ON_CART'
-                    product_obj.save()
-                    returnData = {
-                        'state': check_status,
-                        'error': "Problem while checking your Phone. Please try again or select a differant checker."
-                    }
+                with transaction.atomic():
+                    if check_status == 'Done':
+                        product_obj.Sold_unsold = 'SOLD'
+                        product_obj.User = request.user
+                        product_obj.Sold_date = timezone.now()
+                        product_obj.save()
+                        new_history = Order_history(
+                            User=request.user,
+                            Product=product_obj,
+                            Checker=checker_obj,
+                            Checker_status=check_status,
+                            Checker_response_text=checker_response_text,
+                            Checker_response_full=checker_response_full,
+                        )
+                        new_history.save()
+                        balance_obj = balance.objects.get(user=request.user)
+                        balance_obj.balance = round(balance_obj.balance - float(checker_obj.Cost), 2)
+                        balance_obj.save()
+                        returnData = {
+                            'state': check_status,
+                        }
+                        cart_obj.products.remove(product_obj)
+                    elif check_status == 'Fail':
+                        product_obj.Sold_unsold = 'REFUND'
+                        product_obj.User = request.user
+                        product_obj.Sold_date = timezone.now()
+                        product_obj.save()
+                        new_history = Order_history(
+                            User=request.user,
+                            Product=product_obj,
+                            Checker=checker_obj,
+                            Checker_status=check_status,
+                            Checker_response_text=checker_response_text,
+                            Checker_response_full=checker_response_full,
+                        )
+                        new_history.save()
+                        balance_obj = balance.objects.get(user=request.user)
+                        balance_obj.balance = round(balance_obj.balance - float(checker_obj.Cost) + float(product_obj.Price), 2)
+                        balance_obj.save()
+                        returnData = {
+                            'state': check_status,
+                            'error': "This is Invalid Phone. This item price has been refuned to your balance."
+                        }
+                        cart_obj.products.remove(product_obj)
+                    else:
+                        product_obj.Sold_unsold = 'ON_CART'
+                        product_obj.save()
+                        returnData = {
+                            'state': check_status,
+                            'error': "Problem while checking your Phone. Please try again or select a differant checker."
+                        }
 
                 balance_obj = balance.objects.get(user=request.user)
                 data = {
@@ -575,6 +580,7 @@ def store_info_view(request):
 
 @login_required(login_url="/login/")
 @require_http_methods(["GET", "POST"])
+@transaction.atomic
 def insert_batch(request):
     user = User.objects.get(pk=request.user.id)
     if user.is_superuser == 0:
@@ -650,8 +656,6 @@ def insert_batch(request):
                         'error': serializer.errors
                     }
             except Exception as e:
-                if(new_batch):
-                    new_batch.delete()
                 returnData = {
                     'state': "FAIL",
                     'error': repr(e)
@@ -887,6 +891,7 @@ def set_request_as_paid(request):
 
 @login_required(login_url="/login/")
 @require_http_methods(["GET", "POST"])
+@transaction.atomic
 def create_supplier(request):
     user = User.objects.get(pk=request.user.id)
     if user.is_superuser == 0:
