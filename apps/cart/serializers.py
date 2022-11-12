@@ -159,14 +159,14 @@ class SoldRefundSerializer(serializers.ModelSerializer):
     Batch_id =      serializers.IntegerField(source='Product.Batch.id')
     Batch_Name =    serializers.CharField(source='Product.Batch.Name')
     Batch_Publish_date = serializers.DateTimeField(source='Product.Batch.Publish_date')
-    Item_cost =     serializers.DecimalField(decimal_places=2, max_digits=10, source='Product.Price')
+    Price =     serializers.DecimalField(decimal_places=2, max_digits=10, source='Product.Price')
     Checker_cost =  serializers.CharField(source='Checker.Cost')
     Checker_name =  serializers.CharField(source='Checker.Name')
     Sold_unsold =   serializers.CharField(source='Product.Sold_unsold')
     Supplier_payment_status = serializers.CharField(source='Product.Supplier_payment_status')
     class Meta:
         model = Order_history
-        fields = ['Phone', 'Exp_day', 'Exp_month', 'Exp_year', 'Puk_code', 'First_name', 'Last_name', 'Gender', 'Address', 'City', 'State', 'Zipcode', 'Extra1', 'Extra2', 'Extra3', 'Extra4', 'Extra5', 'Item_cost', 'Areaf1', 'Areaf2', 'Areaf3', 'Areaf4', 'Areaf5', 'Areaf6', 'Area_code', 'Sold_date', 'Batch_id', 'Batch_Name', 'Batch_Publish_date', 'Checker_cost', 'Checker_name', 'Checker_status', 'Checker_response_text', 'Checker_response_full', 'Sold_unsold', 'Supplier_payment_status']
+        fields = ['Phone', 'Exp_day', 'Exp_month', 'Exp_year', 'Puk_code', 'First_name', 'Last_name', 'Gender', 'Address', 'City', 'State', 'Zipcode', 'Extra1', 'Extra2', 'Extra3', 'Extra4', 'Extra5', 'Price', 'Areaf1', 'Areaf2', 'Areaf3', 'Areaf4', 'Areaf5', 'Areaf6', 'Area_code', 'Sold_date', 'Batch_id', 'Batch_Name', 'Batch_Publish_date', 'Checker_cost', 'Checker_name', 'Checker_status', 'Checker_response_text', 'Checker_response_full', 'Sold_unsold', 'Supplier_payment_status']
 
 
 class RequestSerializer(serializers.ModelSerializer):
